@@ -81,6 +81,13 @@ const YT={
 
 
 /* ─── NUTRITION PRESETS ─────────────────────────────────────────────── */
+/* ─── JIU CONSTANTS (module-level, shared) ───────────────────────────── */
+const POS=["Meia-guarda","Meia-guarda (top)","Guarda fechada","Passagem","Costas","Em pé","Single leg","Underhook/Esgrima","Raspagem","Finalização","Defesa de queda"];
+const TIPO_COLOR={Técnico:"#F59E0B",Forte:"#EA6C00",Open:"#EF4444"};
+const RES=["Finalizei","Raspei","Passei","Neutro","Fui passado","Fui raspado","Fui finalizado"];
+const FINALIZACOES=["Mata-leão","Triângulo","Armlock","Kimura","Americana","Guilhotina","Kneebar","Heel hook","Anaconda","Darce","Omoplata","Outra"];
+const FAIXA_COLORS={Branca:"#D4D4D4",Azul:"#2563EB",Roxa:"#7C3AED",Marrom:"#92400E",Preta:"#171717"};
+
 const MEALS_G=[
   {id:"cafe",nome:"Café da Manhã",horario:"07:00–09:00",
     fixos:[
@@ -372,6 +379,7 @@ function ExerciseChart({exId,exName,userId,accent}){
 
 /* ─── SESSION EX CARD ────────────────────────────────────────────────── */
 function SessionExCard({ex,data,onChange,accent,user,onModal,onImgModal,prevExData,nextEx}){
+  const[rpePickerIdx,setRpePickerIdx]=useState(null);
   const n=typeof ex.sets==="number"?ex.sets:0;
   const prevSets=prevExData?.sets||[];
   const sets=data.sets||Array.from({length:n},(_,i)=>({w:prevSets[i]?.w||"",r:prevSets[i]?.r||ex.reps||"",rpe:"",done:false}));
@@ -416,7 +424,7 @@ function SessionExCard({ex,data,onChange,accent,user,onModal,onImgModal,prevExDa
                   <div style={{height:48,display:"flex",alignItems:"center",justifyContent:"center",borderRadius:10,background:s.done?T.doneBg:T.inpBg,border:`1px solid ${s.done?T.borderDone:T.border}`,fontFamily:"'JetBrains Mono',monospace",fontSize:14,color:s.done?T.done:T.muted,fontWeight:700}}>{i+1}</div>
                   <input value={s.w} onChange={e=>upd(i,"w",e.target.value)} placeholder="—" inputMode="decimal" style={inp(s.done)}/>
                   <input value={s.r} onChange={e=>upd(i,"r",e.target.value)} placeholder="—" inputMode="decimal" style={inp(s.done)}/>
-                  <input value={s.rpe||""} onChange={e=>upd(i,"rpe",e.target.value)} placeholder="—" inputMode="decimal" style={{...inp(s.done),fontSize:14}}/>
+                  <button onClick={()=>setRpePickerIdx(i)} style={{...inp(s.done),fontSize:14,display:"flex",alignItems:"center",justifyContent:"center",cursor:"pointer",fontWeight:s.rpe?700:400,color:s.rpe?accent:(s.done?T.done:T.muted)}}>{s.rpe||"—"}</button>
                   <button onClick={()=>tick(i)} style={{height:48,width:48,borderRadius:10,border:`1.5px solid ${s.done?T.done:T.border}`,background:s.done?T.done:T.inpBg,color:s.done?"#FFF":T.muted,cursor:"pointer",fontSize:20,display:"flex",alignItems:"center",justifyContent:"center",fontWeight:700}}>✓</button>
                 </div>
                 {prevSets[i]&&<div style={{fontSize:10,color:T.muted,textAlign:"center",marginTop:4}}>ant: {prevSets[i].w||"—"}kg × {prevSets[i].r||"—"}{prevSets[i].rpe?` · RPE ${prevSets[i].rpe}`:""}</div>}
@@ -424,6 +432,25 @@ function SessionExCard({ex,data,onChange,accent,user,onModal,onImgModal,prevExDa
             ))}
             <input value={data.notes||""} onChange={e=>onChange({...data,notes:e.target.value})} placeholder="Notas deste exercício..." style={{width:"100%",marginTop:4,background:T.inpBg,border:`1px solid ${T.border}`,borderRadius:8,color:"#888",padding:"9px 12px",fontSize:14,boxSizing:"border-box",outline:"none"}}/>
             {timer&&<InlineTimer key={timer.key} seconds={timer.s} accent={accent} onClose={()=>setTimer(null)} nextEx={nextEx}/>}
+            {rpePickerIdx!==null&&(
+              <div style={{position:"fixed",inset:0,background:"rgba(10,10,10,0.6)",backdropFilter:"blur(3px)",zIndex:300,display:"flex",alignItems:"flex-end",justifyContent:"center"}} onClick={()=>setRpePickerIdx(null)}>
+                <div style={{background:T.card,borderRadius:"18px 18px 0 0",padding:"18px 18px 32px",width:"100%",maxWidth:500,boxShadow:"0 -8px 40px rgba(0,0,0,0.2)"}} onClick={e=>e.stopPropagation()}>
+                  <div style={{width:36,height:4,background:T.border,borderRadius:2,margin:"0 auto 14px"}}/>
+                  <div style={{fontSize:14,fontWeight:700,color:T.text,marginBottom:2}}>RPE — Esforço Percebido</div>
+                  <div style={{fontSize:12,color:T.muted,marginBottom:14,lineHeight:1.5}}>Qual número descreve melhor essa série?</div>
+                  <div style={{display:"flex",flexDirection:"column",gap:6}}>
+                    {[{v:1,l:"Esforço mínimo"},{v:2,l:"Muito leve"},{v:3,l:"Leve"},{v:4,l:"Moderado leve"},{v:5,l:"Moderado"},{v:6,l:"Moderado-difícil"},{v:7,l:"Difícil — 3 reps na reserva"},{v:8,l:"Muito difícil — 2 reps na reserva"},{v:9,l:"Quase máximo — 1 rep na reserva"},{v:10,l:"Esforço máximo — falha"}].map(({v,l})=>{
+                      const selected=sets[rpePickerIdx]?.rpe==String(v);
+                      return(<button key={v} onClick={()=>{upd(rpePickerIdx,"rpe",String(v));setRpePickerIdx(null);}} style={{display:"flex",alignItems:"center",gap:12,padding:"10px 12px",borderRadius:10,border:`1.5px solid ${selected?accent:T.border}`,background:selected?`${accent}15`:T.inpBg,cursor:"pointer",textAlign:"left"}}>
+                        <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:18,fontWeight:700,color:selected?accent:T.text,minWidth:24}}>{v}</span>
+                        <span style={{fontSize:13,color:selected?accent:T.sub,fontWeight:selected?600:400}}>{l}</span>
+                      </button>);
+                    })}
+                  </div>
+                  <button onClick={()=>setRpePickerIdx(null)} style={{width:"100%",padding:12,borderRadius:10,border:`1px solid ${T.border}`,background:"transparent",color:T.sub,fontSize:13,cursor:"pointer",marginTop:14}}>Fechar</button>
+                </div>
+              </div>
+            )}
           </>
         )}
       </div>
@@ -672,6 +699,101 @@ function CorpoView({user}){
 
 
 /* ─── FISICO VIEW ───────────────────────────────────────────────────── */
+/* ─── PILL BUTTON (module-level, reused across views) ────────────────── */
+function PillBtn({label,active,color,accent,onClick,small}){
+  const c=color||accent||"#888";
+  return(<button onClick={onClick} style={{padding:small?"4px 8px":"6px 11px",borderRadius:20,border:`1px solid ${active?c:T.border}`,background:active?`${c}15`:T.inpBg,color:active?c:T.sub,fontSize:small?10:11,fontWeight:active?700:400,cursor:"pointer",whiteSpace:"nowrap"}}>{label}</button>);
+}
+
+/* ─── ROLA FORM (module-level — fixes input-refocus bug) ─────────────── */
+function RolaForm({rolaInp,setRolaInp,parceiros,accent,onAdd,onCancel}){
+  const I={width:"100%",background:T.inpBg,border:`1px solid ${T.border}`,borderRadius:10,color:T.text,padding:"10px 12px",fontSize:15,outline:"none",minHeight:46,boxSizing:"border-box"};
+  const matches=rolaInp.parceiro.trim().length>0
+    ?parceiros.filter(p=>p.nome.toLowerCase().includes(rolaInp.parceiro.toLowerCase())&&p.nome.toLowerCase()!==rolaInp.parceiro.toLowerCase())
+    :[];
+  const selectParceiro=(p)=>setRolaInp(prev=>({...prev,parceiroId:p.id,parceiro:p.nome,nivel:p.faixaAtual}));
+  const posicoes=rolaInp.posicoes||[];
+  const finFeita=rolaInp.finalizacaoFeita||[];
+  const finSofrida=rolaInp.finalizacaoSofrida||[];
+  const showFinFeita=(rolaInp.resultados?.["Finalizei"]||0)>0;
+  const showFinSofrida=(rolaInp.resultados?.["Fui finalizado"]||0)>0;
+  const toggleArr=(field,val)=>setRolaInp(prev=>{const arr=prev[field]||[];return{...prev,[field]:arr.includes(val)?arr.filter(x=>x!==val):[...arr,val]};});
+
+  return(
+    <div style={{background:T.card,border:`1.5px solid ${accent}40`,borderRadius:14,padding:16,marginTop:10,marginBottom:6}}>
+      <div style={{fontSize:13,fontWeight:700,color:accent,marginBottom:12}}>Novo Rola</div>
+
+      <div style={{marginBottom:8}}>
+        <input value={rolaInp.parceiro} onChange={e=>setRolaInp(p=>({...p,parceiro:e.target.value,parceiroId:null}))} placeholder="Nome do parceiro" style={I}/>
+        {matches.length>0&&<div style={{display:"flex",flexWrap:"wrap",gap:5,marginTop:6}}>
+          {matches.slice(0,5).map(p=>(<button key={p.id} onClick={()=>selectParceiro(p)} style={{display:"flex",alignItems:"center",gap:5,padding:"5px 10px",borderRadius:20,border:`1px solid ${T.border}`,background:T.inpBg,cursor:"pointer"}}>
+            <div style={{width:8,height:8,borderRadius:"50%",background:FAIXA_COLORS[p.faixaAtual]||"#888"}}/>
+            <span style={{fontSize:11,color:T.text}}>{p.nome}</span>
+            <span style={{fontSize:10,color:T.muted}}>{p.faixaAtual}</span>
+          </button>))}
+        </div>}
+        {rolaInp.parceiroId&&<div style={{fontSize:11,color:T.done,marginTop:4}}>✓ Vinculado ao perfil de {rolaInp.parceiro}</div>}
+      </div>
+
+      <div style={{display:"flex",gap:8,marginBottom:10}}>
+        <input value={rolaInp.nivel} onChange={e=>setRolaInp(p=>({...p,nivel:e.target.value}))} placeholder="Faixa / Nível" style={{...I,flex:2}}/>
+        <input value={rolaInp.peso} onChange={e=>setRolaInp(p=>({...p,peso:e.target.value}))} placeholder="Peso" inputMode="decimal" style={{...I,flex:1}}/>
+      </div>
+
+      <div style={{fontSize:12,color:T.muted,marginBottom:8,fontWeight:600}}>Intensidade deste rola</div>
+      <div style={{display:"flex",gap:6,marginBottom:14}}>
+        {["Técnico","Forte","Open"].map(t=>(<button key={t} onClick={()=>setRolaInp(p=>({...p,intensidade:t}))} style={{flex:1,padding:"9px 4px",borderRadius:9,border:`1.5px solid ${rolaInp.intensidade===t?TIPO_COLOR[t]:T.border}`,background:rolaInp.intensidade===t?`${TIPO_COLOR[t]}14`:T.inpBg,color:rolaInp.intensidade===t?TIPO_COLOR[t]:T.sub,fontSize:12,fontWeight:rolaInp.intensidade===t?700:400,cursor:"pointer",minHeight:40}}>{t}</button>))}
+      </div>
+
+      <div style={{fontSize:12,color:T.muted,marginBottom:8,fontWeight:600}}>Resultado</div>
+      {[{label:"Positivos",items:["Finalizei","Raspei","Passei"],color:T.done},{label:"Neutro",items:["Neutro"],color:T.sub},{label:"Negativos",items:["Fui finalizado","Fui raspado","Fui passado"],color:"#EF4444"}].map(({label,items,color})=>(
+        <div key={label} style={{marginBottom:10}}>
+          <div style={{fontSize:10,fontWeight:700,color,letterSpacing:0.6,marginBottom:6,textTransform:"uppercase"}}>{label}</div>
+          <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
+            {items.map(r=>{
+              const cnt=(rolaInp.resultados||{})[r]||0;
+              const setR=(n)=>setRolaInp(p=>{const rs={...(p.resultados||{})};if(n<=0)delete rs[r];else rs[r]=n;return{...p,resultados:rs};});
+              return(<div key={r} style={{display:"flex",alignItems:"center",gap:4}}>
+                <button onClick={()=>setR(cnt>0?0:1)} style={{padding:"7px 12px",borderRadius:20,border:`1.5px solid ${cnt>0?color:T.border}`,background:cnt>0?`${color}18`:T.inpBg,color:cnt>0?color:T.sub,fontSize:12,fontWeight:cnt>0?700:400,cursor:"pointer",minHeight:36}}>{r}</button>
+                {cnt>0&&<>
+                  <button onClick={()=>setR(cnt-1)} style={{width:28,height:28,borderRadius:"50%",border:`1px solid ${T.border}`,background:T.inpBg,color:T.sub,fontSize:15,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",lineHeight:1}}>−</button>
+                  <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:13,fontWeight:700,color,minWidth:20,textAlign:"center"}}>×{cnt}</span>
+                  <button onClick={()=>setR(cnt+1)} style={{width:28,height:28,borderRadius:"50%",border:`1px solid ${color}`,background:`${color}12`,color,fontSize:15,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",lineHeight:1}}>+</button>
+                </>}
+              </div>);
+            })}
+          </div>
+        </div>
+      ))}
+
+      {showFinFeita&&<div style={{marginBottom:10}}>
+        <div style={{fontSize:10,fontWeight:700,color:T.done,letterSpacing:0.6,marginBottom:6,textTransform:"uppercase"}}>Qual finalização você fez?</div>
+        <div style={{display:"flex",flexWrap:"wrap",gap:5}}>
+          {FINALIZACOES.map(f=>(<PillBtn key={f} label={f} small color={T.done} active={finFeita.includes(f)} onClick={()=>toggleArr("finalizacaoFeita",f)}/>))}
+        </div>
+      </div>}
+
+      {showFinSofrida&&<div style={{marginBottom:10}}>
+        <div style={{fontSize:10,fontWeight:700,color:"#EF4444",letterSpacing:0.6,marginBottom:6,textTransform:"uppercase"}}>Qual finalização você sofreu?</div>
+        <div style={{display:"flex",flexWrap:"wrap",gap:5}}>
+          {FINALIZACOES.map(f=>(<PillBtn key={f} label={f} small color="#EF4444" active={finSofrida.includes(f)} onClick={()=>toggleArr("finalizacaoSofrida",f)}/>))}
+        </div>
+      </div>}
+
+      <div style={{fontSize:12,color:T.muted,marginBottom:8,marginTop:4,fontWeight:600}}>Posições (pode marcar mais de uma)</div>
+      <div style={{display:"flex",flexWrap:"wrap",gap:6,marginBottom:14}}>
+        {POS.map(p=>(<PillBtn key={p} label={p} accent={accent} active={posicoes.includes(p)} onClick={()=>toggleArr("posicoes",p)}/>))}
+      </div>
+
+      <input value={rolaInp.notas} onChange={e=>setRolaInp(p=>({...p,notas:e.target.value}))} placeholder="Observação (opcional)" style={{...I,marginBottom:12}}/>
+      <div style={{display:"flex",gap:8}}>
+        <button onClick={onCancel} style={{flex:1,padding:12,borderRadius:10,border:`1px solid ${T.border}`,background:"transparent",color:T.sub,fontSize:14,cursor:"pointer",minHeight:46}}>Cancelar</button>
+        <button onClick={onAdd} style={{flex:2,padding:12,borderRadius:10,border:"none",background:accent,color:"#FFF",fontSize:14,fontWeight:700,cursor:"pointer",minHeight:46}}>+ Adicionar Rola</button>
+      </div>
+    </div>
+  );
+}
+
 function FisicoView({user,plans}){
   const[tab,setTab]=useState("plano");
   const[lp,setLp]=useState(null);
@@ -993,11 +1115,17 @@ function JiuView({user}){
   const[adversarios,setAdversarios]=useState([]);
   const[faixas,setFaixas]=useState([]);
   const[faixaInp,setFaixaInp]=useState({faixa:"Branca",grau:0,data:"",notas:""});
+  const[parceiros,setParceiros]=useState([]);
+  const[parcSearch,setParcSearch]=useState("");
+  const[editingParcId,setEditingParcId]=useState(null);
+  const[openParcId,setOpenParcId]=useState(null);
+  const[parcNotaDraft,setParcNotaDraft]=useState("");
 
   // Active session draft (form state)
-  const[sessTipo,setSessTipo]=useState("Técnico");
+
   const[sessDur,setSessDur]=useState("");
-  const[fadiga,setFadiga]=useState({sono:3,horas:7,disposicao:3,corpo:3});
+  const[posicaoEnsinada,setPosicaoEnsinada]=useState("");
+  const[detalhesPosicaoEnsinada,setDetalhesPosicaoEnsinada]=useState("");
   const[draftRolas,setDraftRolas]=useState([]);
   const[posOk,setPosOk]=useState("");
   const[posNok,setPosNok]=useState("");
@@ -1005,7 +1133,7 @@ function JiuView({user}){
 
   // Rola entry sub-form
   const[showRolaForm,setShowRolaForm]=useState(false);
-  const[rolaInp,setRolaInp]=useState({parceiro:"",peso:"",nivel:"",resultados:{},posicao:"Meia-guarda",notas:""});
+  const[rolaInp,setRolaInp]=useState({parceiroId:null,parceiro:"",peso:"",nivel:"",intensidade:"Técnico",resultados:{},posicoes:[],finalizacaoFeita:[],finalizacaoSofrida:[],notas:""});
 
   const[tecInp,setTecInp]=useState({posicao:"Meia-guarda",titulo:"",detalhe:""});
   const[tecSearch,setTecSearch]=useState("");
@@ -1041,16 +1169,18 @@ function JiuView({user}){
     sGet(sk(user.id,"tecnico"),[]).then(d=>setTecnico(d));
     sGet(sk(user.id,"adversarios"),[]).then(d=>setAdversarios(d));
     sGet(sk(user.id,"faixas"),[]).then(d=>setFaixas(d));
+    sGet(sk(user.id,"parceiros"),[]).then(d=>setParceiros(d));
     sGet(sk(user.id,"comps"),[]).then(d=>setComps(d));
     sGet(sk(user.id,"cardio"),[]).then(d=>setCardioLog(d));
   },[user.id]);
 
   // ── Derived: flat list of all rolas across all sessions (for analysis) ──
-  const allRolas=jiuSessions.flatMap(s=>(s.rolas||[]).map(r=>({...r,date:s.date,sessTipo:s.tipo})));
+  const allRolas=jiuSessions.flatMap(s=>(s.rolas||[]).map(r=>({...r,date:s.date})));
 
   const isPos=r=>r.resultados?Object.keys(r.resultados).some(k=>["Finalizei","Raspei","Passei"].includes(k)):["Finalizei","Raspei","Passei"].includes(r.resultado);
   const isNeg=r=>r.resultados?Object.keys(r.resultados).some(k=>["Fui finalizado","Fui raspado","Fui passado"].includes(k)):["Fui finalizado","Fui raspado","Fui passado"].includes(r.resultado);
   const countR=(r,list)=>r.resultados?Object.entries(r.resultados).filter(([k])=>list.includes(k)).reduce((a,[,v])=>a+v,0):(list.includes(r.resultado)?1:0);
+  const getPos=(r)=>r.posicoes&&r.posicoes.length?r.posicoes:(r.posicao?[r.posicao]:[]);
 
   // ── Foco sugerido: posição mais fraca via rolas + temas recentes ──
   const topIssues=Object.entries(jiuSessions.slice(0,5).reduce((acc,s)=>{
@@ -1060,17 +1190,22 @@ function JiuView({user}){
 
   const weakestPos=(()=>{
     const POSITIVOS3=["Finalizei","Raspei","Passei"];const NEGATIVOS3=["Fui finalizado","Fui raspado","Fui passado"];
-    const byPos3={};allRolas.forEach(r=>{if(!r.posicao)return;if(!byPos3[r.posicao])byPos3[r.posicao]=[];byPos3[r.posicao].push(r);});
+    const byPos3={};allRolas.forEach(r=>{getPos(r).forEach(pos=>{if(!byPos3[pos])byPos3[pos]=[];byPos3[pos].push(r);});});
     const stats=Object.entries(byPos3).filter(([,a])=>a.length>=3).map(([pos,arr])=>{const w=arr.reduce((a,r)=>a+countR(r,POSITIVOS3),0);const l=arr.reduce((a,r)=>a+countR(r,NEGATIVOS3),0);const score=(w+l)>0?(w/(w+l))*10:5;return{pos,score,n:arr.length};});
     if(!stats.length)return null;
     return stats.sort((a,b)=>a.score-b.score)[0];
   })();
 
   // ── Save handlers ────────────────────────────────────────────────
-  const addDraftRola=()=>{
+  const addDraftRola=async()=>{
     if(!rolaInp.parceiro)return;
-    setDraftRolas(p=>[...p,{...rolaInp,id:Date.now()}]);
-    setRolaInp({parceiro:"",peso:"",nivel:"",resultados:{},posicao:"Meia-guarda",notas:""});
+    let pId=rolaInp.parceiroId;
+    if(!pId){
+      const p=await findOrCreateParceiro(rolaInp.parceiro,rolaInp.nivel);
+      pId=p.id;
+    }
+    setDraftRolas(p=>[...p,{...rolaInp,parceiroId:pId,id:Date.now()}]);
+    setRolaInp({parceiroId:null,parceiro:"",peso:"",nivel:"",intensidade:"Técnico",resultados:{},posicoes:[],finalizacaoFeita:[],finalizacaoSofrida:[],notas:""});
     setShowRolaForm(false);
     window.__toast?.("Rola adicionado à sessão");
   };
@@ -1078,11 +1213,11 @@ function JiuView({user}){
 
   const saveSession=async()=>{
     if(!sessDur&&draftRolas.length===0){window.__toast?.("Adicione duração ou pelo menos um rola");return;}
-    const newSession={id:Date.now(),date:todayStr(),tipo:sessTipo,dur:sessDur,fadiga:{...fadiga},rolas:draftRolas,pos_ok:posOk,pos_nok:posNok,notas:sessNotas};
+    const newSession={id:Date.now(),date:todayStr(),dur:sessDur,posicaoEnsinada,detalhesPosicaoEnsinada,rolas:draftRolas,pos_ok:posOk,pos_nok:posNok,notas:sessNotas};
     const nl=[newSession,...jiuSessions].slice(0,300);
     setJiuSessions(nl);await sSet(sk(user.id,"jiu_sessions"),nl);
     window.__toast?.("Sessão salva");
-    setSessTipo("Técnico");setSessDur("");setFadiga({sono:3,horas:7,disposicao:3,corpo:3});setDraftRolas([]);setPosOk("");setPosNok("");setSessNotas("");
+    setSessDur("");setPosicaoEnsinada("");setDetalhesPosicaoEnsinada("");setDraftRolas([]);setPosOk("");setPosNok("");setSessNotas("");
   };
 
   const deleteSession=async(id)=>{
@@ -1096,6 +1231,28 @@ function JiuView({user}){
     setTecnico(nl);await sSet(sk(user.id,"tecnico"),nl);window.__toast?.("Detalhe técnico salvo");
     setTecInp({posicao:"Meia-guarda",titulo:"",detalhe:""});
   };
+  // ── Gestão de Parceiros ────────────────────────────────────────
+  const findOrCreateParceiro=async(nome,faixa)=>{
+    const existing=parceiros.find(p=>p.nome.toLowerCase().trim()===nome.toLowerCase().trim());
+    if(existing)return existing;
+    const novo={id:Date.now(),nome:nome.trim(),faixaAtual:faixa||"Branca",criadoEm:todayStr()};
+    const nl=[...parceiros,novo];
+    setParceiros(nl);await sSet(sk(user.id,"parceiros"),nl);
+    return novo;
+  };
+  const updateParceiroFaixa=async(id,faixa)=>{
+    const nl=parceiros.map(p=>p.id===id?{...p,faixaAtual:faixa}:p);
+    setParceiros(nl);await sSet(sk(user.id,"parceiros"),nl);window.__toast?.("Faixa atualizada");
+  };
+  const deleteParceiro=async(id)=>{
+    const nl=parceiros.filter(p=>p.id!==id);
+    setParceiros(nl);await sSet(sk(user.id,"parceiros"),nl);
+  };
+  const saveParceiroNota=async(id,nota)=>{
+    const nl=parceiros.map(p=>p.id===id?{...p,notaEstrategia:nota}:p);
+    setParceiros(nl);await sSet(sk(user.id,"parceiros"),nl);window.__toast?.("Anotação salva");
+  };
+
   const saveAdv=async()=>{
     if(!advInp.nome)return;
     const nl=[{id:Date.now(),date:todayStr(),...advInp},...adversarios].slice(0,200);
@@ -1133,13 +1290,17 @@ function JiuView({user}){
       lines.push(`--- SESSÕES (${jiuSessions.length} total) ---`);
       jiuSessions.slice(0,30).forEach(s=>{
         const f=s.fadiga?`Sono:${s.fadiga.sono} Disp:${s.fadiga.disposicao} Corpo:${s.fadiga.corpo}`:"";
-        lines.push(`${s.date} | ${s.tipo} | ${s.dur||"?"}min${f?" | "+f:""} | ${(s.rolas||[]).length} rolas`);
+        const intensCts={};(s.rolas||[]).forEach(r=>{const t=r.intensidade||s.tipo||"Técnico";intensCts[t]=(intensCts[t]||0)+1;});
+        const intensStr=Object.entries(intensCts).map(([t,c])=>c>1?`${t}×${c}`:t).join(", ")||"—";
+        lines.push(`${s.date} | ${intensStr} | ${s.dur||"?"}min${f?" | "+f:""} | ${(s.rolas||[]).length} rolas`);
+        if(s.posicaoEnsinada)lines.push(`  📚 Posição ensinada: ${s.posicaoEnsinada}${s.detalhesPosicaoEnsinada?" — "+s.detalhesPosicaoEnsinada:""}`);
         if(s.pos_ok)lines.push(`  ✓ ${s.pos_ok}`);
         if(s.pos_nok)lines.push(`  ✗ ${s.pos_nok}`);
         if(s.notas)lines.push(`  → ${s.notas}`);
         (s.rolas||[]).forEach(r=>{
           const resStr=r.resultados?Object.entries(r.resultados).filter(([,v])=>v>0).map(([k,v])=>v>1?`${k}×${v}`:k).join(", "):r.resultado;
-          lines.push(`    · ${r.parceiro}${r.peso?" "+r.peso+"kg":""} ${r.nivel||""} — ${resStr} — ${r.posicao||""}`);
+          const posStr=getPos(r).join(", ");
+          lines.push(`    · [${r.intensidade||"?"}] ${r.parceiro}${r.peso?" "+r.peso+"kg":""} ${r.nivel||""} — ${resStr} — ${posStr}`);
         });
       });
       lines.push("");
@@ -1149,7 +1310,7 @@ function JiuView({user}){
       const losses=allRolas.filter(r=>isNeg(r)).length;
       const wr=Math.round((wins/allRolas.length)*100);
       lines.push(`--- ROLAS (${allRolas.length} total | ${wr}% positivos) ---`);
-      const pm={};allRolas.forEach(r=>{if(!r.posicao)return;if(!pm[r.posicao])pm[r.posicao]={t:0,w:0};pm[r.posicao].t++;if(isPos(r))pm[r.posicao].w++;});
+      const pm={};allRolas.forEach(r=>{getPos(r).forEach(pos=>{if(!pm[pos])pm[pos]={t:0,w:0};pm[pos].t++;if(isPos(r))pm[pos].w++;});});
       Object.entries(pm).filter(([,v])=>v.t>=2).sort((a,b)=>b[1].t-a[1].t).forEach(([pos,v])=>lines.push(`  ${pos}: ${Math.round((v.w/v.t)*100)}% (${v.t} rolas)`));
       lines.push("");
     }
@@ -1185,12 +1346,8 @@ function JiuView({user}){
   const Hdr=({t,mb=10})=>(<div style={{fontSize:10,fontWeight:700,color:T.muted,letterSpacing:1.2,marginBottom:mb,textTransform:"uppercase"}}>{t}</div>);
   const Box=({children,mb=14})=>(<div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:14,padding:"14px 16px",marginBottom:mb}}>{children}</div>);
 
-  const TIPO_COLOR={Técnico:"#F59E0B",Forte:"#EA6C00",Open:"#EF4444"};
-  const POS=["Meia-guarda","Meia-guarda (top)","Guarda fechada","Passagem","Costas","Em pé","Single leg","Underhook/Esgrima","Raspagem","Finalização","Defesa de queda"];
-  const RES=["Finalizei","Raspei","Passei","Neutro","Fui passado","Fui raspado","Fui finalizado"];
   const RES_C={Finalizei:T.done,Raspei:user.accent,Passei:"#3B82F6",Neutro:T.sub,"Fui passado":"#F59E0B","Fui raspado":"#F97316","Fui finalizado":"#EF4444"};
 
-  const PillBtn=({label,active,color,onClick,small})=>(<button onClick={onClick} style={{padding:small?"4px 8px":"6px 11px",borderRadius:20,border:`1px solid ${active?(color||user.accent):T.border}`,background:active?`${color||user.accent}15`:T.inpBg,color:active?(color||user.accent):T.sub,fontSize:small?10:11,fontWeight:active?700:400,cursor:"pointer",whiteSpace:"nowrap"}}>{label}</button>);
 
   const Stars=({label,val,onChange})=>(<div style={{marginBottom:10}}>
     <div style={{display:"flex",justifyContent:"space-between",marginBottom:5}}>
@@ -1202,56 +1359,9 @@ function JiuView({user}){
     </div>
   </div>);
 
-  const tabs=user.id==="G"
-    ?[{id:"sessao",l:"Sessão"},{id:"tecnico",l:"Técnico"},{id:"posicoes",l:"Posições"},{id:"faixa",l:"🥋 Faixa"},{id:"adversarios",l:"Adversários"},{id:"timer",l:"⏱ Timer"}]
-    :[{id:"faixa",l:"🥋 Faixa"},{id:"adversarios",l:"Adversários"}];
-
-  useEffect(()=>{if(user.id==="B"&&tab!=="adversarios")setTab("adversarios");},[user.id]);
+  const tabs=[{id:"sessao",l:"Sessão"},{id:"parceiros",l:"Parceiros"},{id:"posicoes",l:"Posições"},{id:"faixa",l:"🥋 Faixa"},{id:"adversarios",l:"Adversários"},{id:"timer",l:"⏱ Timer"}];
 
   // ── Rola sub-form component (reused) ───────────────────────────────
-  const RolaForm=()=>(
-    <div style={{background:T.card,border:`1.5px solid ${user.accent}40`,borderRadius:14,padding:16,marginTop:10,marginBottom:6}}>
-      <div style={{fontSize:13,fontWeight:700,color:user.accent,marginBottom:12}}>Novo Rola</div>
-      <div style={{display:"flex",gap:8,marginBottom:10}}>
-        <input value={rolaInp.parceiro} onChange={e=>setRolaInp(p=>({...p,parceiro:e.target.value}))} placeholder="Parceiro" style={{...I,flex:2}}/>
-        <input value={rolaInp.peso} onChange={e=>setRolaInp(p=>({...p,peso:e.target.value}))} placeholder="Peso" inputMode="decimal" style={{...I,flex:1}}/>
-      </div>
-      <input value={rolaInp.nivel} onChange={e=>setRolaInp(p=>({...p,nivel:e.target.value}))} placeholder="Faixa / Nível" style={{...I,marginBottom:14}}/>
-
-      <div style={{fontSize:12,color:T.muted,marginBottom:8,fontWeight:600}}>Resultado</div>
-      {[{label:"Positivos",items:["Finalizei","Raspei","Passei"],color:T.done},{label:"Neutro",items:["Neutro"],color:T.sub},{label:"Negativos",items:["Fui finalizado","Fui raspado","Fui passado"],color:"#EF4444"}].map(({label,items,color})=>(
-        <div key={label} style={{marginBottom:10}}>
-          <div style={{fontSize:10,fontWeight:700,color,letterSpacing:0.6,marginBottom:6,textTransform:"uppercase"}}>{label}</div>
-          <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
-            {items.map(r=>{
-              const cnt=(rolaInp.resultados||{})[r]||0;
-              const setR=(n)=>setRolaInp(p=>{const rs={...(p.resultados||{})};if(n<=0)delete rs[r];else rs[r]=n;return{...p,resultados:rs};});
-              return(<div key={r} style={{display:"flex",alignItems:"center",gap:4}}>
-                <button onClick={()=>setR(cnt>0?0:1)} style={{padding:"7px 12px",borderRadius:20,border:`1.5px solid ${cnt>0?color:T.border}`,background:cnt>0?`${color}18`:T.inpBg,color:cnt>0?color:T.sub,fontSize:12,fontWeight:cnt>0?700:400,cursor:"pointer",minHeight:36}}>{r}</button>
-                {cnt>0&&<>
-                  <button onClick={()=>setR(cnt-1)} style={{width:28,height:28,borderRadius:"50%",border:`1px solid ${T.border}`,background:T.inpBg,color:T.sub,fontSize:15,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",lineHeight:1}}>−</button>
-                  <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:13,fontWeight:700,color,minWidth:20,textAlign:"center"}}>×{cnt}</span>
-                  <button onClick={()=>setR(cnt+1)} style={{width:28,height:28,borderRadius:"50%",border:`1px solid ${color}`,background:`${color}12`,color,fontSize:15,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",lineHeight:1}}>+</button>
-                </>}
-              </div>);
-            })}
-          </div>
-        </div>
-      ))}
-
-      <div style={{fontSize:12,color:T.muted,marginBottom:8,marginTop:4,fontWeight:600}}>Posição</div>
-      <div style={{display:"flex",flexWrap:"wrap",gap:6,marginBottom:14}}>
-        {POS.map(p=>(<PillBtn key={p} label={p} active={rolaInp.posicao===p} onClick={()=>setRolaInp(prev=>({...prev,posicao:p}))}/>))}
-      </div>
-
-      <input value={rolaInp.notas} onChange={e=>setRolaInp(p=>({...p,notas:e.target.value}))} placeholder="Observação (opcional)" style={{...I,marginBottom:12}}/>
-      <div style={{display:"flex",gap:8}}>
-        <button onClick={()=>{setShowRolaForm(false);setRolaInp({parceiro:"",peso:"",nivel:"",resultados:{},posicao:"Meia-guarda",notas:""});}} style={{flex:1,padding:12,borderRadius:10,border:`1px solid ${T.border}`,background:"transparent",color:T.sub,fontSize:14,cursor:"pointer",minHeight:46}}>Cancelar</button>
-        <button onClick={addDraftRola} style={{flex:2,padding:12,borderRadius:10,border:"none",background:user.accent,color:"#FFF",fontSize:14,fontWeight:700,cursor:"pointer",minHeight:46}}>+ Adicionar Rola</button>
-      </div>
-    </div>
-  );
-
   const weekCardio=cardioLog.filter(c=>{const d=new Date();d.setDate(d.getDate()-7);return c.date>=d.toISOString().split("T")[0];}).reduce((a,c)=>a+parseInt(c.dur||0),0);
 
   return(
@@ -1285,28 +1395,18 @@ function JiuView({user}){
 
         <Box>
           <Hdr t="Nova Sessão"/>
-          <div style={{display:"flex",gap:6,marginBottom:10}}>
-            {["Técnico","Forte","Open"].map(t=>(<button key={t} onClick={()=>setSessTipo(t)} style={{flex:1,padding:"10px 4px",borderRadius:9,border:`1.5px solid ${sessTipo===t?TIPO_COLOR[t]:T.border}`,background:sessTipo===t?`${TIPO_COLOR[t]}14`:T.inpBg,color:sessTipo===t?TIPO_COLOR[t]:T.sub,fontSize:13,fontWeight:sessTipo===t?700:400,cursor:"pointer",minHeight:44}}>{t}</button>))}
-          </div>
           <input value={sessDur} onChange={e=>setSessDur(e.target.value)} placeholder="Duração total (min)" inputMode="decimal" style={{...I,marginBottom:12}}/>
 
-          <Hdr t="Como você está hoje?" mb={8}/>
-          <Stars label="Qualidade do sono" val={fadiga.sono} onChange={v=>setFadiga(p=>({...p,sono:v}))}/>
-          <div style={{marginBottom:10}}>
-            <div style={{display:"flex",justifyContent:"space-between",marginBottom:5}}>
-              <span style={{fontSize:13,color:T.sub}}>Horas dormidas</span>
-              <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:13,color:user.accent,fontWeight:700}}>{fadiga.horas}h</span>
-            </div>
-            <div style={{display:"flex",alignItems:"center",gap:8}}>
-              <button onClick={()=>setFadiga(p=>({...p,horas:Math.max(0,Math.round((p.horas-0.5)*10)/10)}))} style={{width:36,height:36,borderRadius:9,border:`1px solid ${T.border}`,background:T.inpBg,color:T.text,fontSize:18,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>−</button>
-              <div style={{flex:1,height:34,borderRadius:8,background:T.inpBg,position:"relative",overflow:"hidden"}}>
-                <div style={{position:"absolute",inset:0,width:`${Math.min(100,(fadiga.horas/12)*100)}%`,background:`${user.accent}25`,borderRadius:8,transition:"width 0.2s ease"}}/>
-              </div>
-              <button onClick={()=>setFadiga(p=>({...p,horas:Math.min(12,Math.round((p.horas+0.5)*10)/10)}))} style={{width:36,height:36,borderRadius:9,border:`1px solid ${T.border}`,background:T.inpBg,color:T.text,fontSize:18,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>+</button>
-            </div>
+          <div style={{fontSize:12,color:T.muted,marginBottom:8,fontWeight:600}}>Posição ensinada pelo professor</div>
+          <div style={{display:"flex",flexWrap:"wrap",gap:6,marginBottom:12}}>
+            {POS.map(p=>(<PillBtn key={p} label={p} accent={user.accent} active={posicaoEnsinada===p} onClick={()=>setPosicaoEnsinada(prev=>prev===p?"":p)}/>))}
           </div>
-          <Stars label="Disposição" val={fadiga.disposicao} onChange={v=>setFadiga(p=>({...p,disposicao:v}))}/>
-          <Stars label="Corpo / Dores" val={fadiga.corpo} onChange={v=>setFadiga(p=>({...p,corpo:v}))}/>
+          {posicaoEnsinada&&(
+            <div style={{background:T.inpBg,border:`1px solid ${T.border}`,borderRadius:10,padding:12,marginBottom:12}}>
+              <div style={{fontSize:11,fontWeight:700,color:user.accent,marginBottom:6}}>📚 Detalhes — {posicaoEnsinada}</div>
+              <textarea value={detalhesPosicaoEnsinada} onChange={e=>setDetalhesPosicaoEnsinada(e.target.value)} placeholder="O que o professor explicou, pontos-chave, detalhe técnico, o que praticar..." rows={3} style={{...I,resize:"none",background:T.card}}/>
+            </div>
+          )}
 
           <div style={{height:1,background:T.border,margin:"14px 0"}}/>
 
@@ -1329,13 +1429,14 @@ function JiuView({user}){
                 {resEntries.map(([k,v])=>(<span key={k} style={{fontSize:11,fontWeight:700,padding:"3px 9px",borderRadius:20,background:`${RES_C[k]||T.sub}15`,color:RES_C[k]||T.sub}}>{v>1?`${k} ×${v}`:k}</span>))}
               </div>}
               <div style={{display:"flex",alignItems:"center",gap:6}}>
-                <span style={{fontSize:11,color:user.accent,background:`${user.accent}12`,padding:"2px 9px",borderRadius:10,fontWeight:600}}>{r.posicao}</span>
+                {(r.posicoes||(r.posicao?[r.posicao]:[])).map(p=>(<span key={p} style={{fontSize:11,color:user.accent,background:`${user.accent}12`,padding:"2px 9px",borderRadius:10,fontWeight:600}}>{p}</span>))}
+                {r.intensidade&&<span style={{fontSize:11,color:TIPO_COLOR[r.intensidade]||T.sub,background:`${TIPO_COLOR[r.intensidade]||T.sub}12`,padding:"2px 9px",borderRadius:10,fontWeight:600}}>{r.intensidade}</span>}
               </div>
               {r.notas&&<div style={{fontSize:12,color:T.sub,fontStyle:"italic",marginTop:6}}>{r.notas}</div>}
             </div>);
           })}
 
-          {showRolaForm&&<RolaForm/>}
+          {showRolaForm&&<RolaForm rolaInp={rolaInp} setRolaInp={setRolaInp} parceiros={parceiros} accent={user.accent} onAdd={addDraftRola} onCancel={()=>{setShowRolaForm(false);setRolaInp({parceiroId:null,parceiro:"",peso:"",nivel:"",intensidade:"Técnico",resultados:{},posicoes:[],finalizacaoFeita:[],finalizacaoSofrida:[],notas:""});}}/>}
 
           <div style={{height:1,background:T.border,margin:"14px 0"}}/>
 
@@ -1350,11 +1451,13 @@ function JiuView({user}){
           {jiuSessions.slice(0,15).map(s=>{
             const wins=(s.rolas||[]).reduce((a,r)=>a+countR(r,["Finalizei","Raspei","Passei"]),0);
             const losses=(s.rolas||[]).reduce((a,r)=>a+countR(r,["Fui finalizado","Fui raspado","Fui passado"]),0);
+            const intensCounts={};(s.rolas||[]).forEach(r=>{const t=r.intensidade||s.tipo||"Técnico";intensCounts[t]=(intensCounts[t]||0)+1;});
+            const intensSummary=Object.entries(intensCounts).sort((a,b)=>b[1]-a[1]);
             return(<div key={s.id} style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:12,overflow:"hidden"}}>
               <div style={{padding:"11px 14px"}}>
                 <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4}}>
-                  <div style={{display:"flex",alignItems:"center",gap:8}}>
-                    <span style={{fontSize:13,fontWeight:700,color:TIPO_COLOR[s.tipo]||T.text}}>{s.tipo}</span>
+                  <div style={{display:"flex",alignItems:"center",gap:6,flexWrap:"wrap"}}>
+                    {intensSummary.length>0?intensSummary.map(([t,c])=>(<span key={t} style={{fontSize:11,fontWeight:700,color:TIPO_COLOR[t]||T.text,background:`${TIPO_COLOR[t]||T.muted}12`,padding:"2px 7px",borderRadius:8}}>{t}{c>1?` ×${c}`:""}</span>)):<span style={{fontSize:13,fontWeight:700,color:T.text}}>Sessão</span>}
                     {s.fadiga&&<span style={{fontSize:10,color:T.muted}}>😴{s.fadiga.sono}{s.fadiga.horas?` (${s.fadiga.horas}h)`:""} 💪{s.fadiga.disposicao} 🦵{s.fadiga.corpo}</span>}
                   </div>
                   <div style={{display:"flex",gap:8,alignItems:"center"}}>
@@ -1368,6 +1471,8 @@ function JiuView({user}){
                   {wins>0&&<span style={{fontSize:11,color:T.done}}>{wins} ✓</span>}
                   {losses>0&&<span style={{fontSize:11,color:"#EF4444"}}>{losses} ✗</span>}
                 </div>}
+                {s.posicaoEnsinada&&<div style={{marginBottom:s.detalhesPosicaoEnsinada?2:4}}><span style={{display:"inline-block",fontSize:11,color:user.accent,background:`${user.accent}12`,padding:"2px 8px",borderRadius:8,fontWeight:600}}>📚 {s.posicaoEnsinada}</span></div>}
+                {s.detalhesPosicaoEnsinada&&<div style={{fontSize:12,color:T.sub,marginBottom:4,paddingLeft:2,lineHeight:1.4}}>{s.detalhesPosicaoEnsinada}</div>}
                 {s.pos_ok&&<div style={{fontSize:12,color:T.done,marginBottom:2}}>✓ {s.pos_ok}</div>}
                 {s.pos_nok&&<div style={{fontSize:12,color:"#EF4444",marginBottom:2}}>✗ {s.pos_nok}</div>}
                 {s.notas&&<div style={{fontSize:11,color:T.muted,fontStyle:"italic"}}>{s.notas}</div>}
@@ -1376,7 +1481,7 @@ function JiuView({user}){
                 {s.rolas.map((r,ri)=>{
                   const resStr=r.resultados?Object.entries(r.resultados).filter(([,v])=>v>0).map(([k,v])=>v>1?`${k}×${v}`:k).join(" · "):r.resultado;
                   return(<div key={ri} style={{display:"flex",justifyContent:"space-between",padding:"4px 0",fontSize:11}}>
-                    <span style={{color:T.sub}}>{r.parceiro}{r.posicao?` · ${r.posicao}`:""}</span>
+                    <span style={{color:T.sub}}>{r.parceiro}{(r.posicoes||(r.posicao?[r.posicao]:[])).length?` · ${(r.posicoes||(r.posicao?[r.posicao]:[])).join(", ")}`:""}</span>
                     <span style={{color:T.muted}}>{resStr}</span>
                   </div>);
                 })}
@@ -1387,40 +1492,175 @@ function JiuView({user}){
         </div>
       </>)}
 
-      {/* ── TÉCNICO ────────────────────────────────────────────── */}
-      {tab==="tecnico"&&(<>
-        <Box>
-          <Hdr t="Adicionar Detalhe Técnico"/>
-          <div style={{marginBottom:10}}>
-            <div style={{fontSize:12,color:T.muted,marginBottom:7}}>Posição</div>
-            <div style={{display:"flex",flexWrap:"wrap",gap:5}}>
-              {POS.map(p=>(<PillBtn key={p} label={p} small active={tecInp.posicao===p} onClick={()=>setTecInp(prev=>({...prev,posicao:p}))}/>))}
-            </div>
-          </div>
-          <input value={tecInp.titulo} onChange={e=>setTecInp(p=>({...p,titulo:e.target.value}))} placeholder="Título (ex: quando o quadril resiste no single...)" style={{...I,marginBottom:8}}/>
-          <textarea value={tecInp.detalhe} onChange={e=>setTecInp(p=>({...p,detalhe:e.target.value}))} placeholder="Descrição completa do detalhe técnico..." rows={3} style={{...I,resize:"none",marginBottom:4}}/>
-          {Sv("Salvar Detalhe",saveTec)}
-        </Box>
-        <input value={tecSearch} onChange={e=>setTecSearch(e.target.value)} placeholder="🔍 Buscar posição, palavra-chave..." style={{...I,marginBottom:12}}/>
-        <div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:14,overflow:"hidden"}}>
-          {tecnico.filter(t=>!tecSearch||[t.titulo,t.detalhe,t.posicao].some(x=>x?.toLowerCase().includes(tecSearch.toLowerCase()))).map((t,i,arr)=>(<div key={t.id} style={{padding:"12px 14px",borderBottom:i<arr.length-1?`1px solid ${T.border}`:"none"}}>
-            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}}>
-              <span style={{fontSize:10,color:user.accent,background:`${user.accent}12`,padding:"2px 8px",borderRadius:10,fontWeight:700}}>{t.posicao}</span>
-              <span style={{fontSize:10,color:T.muted}}>{t.date}</span>
-            </div>
-            <div style={{fontSize:14,fontWeight:700,color:T.text,marginBottom:4}}>{t.titulo}</div>
-            {t.detalhe&&<div style={{fontSize:13,color:T.sub,lineHeight:1.65}}>{t.detalhe}</div>}
-          </div>))}
-          {tecnico.length===0&&<div style={{padding:14,fontSize:13,color:T.muted}}>Comece a registrar detalhes técnicos após os treinos.</div>}
-        </div>
-      </>)}
+      {/* ── PARCEIROS ──────────────────────────────────────────── */}
+      {tab==="parceiros"&&(()=>{
+        const POSITIVOS5=["Finalizei","Raspei","Passei"];
+        const NEGATIVOS5=["Fui finalizado","Fui raspado","Fui passado"];
+        const byParceiro={};
+        allRolas.forEach(r=>{
+          const key=r.parceiroId||r.parceiro;
+          if(!key)return;
+          if(!byParceiro[key])byParceiro[key]=[];
+          byParceiro[key].push(r);
+        });
+        const filtParc=parceiros.filter(p=>!parcSearch||p.nome.toLowerCase().includes(parcSearch.toLowerCase()));
+        const parcStats=filtParc.map(p=>{
+          const arr=(byParceiro[p.id]||byParceiro[p.nome]||[]).sort((a,b)=>a.date.localeCompare(b.date));
+          const wins=arr.reduce((a,r)=>a+countR(r,POSITIVOS5),0);
+          const losses=arr.reduce((a,r)=>a+countR(r,NEGATIVOS5),0);
+          const total=wins+losses;
+          const score=total>0?Math.round((wins/total)*10*10)/10:null;
+          let trend=null;
+          if(arr.length>=4){
+            const mid=Math.floor(arr.length/2);
+            const older=arr.slice(0,mid);const recent=arr.slice(mid);
+            const oW=older.reduce((a,r)=>a+countR(r,POSITIVOS5),0);const oL=older.reduce((a,r)=>a+countR(r,NEGATIVOS5),0);
+            const rW=recent.reduce((a,r)=>a+countR(r,POSITIVOS5),0);const rL=recent.reduce((a,r)=>a+countR(r,NEGATIVOS5),0);
+            const oScore=(oW+oL)>0?(oW/(oW+oL))*10:5;
+            const rScore=(rW+rL)>0?(rW/(rW+rL))*10:5;
+            trend=Math.round((rScore-oScore)*10)/10;
+          }
+          return{...p,rolaCount:arr.length,score,trend,wins,losses,arr};
+        }).sort((a,b)=>{
+          if(a.score==null&&b.score==null)return b.rolaCount-a.rolaCount;
+          if(a.score==null)return 1;
+          if(b.score==null)return -1;
+          return a.score-b.score;
+        });
 
-      {/* ── POSIÇÕES ───────────────────────────────────────────── */}
+        const buildDetail=(p)=>{
+          const arr=p.arr;
+          const getPosArr=(r)=>r.posicoes&&r.posicoes.length?r.posicoes:(r.posicao?[r.posicao]:[]);
+          // breakdown por posição
+          const byPos={};
+          arr.forEach(r=>{getPosArr(r).forEach(pos=>{if(!byPos[pos])byPos[pos]={w:0,l:0};byPos[pos].w+=countR(r,POSITIVOS5);byPos[pos].l+=countR(r,NEGATIVOS5);});});
+          const posBreakdown=Object.entries(byPos).map(([pos,{w,l}])=>({pos,w,l,total:w+l,pct:(w+l)>0?Math.round((w/(w+l))*100):null})).filter(x=>x.total>0).sort((a,b)=>b.total-a.total);
+          // finalizações feitas / sofridas
+          const finFeitas={};arr.forEach(r=>(r.finalizacaoFeita||[]).forEach(f=>finFeitas[f]=(finFeitas[f]||0)+1));
+          const finSofridas={};arr.forEach(r=>(r.finalizacaoSofrida||[]).forEach(f=>finSofridas[f]=(finSofridas[f]||0)+1));
+          const finFeitasArr=Object.entries(finFeitas).sort((a,b)=>b[1]-a[1]);
+          const finSofridasArr=Object.entries(finSofridas).sort((a,b)=>b[1]-a[1]);
+          // texto auto-gerado
+          let insight="";
+          if(arr.length<3){
+            insight="Registre mais rolas contra esse parceiro para o app começar a identificar padrões.";
+          }else{
+            const parts=[];
+            const bestPos=posBreakdown.filter(x=>x.total>=2).sort((a,b)=>b.pct-a.pct)[0];
+            const worstPos=posBreakdown.filter(x=>x.total>=2).sort((a,b)=>a.pct-b.pct)[0];
+            if(bestPos&&bestPos.pct>=60)parts.push(`Você vai bem em ${bestPos.pos} contra ${p.nome} (${bestPos.pct}% de aproveitamento).`);
+            if(worstPos&&worstPos.pct<=40&&worstPos.pos!==bestPos?.pos)parts.push(`Cuidado em ${worstPos.pos} — só ${worstPos.pct}% de aproveitamento aí.`);
+            if(finSofridasArr.length>0)parts.push(`${p.nome} costuma te finalizar com ${finSofridasArr[0][0]}${finSofridasArr[0][1]>1?` (${finSofridasArr[0][1]}x)`:""}.`);
+            if(finFeitasArr.length>0)parts.push(`Sua finalização mais efetiva contra ${p.nome} é ${finFeitasArr[0][0]}${finFeitasArr[0][1]>1?` (${finFeitasArr[0][1]}x)`:""}.`);
+            insight=parts.length?parts.join(" "):`${p.wins} positivos e ${p.losses} negativos registrados até agora — sem padrão claro de posição ainda.`;
+          }
+          return{posBreakdown,finFeitasArr,finSofridasArr,insight};
+        };
+
+        return(<>
+          <input value={parcSearch} onChange={e=>setParcSearch(e.target.value)} placeholder="🔍 Buscar parceiro..." style={{...I,marginBottom:12}}/>
+          {parcStats.length>0&&<div style={{fontSize:11,color:T.muted,marginBottom:10}}>Ordenado de quem você mais perde para quem você mais ganha.</div>}
+          {parcStats.length===0&&<div style={{fontSize:13,color:T.muted,fontStyle:"italic",padding:"10px 0"}}>Parceiros aparecem aqui automaticamente quando você registra rolas com o nome deles.</div>}
+          <div style={{display:"flex",flexDirection:"column",gap:8}}>
+            {parcStats.map((p,idx)=>{
+              const isOpen=openParcId===p.id;
+              const detail=isOpen?buildDetail(p):null;
+              const rank=idx+1;
+              const rankColor=p.score==null?T.muted:p.score<5?"#EF4444":p.score<7?"#F59E0B":T.done;
+              return(<Box key={p.id} mb={0}>
+                <button onClick={()=>{if(isOpen){setOpenParcId(null);}else{setOpenParcId(p.id);setParcNotaDraft(p.notaEstrategia||"");}}} style={{width:"100%",display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:10,background:"transparent",border:"none",cursor:"pointer",padding:0,textAlign:"left"}}>
+                  <div style={{display:"flex",gap:10,flex:1}}>
+                    <div style={{width:24,height:24,borderRadius:"50%",background:`${rankColor}15`,border:`1px solid ${rankColor}40`,display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,marginTop:1}}>
+                      <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:10,fontWeight:700,color:rankColor}}>{rank}</span>
+                    </div>
+                    <div style={{flex:1}}>
+                      <div style={{fontSize:15,fontWeight:700,color:T.text}}>{p.nome}</div>
+                      <div style={{fontSize:11,color:T.muted,marginTop:1}}>{p.rolaCount} rolas registrados {isOpen?"▲":"▼"}</div>
+                    </div>
+                  </div>
+                  {p.score!=null&&<div style={{textAlign:"right"}}>
+                    <div style={{display:"flex",alignItems:"center",gap:6}}>
+                      {p.trend!==null&&Math.abs(p.trend)>=0.3&&<span style={{fontSize:11,fontWeight:700,color:p.trend>0?T.done:"#EF4444"}}>{p.trend>0?"↑":"↓"}{Math.abs(p.trend).toFixed(1)}</span>}
+                      <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:18,fontWeight:700,color:p.score>=7?T.done:p.score>=5?user.accent:"#EF4444"}}>{p.score.toFixed(1)}/10</span>
+                    </div>
+                  </div>}
+                </button>
+
+                {editingParcId===p.id?(
+                  <div style={{marginBottom:8}}>
+                    <div style={{fontSize:10,color:T.muted,marginBottom:6,fontWeight:700,textTransform:"uppercase"}}>Atualizar faixa atual</div>
+                    <div style={{display:"flex",flexWrap:"wrap",gap:5,marginBottom:8}}>
+                      {["Branca","Azul","Roxa","Marrom","Preta"].map(f=>(<button key={f} onClick={()=>{updateParceiroFaixa(p.id,f);setEditingParcId(null);}} style={{display:"flex",alignItems:"center",gap:5,padding:"5px 10px",borderRadius:20,border:`1.5px solid ${p.faixaAtual===f?FAIXA_COLORS[f]:T.border}`,background:p.faixaAtual===f?`${FAIXA_COLORS[f]}15`:T.inpBg,cursor:"pointer"}}>
+                        <div style={{width:10,height:10,borderRadius:"50%",background:FAIXA_COLORS[f]}}/>
+                        <span style={{fontSize:11,color:T.text}}>{f}</span>
+                      </button>))}
+                    </div>
+                    <button onClick={()=>setEditingParcId(null)} style={{fontSize:11,color:T.muted,background:"transparent",border:"none",cursor:"pointer"}}>Cancelar</button>
+                  </div>
+                ):(
+                  <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:8}}>
+                    <button onClick={()=>setEditingParcId(p.id)} style={{display:"flex",alignItems:"center",gap:6,background:"transparent",border:"none",cursor:"pointer",padding:0}}>
+                      <div style={{width:12,height:12,borderRadius:"50%",background:FAIXA_COLORS[p.faixaAtual]||"#888"}}/>
+                      <span style={{fontSize:12,color:T.sub}}>{p.faixaAtual}</span>
+                      <span style={{fontSize:10,color:user.accent}}>✎ editar</span>
+                    </button>
+                    <button onClick={()=>deleteParceiro(p.id)} style={{background:"transparent",border:"none",color:T.muted,fontSize:11,cursor:"pointer"}}>remover</button>
+                  </div>
+                )}
+                {p.score!=null&&<div style={{height:6,background:T.inpBg,borderRadius:3,marginBottom:6}}>
+                  <div style={{height:"100%",width:`${p.score*10}%`,background:p.score>=7?T.done:p.score>=5?user.accent:"#EF4444",borderRadius:3,transition:"width 0.4s ease"}}/>
+                </div>}
+                {p.score!=null&&<div style={{fontSize:10,color:T.muted}}>{p.wins} positivos · {p.losses} negativos</div>}
+
+                {isOpen&&detail&&(<div style={{marginTop:14,paddingTop:14,borderTop:`1px solid ${T.border}`}}>
+                  {/* Auto insight */}
+                  <div style={{background:`${user.accent}08`,border:`1px solid ${user.accent}25`,borderRadius:10,padding:"10px 12px",marginBottom:14}}>
+                    <div style={{fontSize:9,fontWeight:700,color:user.accent,letterSpacing:0.6,marginBottom:5,textTransform:"uppercase"}}>🤖 Análise automática</div>
+                    <div style={{fontSize:12,color:T.sub,lineHeight:1.55}}>{detail.insight}</div>
+                  </div>
+
+                  {/* Por posição */}
+                  {detail.posBreakdown.length>0&&(<div style={{marginBottom:14}}>
+                    <div style={{fontSize:9,fontWeight:700,color:T.muted,letterSpacing:0.6,marginBottom:8,textTransform:"uppercase"}}>Por posição</div>
+                    {detail.posBreakdown.map(({pos,pct,total})=>(<div key={pos} style={{marginBottom:6}}>
+                      <div style={{display:"flex",justifyContent:"space-between",marginBottom:3}}>
+                        <span style={{fontSize:12,color:T.text}}>{pos}</span>
+                        <span style={{fontSize:11,fontFamily:"'JetBrains Mono',monospace",color:pct==null?T.muted:pct>=60?T.done:pct<=40?"#EF4444":user.accent,fontWeight:700}}>{pct==null?"—":`${pct}%`}<span style={{color:T.muted,fontWeight:400}}> ({total})</span></span>
+                      </div>
+                      {pct!=null&&<div style={{height:5,background:T.inpBg,borderRadius:3,overflow:"hidden"}}><div style={{height:"100%",width:`${pct}%`,background:pct>=60?T.done:pct<=40?"#EF4444":user.accent,borderRadius:3}}/></div>}
+                    </div>))}
+                  </div>)}
+
+                  {/* Finalizações */}
+                  {(detail.finFeitasArr.length>0||detail.finSofridasArr.length>0)&&(<div style={{display:"flex",gap:10,marginBottom:14}}>
+                    {detail.finFeitasArr.length>0&&<div style={{flex:1}}>
+                      <div style={{fontSize:9,fontWeight:700,color:T.done,letterSpacing:0.6,marginBottom:6,textTransform:"uppercase"}}>Você finaliza com</div>
+                      {detail.finFeitasArr.map(([f,c])=>(<div key={f} style={{fontSize:11,color:T.sub,marginBottom:2}}>{f} <span style={{color:T.muted}}>×{c}</span></div>))}
+                    </div>}
+                    {detail.finSofridasArr.length>0&&<div style={{flex:1}}>
+                      <div style={{fontSize:9,fontWeight:700,color:"#EF4444",letterSpacing:0.6,marginBottom:6,textTransform:"uppercase"}}>Ele(a) finaliza com</div>
+                      {detail.finSofridasArr.map(([f,c])=>(<div key={f} style={{fontSize:11,color:T.sub,marginBottom:2}}>{f} <span style={{color:T.muted}}>×{c}</span></div>))}
+                    </div>}
+                  </div>)}
+
+                  {/* Nota estratégica */}
+                  <div style={{fontSize:9,fontWeight:700,color:T.muted,letterSpacing:0.6,marginBottom:6,textTransform:"uppercase"}}>Sua anotação</div>
+                  <textarea value={parcNotaDraft} onChange={e=>setParcNotaDraft(e.target.value)} onBlur={()=>saveParceiroNota(p.id,parcNotaDraft)} placeholder="Como lidar com esse parceiro, estratégia, observações..." rows={2} style={{...I,resize:"none",fontSize:13}}/>
+                </div>)}
+              </Box>);
+            })}
+          </div>
+        </>);
+      })()}
+
+      {/* ── TÉCNICO ────────────────────────────────────────────── */}
+      {/* ── POSIÇÕES (fundida com Técnico) ──────────────────────── */}
       {tab==="posicoes"&&(()=>{
         const POSITIVOS=["Finalizei","Raspei","Passei"];
         const NEGATIVOS=["Fui finalizado","Fui raspado","Fui passado"];
+        const getPos2=(r)=>r.posicoes&&r.posicoes.length?r.posicoes:(r.posicao?[r.posicao]:[]);
         const byPos={};
-        allRolas.forEach(r=>{if(!r.posicao)return;if(!byPos[r.posicao])byPos[r.posicao]=[];byPos[r.posicao].push(r);});
+        allRolas.forEach(r=>{getPos2(r).forEach(pos=>{if(!byPos[pos])byPos[pos]=[];byPos[pos].push(r);});});
         const posStats=Object.entries(byPos).filter(([,arr])=>arr.length>=2).map(([pos,arr])=>{
           const sorted=[...arr].sort((a,b)=>a.date.localeCompare(b.date));
           const totalW=sorted.reduce((a,r)=>a+countR(r,POSITIVOS),0);
@@ -1440,47 +1680,95 @@ function JiuView({user}){
           return{pos,score,trend,rolas:sorted.length,wins:totalW,losses:totalL};
         }).sort((a,b)=>b.rolas-a.rolas);
 
+        // Dificuldades reportadas (texto livre em pos_nok)
+        const difMap={};
+        jiuSessions.forEach(s=>{
+          (s.pos_nok||"").split(/[,;]+/).map(x=>x.trim()).filter(Boolean).forEach(txt=>{
+            if(!difMap[txt])difMap[txt]={count:0,dates:[]};
+            difMap[txt].count++;difMap[txt].dates.push(s.date);
+          });
+        });
+        // Posições ensinadas pelo professor
+        const ensinadas=jiuSessions.filter(s=>s.posicaoEnsinada).map(s=>({date:s.date,pos:s.posicaoEnsinada,det:s.detalhesPosicaoEnsinada}));
+
+        const matchesPos=(txt,pos)=>txt.toLowerCase().includes(pos.toLowerCase())||pos.toLowerCase().includes(txt.toLowerCase());
+
+        // Une todas as posições conhecidas: as com rolas + as com dificuldade/ensino/nota mas sem rolas suficientes
+        const allKnownPos=new Set([...posStats.map(p=>p.pos)]);
+        Object.keys(difMap).forEach(txt=>{POS.forEach(p=>{if(matchesPos(txt,p))allKnownPos.add(p);});});
+        ensinadas.forEach(e=>allKnownPos.add(e.pos));
+        tecnico.forEach(t=>allKnownPos.add(t.posicao));
+
+        const cardsData=[...allKnownPos].map(pos=>{
+          const stat=posStats.find(p=>p.pos===pos);
+          const difs=Object.entries(difMap).filter(([txt])=>matchesPos(txt,pos));
+          const ens=ensinadas.filter(e=>e.pos===pos);
+          const notas=tecnico.filter(t=>t.posicao===pos);
+          return{pos,stat,difs,ens,notas,relevance:(stat?.rolas||0)+difs.length+ens.length+notas.length};
+        }).filter(c=>c.relevance>0||tecSearch).sort((a,b)=>b.relevance-a.relevance);
+
+        const filtered=!tecSearch?cardsData:cardsData.filter(c=>
+          c.pos.toLowerCase().includes(tecSearch.toLowerCase())||
+          c.difs.some(([txt])=>txt.toLowerCase().includes(tecSearch.toLowerCase()))||
+          c.ens.some(e=>e.det?.toLowerCase().includes(tecSearch.toLowerCase()))||
+          c.notas.some(n=>[n.titulo,n.detalhe].some(x=>x?.toLowerCase().includes(tecSearch.toLowerCase())))
+        );
+
         return(<>
-          <Box>
-            <Hdr t="Evolução por Posição" mb={6}/>
-            <div style={{fontSize:11,color:T.muted,marginBottom:14,lineHeight:1.5}}>Calculado automaticamente a partir dos seus rolas registrados — não é autoavaliação.</div>
-            {posStats.length===0&&<div style={{fontSize:13,color:T.muted,fontStyle:"italic"}}>Registre rolas com a posição marcada para ver sua evolução aqui (mínimo 2 rolas por posição).</div>}
-            {posStats.map(({pos,score,trend,rolas:rc,wins,losses})=>(
-              <div key={pos} style={{marginBottom:14}}>
-                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:5}}>
-                  <span style={{fontSize:13,color:T.text,fontWeight:600}}>{pos}</span>
-                  <div style={{display:"flex",alignItems:"center",gap:8}}>
-                    {trend!==null&&Math.abs(trend)>=0.3&&<span style={{fontSize:11,fontWeight:700,color:trend>0?T.done:"#EF4444"}}>{trend>0?"↑":"↓"}{Math.abs(trend).toFixed(1)}</span>}
-                    <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:15,color:score>=7?T.done:score>=5?user.accent:"#EF4444",fontWeight:700}}>{score.toFixed(1)}/10</span>
-                  </div>
-                </div>
-                <div style={{height:7,background:T.inpBg,borderRadius:4,overflow:"hidden"}}>
-                  <div style={{height:"100%",width:`${score*10}%`,background:score>=7?T.done:score>=5?user.accent:"#EF4444",borderRadius:4,transition:"width 0.4s ease"}}/>
-                </div>
-                <div style={{fontSize:10,color:T.muted,marginTop:3}}>{rc} rolas · {wins} positivos · {losses} negativos</div>
-              </div>
-            ))}
-          </Box>
-          {posStats.length>0&&(<Box mb={14}>
-            <Hdr t="Análise Geral"/>
-            {(()=>{
-              const wins=allRolas.filter(r=>isPos(r)).length;
-              const losses=allRolas.filter(r=>isNeg(r)).length;
-              const wr=allRolas.length?Math.round((wins/allRolas.length)*100):0;
-              const partMap={};allRolas.forEach(r=>{if(!r.parceiro)return;if(!partMap[r.parceiro])partMap[r.parceiro]={t:0,w:0};partMap[r.parceiro].t++;if(isPos(r))partMap[r.parceiro].w++;});
-              const topPartner=Object.entries(partMap).sort((a,b)=>b[1].t-a[1].t)[0];
-              return(<>
-                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
-                  <span style={{fontSize:13,color:T.text,fontWeight:600}}>Aproveitamento geral ({allRolas.length} rolas)</span>
-                  <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:18,fontWeight:700,color:wr>=50?T.done:"#EF4444"}}>{wr}%</span>
-                </div>
-                {topPartner&&<div style={{display:"flex",justifyContent:"space-between",paddingTop:8,borderTop:`1px solid ${T.border}`}}>
-                  <span style={{fontSize:12,color:T.sub}}>Parceiro mais frequente</span>
-                  <span style={{fontSize:12,color:T.text,fontWeight:600}}>{topPartner[0]} ({topPartner[1].t}x)</span>
+          <input value={tecSearch} onChange={e=>setTecSearch(e.target.value)} placeholder="🔍 Buscar posição, palavra-chave..." style={{...I,marginBottom:12}}/>
+
+          {filtered.length===0&&<div style={{fontSize:13,color:T.muted,fontStyle:"italic",padding:"20px 0",textAlign:"center"}}>
+            Registre rolas, "o que não funcionou" e "posição ensinada" nas sessões — aqui aparece tudo organizado por posição.
+          </div>}
+
+          {filtered.map(({pos,stat,difs,ens,notas})=>(
+            <Box key={pos} mb={10}>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:stat?6:2}}>
+                <span style={{fontSize:14,color:T.text,fontWeight:700}}>{pos}</span>
+                {stat&&<div style={{display:"flex",alignItems:"center",gap:8}}>
+                  {stat.trend!==null&&Math.abs(stat.trend)>=0.3&&<span style={{fontSize:11,fontWeight:700,color:stat.trend>0?T.done:"#EF4444"}}>{stat.trend>0?"↑":"↓"}{Math.abs(stat.trend).toFixed(1)}</span>}
+                  <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:16,color:stat.score>=7?T.done:stat.score>=5?user.accent:"#EF4444",fontWeight:700}}>{stat.score.toFixed(1)}/10</span>
                 </div>}
-              </>);
-            })()}
-          </Box>)}
+              </div>
+              {stat&&(<>
+                <div style={{height:6,background:T.inpBg,borderRadius:3,overflow:"hidden",marginBottom:4}}>
+                  <div style={{height:"100%",width:`${stat.score*10}%`,background:stat.score>=7?T.done:stat.score>=5?user.accent:"#EF4444",borderRadius:3}}/>
+                </div>
+                <div style={{fontSize:10,color:T.muted,marginBottom:8}}>{stat.rolas} rolas · {stat.wins} positivos · {stat.losses} negativos</div>
+              </>)}
+              {!stat&&<div style={{fontSize:11,color:T.muted,marginBottom:8}}>Sem rolas suficientes ainda para calcular score (mínimo 2)</div>}
+
+              {difs.length>0&&(<div style={{marginBottom:8}}>
+                <div style={{fontSize:9,fontWeight:700,color:"#EF4444",letterSpacing:0.5,marginBottom:4,textTransform:"uppercase"}}>Dificuldades relatadas</div>
+                {difs.map(([txt,{count,dates}])=>(<div key={txt} style={{display:"flex",justifyContent:"space-between",fontSize:12,color:T.sub,padding:"3px 0"}}><span>{txt}</span><span style={{color:T.muted,fontFamily:"'JetBrains Mono',monospace"}}>×{count}</span></div>))}
+              </div>)}
+
+              {ens.length>0&&(<div style={{marginBottom:8}}>
+                <div style={{fontSize:9,fontWeight:700,color:user.accent,letterSpacing:0.5,marginBottom:4,textTransform:"uppercase"}}>📚 Aulas do professor</div>
+                {ens.map((e,i)=>(<div key={i} style={{fontSize:12,color:T.sub,padding:"4px 0",borderBottom:i<ens.length-1?`1px solid ${T.border}`:"none"}}>
+                  <span style={{color:T.muted,fontSize:10}}>{e.date}</span>{e.det&&<div style={{marginTop:1}}>{e.det}</div>}
+                </div>))}
+              </div>)}
+
+              {notas.length>0&&(<div>
+                <div style={{fontSize:9,fontWeight:700,color:T.muted,letterSpacing:0.5,marginBottom:4,textTransform:"uppercase"}}>Notas</div>
+                {notas.map(n=>(<div key={n.id} style={{fontSize:12,color:T.sub,padding:"4px 0"}}><span style={{fontWeight:600,color:T.text}}>{n.titulo}</span>{n.detalhe&&<div style={{marginTop:1}}>{n.detalhe}</div>}</div>))}
+              </div>)}
+            </Box>
+          ))}
+
+          <Box>
+            <Hdr t="Anotação Avulsa (opcional)" mb={8}/>
+            <div style={{fontSize:11,color:T.muted,marginBottom:10,lineHeight:1.4}}>Use apenas se quiser registrar algo fora do fluxo normal de sessões.</div>
+            <div style={{marginBottom:10}}>
+              <div style={{display:"flex",flexWrap:"wrap",gap:5}}>
+                {POS.map(p=>(<PillBtn key={p} label={p} small accent={user.accent} active={tecInp.posicao===p} onClick={()=>setTecInp(prev=>({...prev,posicao:p}))}/>))}
+              </div>
+            </div>
+            <input value={tecInp.titulo} onChange={e=>setTecInp(p=>({...p,titulo:e.target.value}))} placeholder="Título" style={{...I,marginBottom:8}}/>
+            <textarea value={tecInp.detalhe} onChange={e=>setTecInp(p=>({...p,detalhe:e.target.value}))} placeholder="Descrição..." rows={2} style={{...I,resize:"none",marginBottom:4}}/>
+            {Sv("Salvar",saveTec)}
+          </Box>
         </>);
       })()}
 
@@ -1679,17 +1967,28 @@ function SettingsView({user,onClose,onConfigSaved}){
 
 function DashboardView({user,plans,setPillar,setShowSettings}){
   const[data,setData]=useState(null);
+  const[checkin,setCheckin]=useState({sono:3,horas:7,disposicao:3,corpo:3});
+  const[checkinSaved,setCheckinSaved]=useState(false);
+  const[reloadKey,setReloadKey]=useState(0);
+  useEffect(()=>{
+    sGet(sk(user.id,"checkin",todayStr()),null).then(c=>{if(c){setCheckin(c);setCheckinSaved(true);}else{setCheckin({sono:3,horas:7,disposicao:3,corpo:3});setCheckinSaved(false);}});
+  },[user.id]);
+  const saveCheckin=async(newC)=>{
+    setCheckin(newC);
+    await sSet(sk(user.id,"checkin",todayStr()),newC);
+    if(!checkinSaved){window.__toast?.("Check-in de hoje salvo");setCheckinSaved(true);}
+    setReloadKey(k=>k+1);
+  };
   useEffect(()=>{
     (async()=>{
       const ws=new Date();ws.setDate(ws.getDate()-7);const wsStr=ws.toISOString().split("T")[0];
       // Treinos semana
       const skeys=await sList(sk(user.id,"sess",""));let treinos=0;
       for(const k of skeys){const s=await sGet(k);if(s&&s.date>=wsStr)treinos++;}
-      // Jiu sessões + fadiga (lê da estrutura unificada jiu_sessions)
+      // Jiu sessões (lê da estrutura unificada jiu_sessions)
       const jiuSessionsRaw=await sGet(sk(user.id,"jiu_sessions"),[]);
       const jiuLog=jiuSessionsRaw;
       const jiuWeek=jiuLog.filter(s=>s.date>=wsStr);
-      const avgFadiga=jiuWeek.length?Math.round(jiuWeek.reduce((a,s)=>{const f=s.fadiga||{};return a+((f.sono||0)+(f.disposicao||0)+(f.corpo||0))/3;},0)/jiuWeek.length*10)/10:null;
       // Nutrição (dias com 3+ refeições)
       let nutriOk=0;
       const nutriMeals=user.id==="G"?MEALS_G:MEALS_B;
@@ -1702,19 +2001,33 @@ function DashboardView({user,plans,setPillar,setShowSettings}){
       const rolas=jiuSessionsRaw.flatMap(s=>(s.rolas||[]).map(r=>({...r,date:s.date})));
       const rolasWeek=rolas.filter(r=>r.date>=wsStr);
       const winsWeek=rolasWeek.filter(r=>["Finalizei","Raspei","Passei"].some(p=>r.resultado?.includes(p)||(r.resultados&&r.resultados[p]>0))).length;
-      // Correlações: sono vs rolas
       const rolasByDate={};rolas.forEach(r=>{if(!rolasByDate[r.date])rolasByDate[r.date]=[];rolasByDate[r.date].push(r);});
+
+      // ── Check-ins diários (sono/disposição/corpo — independente de treino) ──
+      const checkinsByDate={};
+      for(let i=0;i<14;i++){const d=new Date();d.setDate(d.getDate()-i);const ds=d.toISOString().split("T")[0];const c=await sGet(sk(user.id,"checkin",ds),null);if(c)checkinsByDate[ds]=c;}
+      const checkinsWeek=Object.entries(checkinsByDate).filter(([ds])=>ds>=wsStr).map(([,c])=>c);
+      const avgFadiga=checkinsWeek.length?Math.round(checkinsWeek.reduce((a,f)=>a+((f.sono||0)+(f.disposicao||0)+(f.corpo||0))/3,0)/checkinsWeek.length*10)/10:null;
+
+      // Correlações: sono vs rolas (usa check-in do dia, não fadiga da sessão)
       let hW=0,hT=0,lW=0,lT=0;
-      jiuLog.forEach(s=>{const dr=rolasByDate[s.date]||[];if(!dr.length)return;const w=dr.filter(r=>["Finalizei","Raspei","Passei"].some(p=>r.resultado?.includes(p)||(r.resultados&&r.resultados[p]>0))).length;if((s.fadiga?.sono||0)>=4){hW+=w;hT+=dr.length;}else if((s.fadiga?.sono||0)>0){lW+=w;lT+=dr.length;}});
+      Object.entries(rolasByDate).forEach(([ds,dr])=>{
+        const c=checkinsByDate[ds];if(!c?.sono)return;
+        const w=dr.filter(r=>["Finalizei","Raspei","Passei"].some(p=>r.resultado?.includes(p)||(r.resultados&&r.resultados[p]>0))).length;
+        if(c.sono>=4){hW+=w;hT+=dr.length;}else{lW+=w;lT+=dr.length;}
+      });
       const correlacoes=[];
       if(hT>=5&&lT>=5){const hR=Math.round((hW/hT)*100);const lR=Math.round((lW/lT)*100);correlacoes.push({icon:"😴",title:"Sono → Aproveitamento nos Rolas",desc:`Sono 4-5/5: ${hR}% positivos. Sono 1-3/5: ${lR}% positivos. Diferença: ${Math.abs(hR-lR)}pp.`});}
       const cfg=window.__config||DEF_CFG[user.id];
 
       // ── Índice de Prontidão ─────────────────────────────────
-      // Fator 1: Sono (última sessão de Jiu com fadiga)
-      const lastJiuFadiga=jiuLog.find(s=>s.fadiga?.sono);
-      const sonoScore=lastJiuFadiga?.fadiga?.sono||3;
-      const sonoHoras=lastJiuFadiga?.fadiga?.horas;
+      // Fator 1: Sono — usa o check-in mais recente (hoje, ou últimos dias)
+      const todayCheckin=checkinsByDate[todayStr()];
+      const recentCheckin=todayCheckin||Object.entries(checkinsByDate).sort((a,b)=>b[0].localeCompare(a[0]))[0]?.[1];
+      const sonoScore=recentCheckin?.sono||3;
+      const sonoHoras=recentCheckin?.horas;
+      const dispScore=recentCheckin?.disposicao||3;
+      const corpoScore=recentCheckin?.corpo||3;
       const sonoFactor=sonoHoras
         ?((sonoScore/5)*0.6+(Math.min(sonoHoras,8)/8)*0.4)*3 // combina qualidade (60%) + quantidade (40%), 0–3
         :(sonoScore/5)*3; // fallback só qualidade
@@ -1738,35 +2051,31 @@ function DashboardView({user,plans,setPillar,setShowSettings}){
 
       // ── Padrões de Alto Desempenho ──────────────────────────
       const padroes=[];
-      if(jiuLog.length>=8&&rolas.length>=10){
-        // Sono alto vs baixo
+      if(Object.keys(checkinsByDate).length>=8&&rolas.length>=10){
         if(hT>=4&&lT>=4){
           const hR=Math.round((hW/hT)*100);const lR=Math.round((lW/lT)*100);
           if(Math.abs(hR-lR)>=10) padroes.push({icon:"😴",cond:`Sono 4-5/5`,val:`${hR}% positivos nos rolas`,vs:`vs ${lR}% com sono baixo`});
         }
-        // Carga semanal vs performance Jiu
-        const jiuComDados=jiuLog.filter(s=>s.fadiga?.sono&&rolasByDate[s.date]?.length);
-        if(jiuComDados.length>=6){
-          // Find sessions where week had 2 or fewer vs 4+ gym sessions
-          // Use disposição as proxy for training load impact
-          const altaDisp=jiuLog.filter(s=>(s.fadiga?.disposicao||0)>=4&&rolasByDate[s.date]?.length);
-          const baixaDisp=jiuLog.filter(s=>(s.fadiga?.disposicao||0)<=2&&rolasByDate[s.date]?.length);
-          if(altaDisp.length>=3&&baixaDisp.length>=3){
-            const aW=altaDisp.reduce((a,s)=>a+rolasByDate[s.date].filter(r=>["Finalizei","Raspei","Passei"].includes(r.resultado)).length,0);
-            const aT=altaDisp.reduce((a,s)=>a+rolasByDate[s.date].length,0);
-            const bW=baixaDisp.reduce((a,s)=>a+rolasByDate[s.date].filter(r=>["Finalizei","Raspei","Passei"].includes(r.resultado)).length,0);
-            const bT=baixaDisp.reduce((a,s)=>a+rolasByDate[s.date].length,0);
-            const aR=Math.round((aW/aT)*100);const bR=Math.round((bW/bT)*100);
-            if(Math.abs(aR-bR)>=10) padroes.push({icon:"💪",cond:`Alta disposição (4-5/5)`,val:`${aR}% positivos nos rolas`,vs:`vs ${bR}% com baixa disposição`});
-          }
+        // Disposição alta vs baixa (usa check-in do dia do rola)
+        let aW=0,aT=0,bW=0,bT=0;
+        Object.entries(rolasByDate).forEach(([ds,dr])=>{
+          const c=checkinsByDate[ds];if(!c?.disposicao)return;
+          const w=dr.filter(r=>["Finalizei","Raspei","Passei"].some(p=>r.resultado?.includes(p)||(r.resultados&&r.resultados[p]>0))).length;
+          if(c.disposicao>=4){aW+=w;aT+=dr.length;}else if(c.disposicao<=2){bW+=w;bT+=dr.length;}
+        });
+        if(aT>=4&&bT>=4){
+          const aR=Math.round((aW/aT)*100);const bR=Math.round((bW/bT)*100);
+          if(Math.abs(aR-bR)>=10) padroes.push({icon:"💪",cond:`Alta disposição (4-5/5)`,val:`${aR}% positivos nos rolas`,vs:`vs ${bR}% com baixa disposição`});
         }
-        // Melhor combinação (best conditions summary)
-        const bestSessions=jiuLog.filter(s=>s.fadiga&&(s.fadiga.sono>=4)&&(s.fadiga.disposicao>=4)&&rolasByDate[s.date]?.length);
-        if(bestSessions.length>=3){
-          const bW=bestSessions.reduce((a,s)=>a+rolasByDate[s.date].filter(r=>["Finalizei","Raspei","Passei"].includes(r.resultado)).length,0);
-          const bT=bestSessions.reduce((a,s)=>a+rolasByDate[s.date].length,0);
-          const bR=Math.round((bW/bT)*100);
-          padroes.push({icon:"⚡",cond:`Sono ≥4 + Disposição ≥4`,val:`${bR}% aproveitamento (${bestSessions.length} sessões)`,vs:`seu melhor estado`});
+        // Melhor combinação (sono alto + disposição alta)
+        let bW2=0,bT2=0,bestN=0;
+        Object.entries(rolasByDate).forEach(([ds,dr])=>{
+          const c=checkinsByDate[ds];if(!c||c.sono<4||c.disposicao<4)return;
+          bestN++;bW2+=dr.filter(r=>["Finalizei","Raspei","Passei"].some(p=>r.resultado?.includes(p)||(r.resultados&&r.resultados[p]>0))).length;bT2+=dr.length;
+        });
+        if(bestN>=3&&bT2>0){
+          const bR=Math.round((bW2/bT2)*100);
+          padroes.push({icon:"⚡",cond:`Sono ≥4 + Disposição ≥4`,val:`${bR}% aproveitamento (${bestN} dias)`,vs:`seu melhor estado`});
         }
       }
 
@@ -1810,9 +2119,41 @@ function DashboardView({user,plans,setPillar,setShowSettings}){
         return{monthName,mTreinos,mJiuCount:mJiu.length,mRolasCount:mRolas.length,mWinRate,pesoDelta,mNutriOk,mNutriDays,bestWeekNum:bestWeek?bestWeek[0]:null,bestWeekCount:bestWeek?bestWeek[1]:null};
       })();
 
-      setData({treinos,jiuSess:jiuWeek.length,nutriOk,pesoAtual,pesoAnterior,avgFadiga,rolasWeek:rolasWeek.length,winsWeek,goalWeight:cfg.goalWeight,goalDate:cfg.goalDate,correlacoes,readiness,readinessFactors,padroes,monthSummary});
+      // ── Desafio de Consistência (apenas Bianca) ─────────────
+      let challenge=null;
+      if(user.id==="B"){
+        const trainedDates=new Set();
+        for(const k of skeys){const s=await sGet(k);if(s)trainedDates.add(s.date);}
+        const TARGET_DAYS=44; // ~2 meses corridos (≈61 dias) × 5/7 dias úteis ≈ 44
+        let streak=0;
+        let cursor=new Date();
+        const todayDow=cursor.getDay(); // 0=Dom,6=Sáb
+        const todayStr2=cursor.toISOString().split("T")[0];
+        const todayIsWeekday=todayDow>=1&&todayDow<=5;
+        const todayTrained=trainedDates.has(todayStr2);
+        // Se hoje é dia útil e ainda não treinou, começa a contagem de ontem (hoje ainda "em aberto")
+        if(!(todayIsWeekday&&!todayTrained)){
+          // hoje conta (já treinou, ou é fim de semana — não quebra nem soma)
+        }
+        let d=new Date();
+        if(todayIsWeekday&&!todayTrained){d.setDate(d.getDate()-1);} // hoje ainda em aberto, começa contagem de ontem
+        for(let i=0;i<120;i++){
+          const dow=d.getDay();
+          const ds=d.toISOString().split("T")[0];
+          if(dow>=1&&dow<=5){
+            if(trainedDates.has(ds))streak++;
+            else break;
+          }
+          d.setDate(d.getDate()-1);
+        }
+        const daysLeftChallenge=Math.max(0,TARGET_DAYS-streak);
+        const completed=streak>=TARGET_DAYS;
+        challenge={streak,target:TARGET_DAYS,daysLeft:daysLeftChallenge,completed,todayIsWeekday,todayTrained};
+      }
+
+      setData({treinos,jiuSess:jiuWeek.length,nutriOk,pesoAtual,pesoAnterior,avgFadiga,rolasWeek:rolasWeek.length,winsWeek,goalWeight:cfg.goalWeight,goalDate:cfg.goalDate,correlacoes,readiness,readinessFactors,padroes,monthSummary,challenge});
     })();
-  },[user.id]);
+  },[user.id,reloadKey]);
 
   if(!data)return(<div style={{display:"flex",alignItems:"center",justifyContent:"center",padding:"60px 0",color:T.muted,fontSize:13}}>Carregando...</div>);
 
@@ -1843,6 +2184,86 @@ function DashboardView({user,plans,setPillar,setShowSettings}){
     <div style={{marginBottom:20}}>
       <div style={{fontSize:12,color:T.muted,marginBottom:2,textTransform:"capitalize"}}>{today}</div>
       <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:28,fontWeight:700,color:T.text,letterSpacing:-0.5}}>Semana de {user.name}</div>
+    </div>
+
+    {/* ── Desafio de Consistência (Bianca) ────────────── */}
+    {data.challenge&&(()=>{
+      const c=data.challenge;
+      const pct=Math.min(100,Math.round((c.streak/c.target)*100));
+      const color=c.completed?"#FFD700":c.streak>=20?T.done:c.streak>=5?user.accent:T.muted;
+      return(<div style={{background:c.completed?"linear-gradient(135deg, #FFD70015, #FFA50015)":T.card,border:`2px solid ${c.completed?"#FFD700":color+"30"}`,borderRadius:14,padding:"16px",marginBottom:16,position:"relative",overflow:"hidden"}}>
+        {c.completed&&<div style={{position:"absolute",top:8,right:10,fontSize:24}}>🎉</div>}
+        <div style={{fontSize:10,fontWeight:700,color:T.muted,letterSpacing:1.2,marginBottom:4,textTransform:"uppercase"}}>Desafio da Consistência — Presente Misterioso 🎁</div>
+        <div style={{display:"flex",alignItems:"baseline",gap:8,marginBottom:10}}>
+          <span style={{fontSize:36}}>🔥</span>
+          <div>
+            <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:32,fontWeight:700,color,lineHeight:1,letterSpacing:-1}}>{c.streak}<span style={{fontSize:16,color:T.muted}}> / {c.target} dias</span></div>
+          </div>
+        </div>
+        <div style={{height:10,background:T.inpBg,borderRadius:5,marginBottom:10,overflow:"hidden"}}>
+          <div style={{height:"100%",width:`${pct}%`,background:c.completed?"linear-gradient(90deg, #FFD700, #FFA500)":color,borderRadius:5,transition:"width 0.5s ease"}}/>
+        </div>
+        {c.completed?(
+          <div style={{fontSize:14,fontWeight:700,color:"#B8860B",textAlign:"center",padding:"8px",background:"#FFD70015",borderRadius:8}}>🎁 Desafio completo! Você conquistou o prêmio misterioso.</div>
+        ):(
+          <>
+            <div style={{fontSize:13,color:T.sub,marginBottom:6}}>
+              {c.todayIsWeekday&&!c.todayTrained
+                ?"Hoje é dia útil — treine para manter (ou aumentar) a sequência!"
+                :`Faltam ${c.daysLeft} dias úteis para o prêmio misterioso 🎁`}
+            </div>
+            <div style={{fontSize:11,color:T.muted,fontStyle:"italic"}}>Regra: treinar de segunda a sexta, sem falhar nenhum dia útil. Um dia perdido = reseta do zero.</div>
+          </>
+        )}
+      </div>);
+    })()}
+
+    {/* ── Check-in Diário ─────────────────────────────── */}
+    <div style={{background:T.card,border:`1.5px solid ${checkinSaved?T.borderDone:user.accent+"40"}`,borderRadius:14,padding:"14px 16px",marginBottom:16}}>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
+        <div style={{fontSize:10,fontWeight:700,color:T.muted,letterSpacing:1.2,textTransform:"uppercase"}}>Como você está hoje?</div>
+        {checkinSaved&&<span style={{fontSize:11,color:T.done,fontWeight:700}}>✓ Registrado</span>}
+      </div>
+      <div style={{marginBottom:10}}>
+        <div style={{display:"flex",justifyContent:"space-between",marginBottom:5}}>
+          <span style={{fontSize:12,color:T.sub}}>Qualidade do sono</span>
+          <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:12,color:user.accent,fontWeight:700}}>{checkin.sono}/5</span>
+        </div>
+        <div style={{display:"flex",gap:4}}>
+          {[1,2,3,4,5].map(n=>(<button key={n} onClick={()=>saveCheckin({...checkin,sono:n})} style={{flex:1,height:30,borderRadius:7,border:`1.5px solid ${checkin.sono>=n?user.accent:T.border}`,background:checkin.sono>=n?`${user.accent}18`:T.inpBg,color:checkin.sono>=n?user.accent:T.muted,fontSize:12,fontWeight:checkin.sono>=n?700:400,cursor:"pointer"}}>{n}</button>))}
+        </div>
+      </div>
+      <div style={{marginBottom:10}}>
+        <div style={{display:"flex",justifyContent:"space-between",marginBottom:5}}>
+          <span style={{fontSize:12,color:T.sub}}>Horas dormidas</span>
+          <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:12,color:user.accent,fontWeight:700}}>{checkin.horas}h</span>
+        </div>
+        <div style={{display:"flex",alignItems:"center",gap:6}}>
+          <button onClick={()=>saveCheckin({...checkin,horas:Math.max(0,Math.round((checkin.horas-0.5)*10)/10)})} style={{width:30,height:30,borderRadius:7,border:`1px solid ${T.border}`,background:T.inpBg,color:T.text,fontSize:15,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>−</button>
+          <div style={{flex:1,height:28,borderRadius:7,background:T.inpBg,position:"relative",overflow:"hidden"}}>
+            <div style={{position:"absolute",inset:0,width:`${Math.min(100,(checkin.horas/12)*100)}%`,background:`${user.accent}25`,borderRadius:7,transition:"width 0.2s ease"}}/>
+          </div>
+          <button onClick={()=>saveCheckin({...checkin,horas:Math.min(12,Math.round((checkin.horas+0.5)*10)/10)})} style={{width:30,height:30,borderRadius:7,border:`1px solid ${T.border}`,background:T.inpBg,color:T.text,fontSize:15,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>+</button>
+        </div>
+      </div>
+      <div style={{marginBottom:10}}>
+        <div style={{display:"flex",justifyContent:"space-between",marginBottom:5}}>
+          <span style={{fontSize:12,color:T.sub}}>Disposição</span>
+          <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:12,color:user.accent,fontWeight:700}}>{checkin.disposicao}/5</span>
+        </div>
+        <div style={{display:"flex",gap:4}}>
+          {[1,2,3,4,5].map(n=>(<button key={n} onClick={()=>saveCheckin({...checkin,disposicao:n})} style={{flex:1,height:30,borderRadius:7,border:`1.5px solid ${checkin.disposicao>=n?user.accent:T.border}`,background:checkin.disposicao>=n?`${user.accent}18`:T.inpBg,color:checkin.disposicao>=n?user.accent:T.muted,fontSize:12,fontWeight:checkin.disposicao>=n?700:400,cursor:"pointer"}}>{n}</button>))}
+        </div>
+      </div>
+      <div>
+        <div style={{display:"flex",justifyContent:"space-between",marginBottom:5}}>
+          <span style={{fontSize:12,color:T.sub}}>Corpo / Dores</span>
+          <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:12,color:user.accent,fontWeight:700}}>{checkin.corpo}/5</span>
+        </div>
+        <div style={{display:"flex",gap:4}}>
+          {[1,2,3,4,5].map(n=>(<button key={n} onClick={()=>saveCheckin({...checkin,corpo:n})} style={{flex:1,height:30,borderRadius:7,border:`1.5px solid ${checkin.corpo>=n?user.accent:T.border}`,background:checkin.corpo>=n?`${user.accent}18`:T.inpBg,color:checkin.corpo>=n?user.accent:T.muted,fontSize:12,fontWeight:checkin.corpo>=n?700:400,cursor:"pointer"}}>{n}</button>))}
+        </div>
+      </div>
     </div>
 
     {/* 4 main stats */}
