@@ -82,18 +82,106 @@ const YT={
 
 /* ─── NUTRITION PRESETS ─────────────────────────────────────────────── */
 const MEALS_G=[
-  {id:"cafe",  nome:"Café da Manhã", kcal:320,prot:18,carbs:40,fat:10,horario:"07:00–09:00",desc:"2 ovos + pão francês + banana"},
-  {id:"almoco",nome:"Almoço",        kcal:520,prot:62,carbs:50,fat:14,horario:"12:00–13:00",desc:"250g sobrecoxa + 150g arroz + 100g feijão"},
-  {id:"pre",   nome:"Pré-treino",    kcal:440,prot:50,carbs:40,fat:12,horario:"16:00–17:00",desc:"200g sobrecoxa + 120g arroz + banana"},
-  {id:"jantar",nome:"Jantar",        kcal:380,prot:55,carbs:20,fat:10,horario:"20:00–21:00",desc:"250g sobrecoxa + 80g arroz"},
+  {id:"cafe",nome:"Café da Manhã",horario:"07:00–09:00",
+    fixos:[
+      {id:"cafe_pao",nome:"Pão francês",kcal:145,prot:5,carbs:28,fat:1.2},
+    ],
+    escolhas:[
+      {id:"cafe_prot",label:"Proteína",opcoes:[
+        {id:"cafe_prot_ovo",nome:"3 ovos cozidos",kcal:234,prot:19,carbs:2,fat:16},
+        {id:"cafe_prot_mus",nome:"Muçarela 60g",kcal:168,prot:13,carbs:1,fat:13},
+      ]},
+    ]},
+  {id:"almoco",nome:"Almoço",horario:"12:00–13:00",
+    fixos:[
+      {id:"almoco_arroz",nome:"Arroz 100g",kcal:128,prot:2.5,carbs:28,fat:0.2},
+      {id:"almoco_feijao",nome:"Feijão 80g",kcal:62,prot:4,carbs:11,fat:0.4},
+    ],
+    escolhas:[
+      {id:"almoco_prot",label:"Proteína",opcoes:[
+        {id:"almoco_prot_sobre",nome:"Sobrecoxa assada 200g",kcal:420,prot:52,carbs:0,fat:18},
+        {id:"almoco_prot_pat",nome:"Patinho moído 200g",kcal:344,prot:62,carbs:0,fat:10},
+      ]},
+    ]},
+  {id:"pre",nome:"Pré-treino",horario:"16:00–17:00",
+    fixos:[
+      {id:"pre_banana",nome:"Banana pequena",kcal:70,prot:1,carbs:18,fat:0},
+    ],
+    escolhas:[
+      {id:"pre_carb",label:"Carboidrato",opcoes:[
+        {id:"pre_carb_arroz",nome:"Arroz 100g",kcal:128,prot:2.5,carbs:28,fat:0.2},
+        {id:"pre_carb_pao",nome:"Pão francês (sanduíche)",kcal:145,prot:5,carbs:28,fat:1.2},
+      ]},
+      {id:"pre_prot",label:"Proteína",opcoes:[
+        {id:"pre_prot_sobre",nome:"Sobrecoxa assada 150g",kcal:315,prot:39,carbs:0,fat:13.5},
+        {id:"pre_prot_pat",nome:"Patinho moído 150g",kcal:258,prot:46.5,carbs:0,fat:7.5},
+      ]},
+    ]},
+  {id:"jantar",nome:"Jantar",horario:"20:00–21:00",
+    fixos:[
+      {id:"jantar_arroz",nome:"Arroz 70g",kcal:90,prot:1.75,carbs:19.6,fat:0.14},
+    ],
+    escolhas:[
+      {id:"jantar_prot",label:"Proteína",opcoes:[
+        {id:"jantar_prot_sobre",nome:"Sobrecoxa assada 200g",kcal:420,prot:52,carbs:0,fat:18},
+        {id:"jantar_prot_pat",nome:"Patinho moído 200g",kcal:344,prot:62,carbs:0,fat:10},
+      ]},
+    ]},
 ];
 const MEALS_B=[
-  {id:"cafe_b", nome:"Café da Manhã",kcal:280,prot:20,carbs:28,fat:8, horario:"07:00–09:00",desc:"Ovos + frutas + iogurte"},
-  {id:"almoco_b",nome:"Almoço",      kcal:480,prot:45,carbs:48,fat:12,horario:"12:00–13:00",desc:"Frango + arroz + salada"},
-  {id:"lanche_b",nome:"Lanche",      kcal:180,prot:15,carbs:18,fat:4, horario:"15:00–16:00",desc:"Iogurte grego + fruta"},
-  {id:"jantar_b",nome:"Jantar",      kcal:380,prot:40,carbs:28,fat:10,horario:"20:00–21:00",desc:"Frango + legumes + ovo"},
+  {id:"cafe_b",nome:"Café da Manhã",horario:"07:00–09:00",
+    fixos:[
+      {id:"cafeb_ovo",nome:"2 ovos",kcal:140,prot:12,carbs:1,fat:10},
+      {id:"cafeb_iog",nome:"Iogurte grego",kcal:100,prot:17,carbs:6,fat:1},
+      {id:"cafeb_fruta",nome:"Fruta",kcal:40,prot:1,carbs:21,fat:0},
+    ],
+    escolhas:[]},
+  {id:"almoco_b",nome:"Almoço",horario:"12:00–13:00",
+    fixos:[
+      {id:"almb_frango",nome:"Frango 150g",kcal:248,prot:46,carbs:0,fat:5},
+      {id:"almb_arroz",nome:"Arroz 120g",kcal:155,prot:3,carbs:34,fat:0},
+      {id:"almb_salada",nome:"Salada",kcal:77,prot:1,carbs:13,fat:5},
+    ],
+    escolhas:[]},
+  {id:"lanche_b",nome:"Lanche",horario:"15:00–16:00",
+    fixos:[
+      {id:"lanb_iog",nome:"Iogurte grego",kcal:100,prot:17,carbs:6,fat:1},
+      {id:"lanb_fruta",nome:"Fruta",kcal:80,prot:0,carbs:12,fat:0},
+    ],
+    escolhas:[]},
+  {id:"jantar_b",nome:"Jantar",horario:"20:00–21:00",
+    fixos:[
+      {id:"jantb_frango",nome:"Frango 150g",kcal:248,prot:46,carbs:0,fat:5},
+      {id:"jantb_legumes",nome:"Legumes",kcal:55,prot:2,carbs:11,fat:0},
+      {id:"jantb_ovo",nome:"Ovo",kcal:78,prot:6,carbs:1,fat:5},
+    ],
+    escolhas:[]},
 ];
 
+
+
+/* ─── NUTRITION TOTALS HELPER (handles fixos + escolhas) ────────────── */
+function nutriTotals(meals,dayData){
+  const di=dayData?.done_items||[];
+  const esc=dayData?.escolhas||{};
+  let kcal=0,prot=0,carbs=0,fat=0;
+  meals.forEach(m=>{
+    (m.fixos||[]).forEach(it=>{if(di.includes(it.id)){kcal+=it.kcal;prot+=it.prot;carbs+=it.carbs;fat+=it.fat;}});
+    (m.escolhas||[]).forEach(g=>{const sel=esc[g.id];if(sel){const opt=g.opcoes.find(o=>o.id===sel);if(opt){kcal+=opt.kcal;prot+=opt.prot;carbs+=opt.carbs;fat+=opt.fat;}}});
+  });
+  (dayData?.extras||[]).forEach(e=>{kcal+=e.kcal||0;prot+=e.prot||0;});
+  return{kcal:Math.round(kcal),prot:Math.round(prot*10)/10,carbs:Math.round(carbs),fat:Math.round(fat)};
+}
+function nutriSlots(meals,dayData){
+  const di=dayData?.done_items||[];
+  const esc=dayData?.escolhas||{};
+  let total=0,done=0;
+  meals.forEach(m=>{
+    (m.fixos||[]).forEach(it=>{total++;if(di.includes(it.id))done++;});
+    (m.escolhas||[]).forEach(g=>{total++;if(esc[g.id])done++;});
+  });
+  return{total,done};
+}
 
 const MONTHS_PT=["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
 
@@ -591,12 +679,6 @@ function FisicoView({user,plans}){
   const tabs=[{id:"plano",l:"Plano"},{id:"treinar",l:"Treinar"},{id:"stats",l:"Stats"},{id:"corpo",l:"Corpo"},{id:"hist",l:"Histórico"}];
   return(
     <div>
-      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10}}>
-        <div style={{fontSize:9,fontWeight:700,color:T.muted,letterSpacing:2,textTransform:"uppercase"}}>Jiu-Jitsu</div>
-        <button onClick={exportJiu} style={{display:"flex",alignItems:"center",gap:5,padding:"6px 12px",borderRadius:9,border:`1px solid ${T.border}`,background:T.inpBg,color:T.sub,fontSize:11,fontWeight:600,cursor:"pointer"}}>
-          📤 Exportar para análise
-        </button>
-      </div>
       <div style={{display:"flex",gap:5,marginBottom:16,overflowX:"auto",paddingBottom:4,WebkitOverflowScrolling:"touch"}}>
         {tabs.map(t=>(<button key={t.id} onClick={()=>setTab(t.id)} style={{padding:"7px 14px",borderRadius:20,border:`1px solid ${tab===t.id?user.accent:T.border}`,background:tab===t.id?`${user.accent}15`:T.inpBg,color:tab===t.id?user.accent:T.sub,fontSize:12,fontWeight:tab===t.id?700:400,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0}}>{t.l}</button>))}
       </div>
@@ -612,14 +694,14 @@ function FisicoView({user,plans}){
 /* ─── NUTRICAO VIEW ──────────────────────────────────────────────────── */
 function NutricaoView({user}){
   const[tab,setTab]=useState("hoje");
-  const[today,setToday]=useState({tipo_dia:"normal",done_meals:[],extras:[],agua_ml:0});
+  const[today,setToday]=useState({tipo_dia:"normal",done_items:[],escolhas:{},extras:[],agua_ml:0});
   const[weekData,setWeekData]=useState([]);
   const[ci,setCi]=useState({nome:"",kcal:"",prot:""});
   const[showExtra,setShowExtra]=useState(false);
 
   useEffect(()=>{
-    sGet(sk(user.id,"nutri",todayStr()),{tipo_dia:"normal",done_meals:[],extras:[],agua_ml:0})
-      .then(d=>setToday(d||{tipo_dia:"normal",done_meals:[],extras:[],agua_ml:0}));
+    sGet(sk(user.id,"nutri",todayStr()),{tipo_dia:"normal",done_items:[],escolhas:{},extras:[],agua_ml:0})
+      .then(d=>setToday(d||{tipo_dia:"normal",done_items:[],escolhas:{},extras:[],agua_ml:0}));
     (async()=>{
       const days=[];
       for(let i=1;i<8;i++){const d=new Date();d.setDate(d.getDate()-i);const ds=d.toISOString().split("T")[0];const data=await sGet(sk(user.id,"nutri",ds),null);if(data)days.push({date:ds,...data});}
@@ -628,25 +710,30 @@ function NutricaoView({user}){
   },[user.id]);
 
   const save=async d=>{setToday(d);await sSet(sk(user.id,"nutri",todayStr()),d);};
-  const PR=user.id==="G"?MEALS_G:MEALS_B;
   const cfg=window.__config||DEF_CFG[user.id];
   const KT=today.tipo_dia==="2treinos"?cfg.calorie2treinos:today.tipo_dia==="descanso"?cfg.calorieDescanso:cfg.calorieNormal;
   const PT=cfg.proteinTarget;
   const AT=cfg.hydrationTarget;
-  const dm=today.done_meals||[];
+  const PR=user.id==="G"?MEALS_G:MEALS_B;
+  const di=today.done_items||[];
+  const esc=today.escolhas||{};
   const ex=today.extras||[];
-  const donePR=PR.filter(p=>dm.includes(p.id));
-  const tK=donePR.reduce((a,m)=>a+m.kcal,0)+ex.reduce((a,e)=>a+(e.kcal||0),0);
-  const tP=Math.round(donePR.reduce((a,m)=>a+m.prot,0)+ex.reduce((a,e)=>a+(e.prot||0),0));
+  const totals=nutriTotals(PR,today);
   const ag=today.agua_ml||0;
-  const toggle=id=>{const newDm=dm.includes(id)?dm.filter(x=>x!==id):[...dm,id];save({...today,done_meals:newDm});if(!dm.includes(id))window.__toast?.("Refeição marcada");};
-  const addEx=()=>{if(!ci.nome||!ci.kcal)return;save({...today,extras:[...ex,{id:Date.now(),nome:ci.nome,kcal:parseFloat(ci.kcal)||0,prot:parseFloat(ci.prot)||0}]});setCi({nome:"",kcal:"",prot:""});setShowExtra(false);window.__toast?.("Item adicionado");};
+
+  const toggleItem=(id)=>{const nd=di.includes(id)?di.filter(x=>x!==id):[...di,id];save({...today,done_items:nd});if(!di.includes(id))window.__toast?.("Item marcado");};
+  const selectOption=(groupId,optId)=>{const ne={...esc};if(ne[groupId]===optId)delete ne[groupId];else ne[groupId]=optId;save({...today,escolhas:ne});if(ne[groupId])window.__toast?.("Escolha registrada");};
+  const addCi=()=>{if(!ci.nome||!ci.kcal)return;save({...today,extras:[...ex,{id:Date.now(),nome:ci.nome,kcal:parseFloat(ci.kcal)||0,prot:parseFloat(ci.prot)||0}]});setCi({nome:"",kcal:"",prot:""});setShowExtra(false);window.__toast?.("Item adicionado");};
   const delEx=id=>save({...today,extras:ex.filter(e=>e.id!==id)});
   const addAg=ml=>save({...today,agua_ml:ag+ml});
-  const wAvgK=weekData.length?Math.round(weekData.reduce((a,d)=>{const p=user.id==="G"?MEALS_G:MEALS_B;const k=p.filter(m=>(d.done_meals||[]).includes(m.id)).reduce((b,m)=>b+m.kcal,0)+(d.extras||[]).reduce((b,e)=>b+(e.kcal||0),0);return a+k;},0)/weekData.length):0;
+
+  const wAvgK=weekData.length?Math.round(weekData.reduce((a,d)=>a+nutriTotals(user.id==="G"?MEALS_G:MEALS_B,d).kcal,0)/weekData.length):0;
 
   const I={width:"100%",background:T.inpBg,border:`1px solid ${T.border}`,borderRadius:10,color:T.text,padding:"10px 12px",fontSize:15,outline:"none",minHeight:46,boxSizing:"border-box"};
-  const PC=({label,val,max,unit,color})=>{const p=Math.min(100,Math.round((val/max)*100));const ok=val>=max;return(<div style={{background:T.card,border:`1px solid ${ok?T.borderDone:T.border}`,borderRadius:12,padding:"11px 13px"}}><div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-end",marginBottom:7}}><span style={{fontSize:10,fontWeight:700,color:T.muted,letterSpacing:0.8,textTransform:"uppercase"}}>{label}</span><div><span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:20,fontWeight:700,color:ok?T.done:color}}>{unit==="L"?(val/1000).toFixed(1):val}</span><span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:11,color:T.muted}}>/{unit==="L"?max/1000:max}{unit}</span></div></div><div style={{height:6,background:T.inpBg,borderRadius:3}}><div style={{height:"100%",width:`${p}%`,background:ok?T.done:color,borderRadius:3,transition:"width 0.4s ease"}}/></div><div style={{fontSize:10,color:T.muted,marginTop:4,textAlign:"right"}}>{ok?"✓ Meta atingida":`faltam ${unit==="L"?((max-val)/1000).toFixed(1)+"L":max-val+unit}`}</div></div>);};
+  const Bx=({children,mb=12})=>(<div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:12,padding:"12px 14px",marginBottom:mb}}>{children}</div>);
+  const H=({t})=>(<div style={{fontSize:10,fontWeight:700,color:T.muted,letterSpacing:1.2,marginBottom:10,textTransform:"uppercase"}}>{t}</div>);
+  const Btn=(l,fn)=>(<button onClick={fn} style={{width:"100%",padding:11,borderRadius:9,border:"none",background:user.accent,color:"#FFF",fontSize:14,fontWeight:700,cursor:"pointer",minHeight:46,marginTop:4}}>{l}</button>);
+  const PC=({label,val,max,unit,color})=>{const p=Math.min(100,Math.round((val/max)*100));const ok=val>=max;return(<div style={{background:T.card,border:`1px solid ${ok?T.borderDone:T.border}`,borderRadius:12,padding:"11px 13px"}}><div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-end",marginBottom:7}}><span style={{fontSize:10,fontWeight:700,color:T.muted,letterSpacing:0.8,textTransform:"uppercase"}}>{label}</span><div><span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:19,fontWeight:700,color:ok?T.done:color}}>{unit==="L"?(val/1000).toFixed(1):val}</span><span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:11,color:T.muted}}>/{unit==="L"?max/1000:max}{unit}</span></div></div><div style={{height:6,background:T.inpBg,borderRadius:3}}><div style={{height:"100%",width:`${p}%`,background:ok?T.done:color,borderRadius:3,transition:"width 0.4s ease"}}/></div><div style={{fontSize:10,color:T.muted,marginTop:4,textAlign:"right"}}>{ok?"✓ Meta atingida":`faltam ${unit==="L"?((max-val)/1000).toFixed(1)+"L":max-val+unit}`}</div></div>);};
   const stabs=[{id:"hoje",l:"Hoje"},{id:"refeicoes",l:"Refeições"},{id:"hidratacao",l:"Hidratação"}];
 
   return(
@@ -656,9 +743,7 @@ function NutricaoView({user}){
       </div>
 
       {tab==="hoje"&&(<>
-        {/* Tipo de dia */}
-        <div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:12,padding:"12px 14px",marginBottom:12}}>
-          <div style={{fontSize:10,fontWeight:700,color:T.muted,letterSpacing:1.2,marginBottom:8,textTransform:"uppercase"}}>Tipo de Dia</div>
+        <Bx mb={12}><H t="Tipo de Dia"/>
           <div style={{display:"flex",gap:6}}>
             {[["normal","Normal","1800 kcal"],["2treinos","2 Jiu","2100 kcal"],["descanso","Descanso","1700 kcal"]].map(([val,l,sub])=>(
               <button key={val} onClick={()=>save({...today,tipo_dia:val})} style={{flex:1,padding:"8px 4px",borderRadius:9,border:`1.5px solid ${today.tipo_dia===val?user.accent:T.border}`,background:today.tipo_dia===val?`${user.accent}12`:T.inpBg,cursor:"pointer"}}>
@@ -667,33 +752,75 @@ function NutricaoView({user}){
               </button>
             ))}
           </div>
-        </div>
-
-        {/* Progress */}
+        </Bx>
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:8}}>
-          <PC label="Calorias" val={tK} max={KT} unit="kcal" color={user.accent}/>
-          <PC label="Proteína" val={tP} max={PT} unit="g" color="#3B82F6"/>
+          <PC label="Calorias" val={totals.kcal} max={KT} unit="kcal" color={user.accent}/>
+          <PC label="Proteína" val={totals.prot} max={PT} unit="g" color="#3B82F6"/>
         </div>
         <div style={{marginBottom:14}}><PC label="Hidratação" val={ag} max={AT} unit="L" color="#06B6D4"/></div>
+        {totals.kcal>0&&<Bx mb={12}><H t="Macros de Hoje"/>
+          <div style={{display:"flex",gap:8,justifyContent:"space-around"}}>
+            {[{l:"Proteína",v:totals.prot,c:"#3B82F6"},{l:"Carbs",v:totals.carbs,c:user.accent},{l:"Gorduras",v:totals.fat,c:"#F59E0B"}].map(({l,v,c})=>(<div key={l} style={{textAlign:"center"}}><div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:22,fontWeight:700,color:c}}>{v}<span style={{fontSize:11,color:T.muted}}>g</span></div><div style={{fontSize:10,color:T.muted,marginTop:2}}>{l}</div></div>))}
+          </div>
+        </Bx>}
 
-        {/* Meal toggle cards */}
+        {/* Meal cards: fixed items (checkbox) + choice groups (single-select) */}
         <div style={{fontSize:10,fontWeight:700,color:T.muted,letterSpacing:1.2,marginBottom:8,textTransform:"uppercase"}}>Refeições de Hoje</div>
-        <div style={{display:"flex",flexDirection:"column",gap:6,marginBottom:10}}>
-          {PR.map(p=>{const done=dm.includes(p.id);return(
-            <button key={p.id} onClick={()=>toggle(p.id)} style={{display:"flex",alignItems:"center",gap:12,padding:"12px 14px",borderRadius:12,border:`1.5px solid ${done?T.borderDone:T.border}`,background:done?T.doneBg:T.card,cursor:"pointer",textAlign:"left",width:"100%"}}>
-              <div style={{width:26,height:26,borderRadius:"50%",border:`2px solid ${done?T.done:T.border}`,background:done?T.done:"transparent",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0,transition:"all 0.2s"}}>
-                {done&&<span style={{color:"#FFF",fontSize:13,fontWeight:900,lineHeight:1}}>✓</span>}
+        {PR.map(meal=>{
+          const fixIds=(meal.fixos||[]).map(i=>i.id);
+          const fixDoneCt=fixIds.filter(id=>di.includes(id)).length;
+          const groupIds=(meal.escolhas||[]).map(g=>g.id);
+          const groupDoneCt=groupIds.filter(gid=>esc[gid]).length;
+          const totalSlots=fixIds.length+groupIds.length;
+          const doneSlots=fixDoneCt+groupDoneCt;
+          const allDone=totalSlots>0&&doneSlots===totalSlots;
+          const someD=doneSlots>0&&!allDone;
+          // Calculate this meal's kcal/prot based on current selections
+          let mKcal=0,mProt=0;
+          (meal.fixos||[]).forEach(it=>{if(di.includes(it.id)){mKcal+=it.kcal;mProt+=it.prot;}});
+          (meal.escolhas||[]).forEach(g=>{const sel=esc[g.id];if(sel){const opt=g.opcoes.find(o=>o.id===sel);if(opt){mKcal+=opt.kcal;mProt+=opt.prot;}}});
+          return(<div key={meal.id} style={{background:allDone?T.doneBg:T.card,border:`1.5px solid ${allDone?T.borderDone:someD?user.accent+"50":T.border}`,borderRadius:12,marginBottom:8,overflow:"hidden"}}>
+            <div style={{display:"flex",alignItems:"center",gap:10,padding:"11px 14px"}}>
+              <div style={{width:22,height:22,borderRadius:"50%",border:`2px solid ${allDone?T.done:someD?user.accent:T.border}`,background:allDone?T.done:someD?`${user.accent}20`:"transparent",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+                {allDone&&<span style={{color:"#FFF",fontSize:11,fontWeight:900}}>✓</span>}
+                {someD&&<span style={{color:user.accent,fontSize:9,fontWeight:900}}>{doneSlots}</span>}
               </div>
               <div style={{flex:1}}>
-                <div style={{fontSize:13,fontWeight:600,color:done?T.done:T.text}}>{p.nome}</div>
-                <div style={{fontSize:11,color:T.muted,marginTop:1}}>{p.horario} · {p.kcal}kcal · {p.prot}g prot</div>
+                <div style={{fontSize:13,fontWeight:700,color:allDone?T.done:T.text}}>{meal.nome}</div>
+                <div style={{fontSize:11,color:T.muted,marginTop:1}}>{meal.horario}{mKcal>0?` · ${mKcal}kcal · ${Math.round(mProt*10)/10}g prot`:""}</div>
               </div>
-            </button>
-          );})}
-        </div>
+            </div>
+            <div style={{padding:"0 14px 12px 46px",display:"flex",flexDirection:"column",gap:6}}>
+              {/* Fixed items — simple checkbox */}
+              {(meal.fixos||[]).map(it=>{const done=di.includes(it.id);return(
+                <button key={it.id} onClick={()=>toggleItem(it.id)} style={{display:"flex",alignItems:"center",gap:8,padding:"6px 8px",borderRadius:8,border:"none",background:done?`${T.done}10`:T.inpBg,cursor:"pointer",textAlign:"left"}}>
+                  <div style={{width:16,height:16,borderRadius:4,border:`1.5px solid ${done?T.done:T.border}`,background:done?T.done:"transparent",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>
+                    {done&&<span style={{color:"#FFF",fontSize:9,fontWeight:900}}>✓</span>}
+                  </div>
+                  <span style={{fontSize:12,color:done?T.done:T.sub,flex:1}}>{it.nome}</span>
+                  <span style={{fontSize:10,color:T.muted,fontFamily:"'JetBrains Mono',monospace"}}>{it.kcal}kcal</span>
+                </button>
+              );})}
+              {/* Choice groups — single-select between options */}
+              {(meal.escolhas||[]).map(g=>(
+                <div key={g.id}>
+                  <div style={{fontSize:9,color:T.muted,fontWeight:700,letterSpacing:0.5,textTransform:"uppercase",marginBottom:4,marginTop:2}}>{g.label}</div>
+                  <div style={{display:"flex",gap:6}}>
+                    {g.opcoes.map(opt=>{const sel=esc[g.id]===opt.id;return(
+                      <button key={opt.id} onClick={()=>selectOption(g.id,opt.id)} style={{flex:1,display:"flex",flexDirection:"column",gap:2,padding:"7px 9px",borderRadius:9,border:`1.5px solid ${sel?user.accent:T.border}`,background:sel?`${user.accent}15`:T.inpBg,cursor:"pointer",textAlign:"left"}}>
+                        <span style={{fontSize:11,fontWeight:sel?700:500,color:sel?user.accent:T.text}}>{opt.nome}</span>
+                        <span style={{fontSize:9,color:T.muted,fontFamily:"'JetBrains Mono',monospace"}}>{opt.kcal}kcal · {opt.prot}g</span>
+                      </button>
+                    );})}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>);
+        })}
 
         {/* Extras log */}
-        {ex.length>0&&<div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:12,overflow:"hidden",marginBottom:8}}>
+        {ex.length>0&&<div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:12,overflow:"hidden",marginBottom:8,marginTop:10}}>
           <div style={{padding:"7px 14px",borderBottom:`1px solid ${T.border}`,fontSize:10,fontWeight:700,color:T.muted,letterSpacing:1.2,textTransform:"uppercase"}}>Extras</div>
           {ex.map((e,i)=>(<div key={e.id} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"8px 14px",borderBottom:i<ex.length-1?`1px solid ${T.border}`:"none"}}>
             <div><span style={{fontSize:13,color:T.text}}>{e.nome}</span><span style={{fontSize:11,color:T.muted,marginLeft:8}}>{e.kcal}kcal{e.prot?` · ${e.prot}g`:""}</span></div>
@@ -702,7 +829,7 @@ function NutricaoView({user}){
         </div>}
 
         {showExtra?(
-          <div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:12,padding:"12px 14px",marginBottom:10}}>
+          <div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:12,padding:"12px 14px",marginTop:10,marginBottom:10}}>
             <input value={ci.nome} onChange={e=>setCi(p=>({...p,nome:e.target.value}))} placeholder="Nome (ex: lanche, proteína...)" style={{...I,marginBottom:8}}/>
             <div style={{display:"flex",gap:8,marginBottom:8}}>
               <input value={ci.kcal} onChange={e=>setCi(p=>({...p,kcal:e.target.value}))} placeholder="Kcal" inputMode="decimal" style={{...I,flex:1}}/>
@@ -710,33 +837,40 @@ function NutricaoView({user}){
             </div>
             <div style={{display:"flex",gap:8}}>
               <button onClick={()=>setShowExtra(false)} style={{flex:1,padding:10,borderRadius:9,border:`1px solid ${T.border}`,background:"transparent",color:T.sub,fontSize:13,cursor:"pointer"}}>Cancelar</button>
-              <button onClick={addEx} style={{flex:2,padding:10,borderRadius:9,border:"none",background:user.accent,color:"#FFF",fontSize:13,fontWeight:700,cursor:"pointer"}}>+ Adicionar</button>
+              <button onClick={addCi} style={{flex:2,padding:10,borderRadius:9,border:"none",background:user.accent,color:"#FFF",fontSize:13,fontWeight:700,cursor:"pointer"}}>+ Adicionar</button>
             </div>
           </div>
         ):(
-          <button onClick={()=>setShowExtra(true)} style={{width:"100%",padding:"10px",borderRadius:10,border:`1px dashed ${T.border}`,background:"transparent",color:T.muted,fontSize:12,cursor:"pointer",marginBottom:14}}>+ item extra (lanche, whey...)</button>
+          <button onClick={()=>setShowExtra(true)} style={{width:"100%",padding:"10px",borderRadius:10,border:`1px dashed ${T.border}`,background:"transparent",color:T.muted,fontSize:12,cursor:"pointer",marginTop:10,marginBottom:14}}>+ item extra (lanche, suplemento...)</button>
         )}
 
-        {/* Weekly avg */}
-        {weekData.length>0&&<div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:12,padding:"12px 14px"}}>
-          <div style={{fontSize:10,fontWeight:700,color:T.muted,letterSpacing:1.2,marginBottom:8,textTransform:"uppercase"}}>Últimos 7 dias — Média</div>
+        {weekData.length>0&&<Bx mb={0}><H t="Últimos 7 dias — Média"/>
           <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:30,fontWeight:700,color:user.accent,letterSpacing:-1,lineHeight:1}}>{wAvgK}<span style={{fontSize:13,color:T.muted,fontWeight:400}}> kcal/dia</span></div>
           <div style={{fontSize:12,color:T.muted,marginTop:5}}>{wAvgK>=KT-150&&wAvgK<=KT+200?"✓ Dentro da meta":"Abaixo da meta — revise as refeições"}</div>
-        </div>}
+        </Bx>}
       </>)}
 
       {tab==="refeicoes"&&(<>
-        <div style={{fontSize:11,color:T.muted,marginBottom:12,lineHeight:1.5}}>Referência nutricional das suas {PR.length} refeições principais. Toque em "Hoje" para marcar as que fez.</div>
+        <div style={{fontSize:11,color:T.muted,marginBottom:12,lineHeight:1.5}}>Itens fixos sempre contam quando marcados. Nas opções de escolha, você seleciona qual comeu — só uma por vez.</div>
         <div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:12,overflow:"hidden"}}>
-          {PR.map((p,i)=>(<div key={p.id} style={{padding:"14px",borderBottom:i<PR.length-1?`1px solid ${T.border}`:"none"}}>
-            <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:6}}>
-              <div><div style={{fontSize:14,fontWeight:700,color:T.text}}>{p.nome}</div><div style={{fontSize:11,color:T.muted,marginTop:1}}>{p.horario}</div></div>
-              <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:17,color:user.accent,fontWeight:700,marginLeft:8}}>{p.kcal}<span style={{fontSize:10,color:T.muted}}>kcal</span></span>
+          {PR.map((meal,i)=>(<div key={meal.id} style={{padding:"14px",borderBottom:i<PR.length-1?`1px solid ${T.border}`:"none"}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:8}}>
+              <div><div style={{fontSize:14,fontWeight:700,color:T.text}}>{meal.nome}</div><div style={{fontSize:11,color:T.muted,marginTop:1}}>{meal.horario}</div></div>
             </div>
-            <div style={{fontSize:12,color:T.sub,marginBottom:10,lineHeight:1.5}}>{p.desc}</div>
-            <div style={{display:"flex",gap:16}}>
-              {[{l:"PROTEÍNA",v:p.prot,u:"g",c:"#3B82F6"},{l:"CARBS",v:p.carbs,u:"g",c:user.accent},{l:"GORDURA",v:p.fat,u:"g",c:"#F59E0B"}].map(({l,v,u,c})=>(<div key={l} style={{textAlign:"center"}}><div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:16,fontWeight:700,color:c}}>{v}{u}</div><div style={{fontSize:9,color:T.muted,marginTop:2,letterSpacing:0.5}}>{l}</div></div>))}
-            </div>
+            {(meal.fixos||[]).length>0&&<div style={{marginBottom:8}}>
+              <div style={{fontSize:9,color:T.muted,fontWeight:700,letterSpacing:0.5,marginBottom:4,textTransform:"uppercase"}}>Fixo</div>
+              {meal.fixos.map(it=>(<div key={it.id} style={{display:"flex",justifyContent:"space-between",padding:"5px 8px",background:T.inpBg,borderRadius:6,fontSize:12,marginBottom:3}}>
+                <span style={{color:T.text}}>{it.nome}</span>
+                <span style={{color:T.muted,fontFamily:"'JetBrains Mono',monospace"}}>{it.kcal}kcal · P{it.prot}g</span>
+              </div>))}
+            </div>}
+            {(meal.escolhas||[]).map(g=>(<div key={g.id} style={{marginBottom:8}}>
+              <div style={{fontSize:9,color:user.accent,fontWeight:700,letterSpacing:0.5,marginBottom:4,textTransform:"uppercase"}}>{g.label} — escolha uma</div>
+              {g.opcoes.map(opt=>(<div key={opt.id} style={{display:"flex",justifyContent:"space-between",padding:"5px 8px",background:`${user.accent}08`,borderRadius:6,fontSize:12,marginBottom:3}}>
+                <span style={{color:T.text}}>{opt.nome}</span>
+                <span style={{color:T.muted,fontFamily:"'JetBrains Mono',monospace"}}>{opt.kcal}kcal · P{opt.prot}g</span>
+              </div>))}
+            </div>))}
           </div>))}
         </div>
       </>)}
@@ -767,8 +901,6 @@ function NutricaoView({user}){
 }
 
 
-
-/* ─── BJJ TIMER ─────────────────────────────────────────────────────── */
 function BJJTimer({user}){
   const cfg=()=>window.__config||DEF_CFG[user.id];
   const[roundMin,setRoundMin]=useState(()=>cfg().roundMin||5);
@@ -856,63 +988,108 @@ function BJJTimer({user}){
 /* ─── JIU / EXTRAS VIEW ─────────────────────────────────────────────── */
 function JiuView({user}){
   const[tab,setTab]=useState("sessao");
-  const[jiuLog,setJiuLog]=useState([]);const[rolas,setRolas]=useState([]);
-  const[tecnico,setTecnico]=useState([]);const[evolucao,setEvolucao]=useState([]);
-  const[adversarios,setAdversarios]=useState([]);const[cardioLog,setCardioLog]=useState([]);
-  const[comps,setComps]=useState([]);
+  const[jiuSessions,setJiuSessions]=useState([]);
+  const[tecnico,setTecnico]=useState([]);
+  const[adversarios,setAdversarios]=useState([]);
   const[faixas,setFaixas]=useState([]);
   const[faixaInp,setFaixaInp]=useState({faixa:"Branca",grau:0,data:"",notas:""});
-  const[jiuInp,setJiuInp]=useState({tipo:"Técnico",dur:"",parceiros:"",pos_trab:[],pos_ok:"",pos_nok:"",notas:""});
-  const[fadiga,setFadiga]=useState({sono:3,disposicao:3,corpo:3});
-  const[rolaInp,setRolaInp]=useState({parceiro:"",peso:"",nivel:"",resultados:{},posicao:"Meia-guarda",notas:""});
-  const[tecInp,setTecInp]=useState({posicao:"Meia-guarda",titulo:"",detalhe:""});
-  const[advInp,setAdvInp]=useState({nome:"",clube:"",peso:"",estilo:"",forte:"",fraco:""});
-  const[cardInp,setCardInp]=useState({dur:"",zona:"2",rpe:"",hora:"Manhã"});
-  const[compInp,setCompInp]=useState({evento:"",cat:"",peso:"",resultado:"",notas:""});
-  const[tecSearch,setTecSearch]=useState("");
 
+  // Active session draft (form state)
+  const[sessTipo,setSessTipo]=useState("Técnico");
+  const[sessDur,setSessDur]=useState("");
+  const[fadiga,setFadiga]=useState({sono:3,horas:7,disposicao:3,corpo:3});
+  const[draftRolas,setDraftRolas]=useState([]);
+  const[posOk,setPosOk]=useState("");
+  const[posNok,setPosNok]=useState("");
+  const[sessNotas,setSessNotas]=useState("");
+
+  // Rola entry sub-form
+  const[showRolaForm,setShowRolaForm]=useState(false);
+  const[rolaInp,setRolaInp]=useState({parceiro:"",peso:"",nivel:"",resultados:{},posicao:"Meia-guarda",notas:""});
+
+  const[tecInp,setTecInp]=useState({posicao:"Meia-guarda",titulo:"",detalhe:""});
+  const[tecSearch,setTecSearch]=useState("");
+  const[advInp,setAdvInp]=useState({nome:"",clube:"",peso:"",estilo:"",forte:"",fraco:""});
+  const[compInp,setCompInp]=useState({evento:"",cat:"",peso:"",resultado:"",notas:""});
+  const[comps,setComps]=useState([]);
+  const[cardioLog,setCardioLog]=useState([]);
+  const[cardInp,setCardInp]=useState({dur:"",zona:"2",rpe:"",hora:"Manhã"});
+
+  // ── Load + auto-migrate legacy data ──────────────────────────────
   useEffect(()=>{
-    sGet(sk(user.id,"jiu"),[]).then(d=>setJiuLog(d));
-    sGet(sk(user.id,"rolas"),[]).then(d=>setRolas(d));
+    (async()=>{
+      let sessions=await sGet(sk(user.id,"jiu_sessions"),null);
+      if(sessions===null){
+        // Migrate from old separate "jiu" (sessions) + "rolas" (flat list) keys
+        const oldJiu=await sGet(sk(user.id,"jiu"),[]);
+        const oldRolas=await sGet(sk(user.id,"rolas"),[]);
+        const usedRolaIdx=new Set();
+        sessions=oldJiu.map((s,i)=>{
+          const matched=oldRolas.filter((r,ri)=>{if(r.date===s.date&&!usedRolaIdx.has(ri)){usedRolaIdx.add(ri);return true;}return false;});
+          return{id:`mig_${i}_${Date.now()}`,date:s.date,tipo:s.tipo||"Técnico",dur:s.dur||"",fadiga:s.fadiga||null,rolas:matched,pos_ok:s.pos_ok||"",pos_nok:s.pos_nok||"",notas:s.notas||""};
+        });
+        const leftover=oldRolas.filter((r,ri)=>!usedRolaIdx.has(ri));
+        if(leftover.length){
+          const byDate={};leftover.forEach(r=>{(byDate[r.date]=byDate[r.date]||[]).push(r);});
+          Object.entries(byDate).forEach(([date,rs])=>{sessions.push({id:`mig_leftover_${date}`,date,tipo:"Técnico",dur:"",fadiga:null,rolas:rs,pos_ok:"",pos_nok:"",notas:"Rolas migrados automaticamente"});});
+        }
+        sessions.sort((a,b)=>b.date.localeCompare(a.date));
+        if(sessions.length)await sSet(sk(user.id,"jiu_sessions"),sessions);
+      }
+      setJiuSessions(sessions||[]);
+    })();
     sGet(sk(user.id,"tecnico"),[]).then(d=>setTecnico(d));
-    sGet(sk(user.id,"evolucao"),[]).then(d=>setEvolucao(d));
     sGet(sk(user.id,"adversarios"),[]).then(d=>setAdversarios(d));
-    sGet(sk(user.id,"cardio"),[]).then(d=>setCardioLog(d));
-    sGet(sk(user.id,"comps"),[]).then(d=>setComps(d));
     sGet(sk(user.id,"faixas"),[]).then(d=>setFaixas(d));
+    sGet(sk(user.id,"comps"),[]).then(d=>setComps(d));
+    sGet(sk(user.id,"cardio"),[]).then(d=>setCardioLog(d));
   },[user.id]);
 
-  // Pre-training review: find recurring issues from last 5 sessions
-  const topIssues=Object.entries(jiuLog.slice(0,5).reduce((acc,s)=>{
+  // ── Derived: flat list of all rolas across all sessions (for analysis) ──
+  const allRolas=jiuSessions.flatMap(s=>(s.rolas||[]).map(r=>({...r,date:s.date,sessTipo:s.tipo})));
+
+  const isPos=r=>r.resultados?Object.keys(r.resultados).some(k=>["Finalizei","Raspei","Passei"].includes(k)):["Finalizei","Raspei","Passei"].includes(r.resultado);
+  const isNeg=r=>r.resultados?Object.keys(r.resultados).some(k=>["Fui finalizado","Fui raspado","Fui passado"].includes(k)):["Fui finalizado","Fui raspado","Fui passado"].includes(r.resultado);
+  const countR=(r,list)=>r.resultados?Object.entries(r.resultados).filter(([k])=>list.includes(k)).reduce((a,[,v])=>a+v,0):(list.includes(r.resultado)?1:0);
+
+  // ── Foco sugerido: posição mais fraca via rolas + temas recentes ──
+  const topIssues=Object.entries(jiuSessions.slice(0,5).reduce((acc,s)=>{
     (s.pos_nok||"").split(/[,;]+/).map(p=>p.trim()).filter(Boolean).forEach(p=>{acc[p]=(acc[p]||0)+1;});
     return acc;
   },{})).filter(([,v])=>v>=2).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([k])=>k);
 
-  // Posição mais fraca calculada a partir dos rolas (score real)
   const weakestPos=(()=>{
     const POSITIVOS3=["Finalizei","Raspei","Passei"];const NEGATIVOS3=["Fui finalizado","Fui raspado","Fui passado"];
-    const countR3=(r,list)=>r.resultados?Object.entries(r.resultados).filter(([k])=>list.includes(k)).reduce((a,[,v])=>a+v,0):(list.includes(r.resultado)?1:0);
-    const byPos3={};rolas.forEach(r=>{if(!r.posicao)return;if(!byPos3[r.posicao])byPos3[r.posicao]=[];byPos3[r.posicao].push(r);});
-    const stats=Object.entries(byPos3).filter(([,a])=>a.length>=3).map(([pos,arr])=>{const w=arr.reduce((a,r)=>a+countR3(r,POSITIVOS3),0);const l=arr.reduce((a,r)=>a+countR3(r,NEGATIVOS3),0);const score=(w+l)>0?(w/(w+l))*10:5;return{pos,score,n:arr.length};});
+    const byPos3={};allRolas.forEach(r=>{if(!r.posicao)return;if(!byPos3[r.posicao])byPos3[r.posicao]=[];byPos3[r.posicao].push(r);});
+    const stats=Object.entries(byPos3).filter(([,a])=>a.length>=3).map(([pos,arr])=>{const w=arr.reduce((a,r)=>a+countR(r,POSITIVOS3),0);const l=arr.reduce((a,r)=>a+countR(r,NEGATIVOS3),0);const score=(w+l)>0?(w/(w+l))*10:5;return{pos,score,n:arr.length};});
     if(!stats.length)return null;
     return stats.sort((a,b)=>a.score-b.score)[0];
   })();
 
-  // Save handlers
-  const saveJiu=async()=>{
-    if(!jiuInp.dur)return;
-    const nl=[{date:todayStr(),fadiga:{...fadiga},...jiuInp},...jiuLog].slice(0,200);
-    setJiuLog(nl);await sSet(sk(user.id,"jiu"),nl);window.__toast?.("Sessão de Jiu salva");
-    setJiuInp({tipo:"Técnico",dur:"",parceiros:"",pos_trab:[],pos_ok:"",pos_nok:"",notas:""});
-  };
-  const saveRola=async()=>{
+  // ── Save handlers ────────────────────────────────────────────────
+  const addDraftRola=()=>{
     if(!rolaInp.parceiro)return;
-    const rStr=Object.entries(rolaInp.resultados||{}).filter(([,v])=>v>0).sort((a,b)=>b[1]-a[1]).map(([k,v])=>v>1?`${k} ×${v}`:k).join(" · ")||"Neutro";
-    const entry={date:todayStr(),...rolaInp,resultado:rStr};
-    const nl=[entry,...rolas].slice(0,500);
-    setRolas(nl);await sSet(sk(user.id,"rolas"),nl);window.__toast?.("Rola registrado");
+    setDraftRolas(p=>[...p,{...rolaInp,id:Date.now()}]);
     setRolaInp({parceiro:"",peso:"",nivel:"",resultados:{},posicao:"Meia-guarda",notas:""});
+    setShowRolaForm(false);
+    window.__toast?.("Rola adicionado à sessão");
   };
+  const removeDraftRola=(id)=>setDraftRolas(p=>p.filter(r=>r.id!==id));
+
+  const saveSession=async()=>{
+    if(!sessDur&&draftRolas.length===0){window.__toast?.("Adicione duração ou pelo menos um rola");return;}
+    const newSession={id:Date.now(),date:todayStr(),tipo:sessTipo,dur:sessDur,fadiga:{...fadiga},rolas:draftRolas,pos_ok:posOk,pos_nok:posNok,notas:sessNotas};
+    const nl=[newSession,...jiuSessions].slice(0,300);
+    setJiuSessions(nl);await sSet(sk(user.id,"jiu_sessions"),nl);
+    window.__toast?.("Sessão salva");
+    setSessTipo("Técnico");setSessDur("");setFadiga({sono:3,horas:7,disposicao:3,corpo:3});setDraftRolas([]);setPosOk("");setPosNok("");setSessNotas("");
+  };
+
+  const deleteSession=async(id)=>{
+    const nl=jiuSessions.filter(s=>s.id!==id);
+    setJiuSessions(nl);await sSet(sk(user.id,"jiu_sessions"),nl);
+  };
+
   const saveTec=async()=>{
     if(!tecInp.titulo)return;
     const nl=[{id:Date.now(),date:todayStr(),...tecInp},...tecnico].slice(0,500);
@@ -935,17 +1112,72 @@ function JiuView({user}){
     const nl=faixas.filter(f=>f.id!==id);
     setFaixas(nl);await sSet(sk(user.id,"faixas"),nl);
   };
-  const saveCardio=async()=>{
-    if(!cardInp.dur)return;
-    const nl=[{date:todayStr(),...cardInp},...cardioLog].slice(0,200);
-    setCardioLog(nl);await sSet(sk(user.id,"cardio"),nl);
-    setCardInp({dur:"",zona:"2",rpe:"",hora:"Manhã"});
-  };
   const saveComp=async()=>{
     if(!compInp.evento)return;
     const nl=[{date:todayStr(),...compInp},...comps].slice(0,50);
-    setComps(nl);await sSet(sk(user.id,"comps"),nl);
+    setComps(nl);await sSet(sk(user.id,"comps"),nl);window.__toast?.("Competição salva");
     setCompInp({evento:"",cat:"",peso:"",resultado:"",notas:""});
+  };
+  const saveCardio=async()=>{
+    if(!cardInp.dur)return;
+    const nl=[{date:todayStr(),...cardInp},...cardioLog].slice(0,200);
+    setCardioLog(nl);await sSet(sk(user.id,"cardio"),nl);window.__toast?.("Cardio salvo");
+    setCardInp({dur:"",zona:"2",rpe:"",hora:"Manhã"});
+  };
+
+  const exportJiu=async()=>{
+    const lines=[];
+    const now=new Date().toLocaleDateString("pt-BR");
+    lines.push(`=== JIULAB EXPORT — ${user.name} — ${now} ===\n`);
+    if(jiuSessions.length){
+      lines.push(`--- SESSÕES (${jiuSessions.length} total) ---`);
+      jiuSessions.slice(0,30).forEach(s=>{
+        const f=s.fadiga?`Sono:${s.fadiga.sono} Disp:${s.fadiga.disposicao} Corpo:${s.fadiga.corpo}`:"";
+        lines.push(`${s.date} | ${s.tipo} | ${s.dur||"?"}min${f?" | "+f:""} | ${(s.rolas||[]).length} rolas`);
+        if(s.pos_ok)lines.push(`  ✓ ${s.pos_ok}`);
+        if(s.pos_nok)lines.push(`  ✗ ${s.pos_nok}`);
+        if(s.notas)lines.push(`  → ${s.notas}`);
+        (s.rolas||[]).forEach(r=>{
+          const resStr=r.resultados?Object.entries(r.resultados).filter(([,v])=>v>0).map(([k,v])=>v>1?`${k}×${v}`:k).join(", "):r.resultado;
+          lines.push(`    · ${r.parceiro}${r.peso?" "+r.peso+"kg":""} ${r.nivel||""} — ${resStr} — ${r.posicao||""}`);
+        });
+      });
+      lines.push("");
+    }
+    if(allRolas.length){
+      const wins=allRolas.filter(r=>isPos(r)).length;
+      const losses=allRolas.filter(r=>isNeg(r)).length;
+      const wr=Math.round((wins/allRolas.length)*100);
+      lines.push(`--- ROLAS (${allRolas.length} total | ${wr}% positivos) ---`);
+      const pm={};allRolas.forEach(r=>{if(!r.posicao)return;if(!pm[r.posicao])pm[r.posicao]={t:0,w:0};pm[r.posicao].t++;if(isPos(r))pm[r.posicao].w++;});
+      Object.entries(pm).filter(([,v])=>v.t>=2).sort((a,b)=>b[1].t-a[1].t).forEach(([pos,v])=>lines.push(`  ${pos}: ${Math.round((v.w/v.t)*100)}% (${v.t} rolas)`));
+      lines.push("");
+    }
+    if(tecnico.length){
+      lines.push(`--- BIBLIOTECA TÉCNICA (${tecnico.length}) ---`);
+      tecnico.forEach(t=>{lines.push(`[${t.posicao}] ${t.titulo}`);if(t.detalhe)lines.push(`  ${t.detalhe}`);});
+      lines.push("");
+    }
+    if(adversarios.length){
+      lines.push(`--- ADVERSÁRIOS (${adversarios.length}) ---`);
+      adversarios.forEach(a=>{lines.push(`${a.nome}${a.peso?" "+a.peso+"kg":""} — ${a.clube||""} — ${a.estilo||""}`);if(a.forte)lines.push(`  ⚠ ${a.forte}`);if(a.fraco)lines.push(`  🎯 ${a.fraco}`);});
+      lines.push("");
+    }
+    if(comps.length){
+      lines.push(`--- COMPETIÇÕES (${comps.length}) ---`);
+      comps.forEach(c=>lines.push(`${c.date} | ${c.evento} | ${c.cat||""} | ${c.peso||""}kg | ${c.resultado||""}`));
+      lines.push("");
+    }
+    lines.push("=== FIM DO EXPORT ===");
+    const text=lines.join("\n");
+    try{await navigator.clipboard.writeText(text);window.__toast?.("Copiado para o clipboard!");}
+    catch{
+      const blob=new Blob([text],{type:"text/plain;charset=utf-8"});
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement("a");a.href=url;a.download=`jiulab_${user.name.toLowerCase()}_${todayStr()}.txt`;
+      document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
+      window.__toast?.("Arquivo baixado!");
+    }
   };
 
   const I={width:"100%",background:T.inpBg,border:`1px solid ${T.border}`,borderRadius:10,color:T.text,padding:"10px 12px",fontSize:15,outline:"none",minHeight:46,boxSizing:"border-box"};
@@ -955,7 +1187,6 @@ function JiuView({user}){
 
   const TIPO_COLOR={Técnico:"#F59E0B",Forte:"#EA6C00",Open:"#EF4444"};
   const POS=["Meia-guarda","Meia-guarda (top)","Guarda fechada","Passagem","Costas","Em pé","Single leg","Underhook/Esgrima","Raspagem","Finalização","Defesa de queda"];
-  const POS_EVOL=[["meia_guarda","Meia-guarda"],["esgrima","Esgrima/Underhook"],["single","Single leg"],["passagem","Passagem de guarda"],["costas","Costas (ataque)"],["finalizacoes","Finalizações"],["em_pe","Em pé / Queda"],["defesa","Defesa de queda"]];
   const RES=["Finalizei","Raspei","Passei","Neutro","Fui passado","Fui raspado","Fui finalizado"];
   const RES_C={Finalizei:T.done,Raspei:user.accent,Passei:"#3B82F6",Neutro:T.sub,"Fui passado":"#F59E0B","Fui raspado":"#F97316","Fui finalizado":"#EF4444"};
 
@@ -971,114 +1202,69 @@ function JiuView({user}){
     </div>
   </div>);
 
-  const exportJiu=async()=>{
-    const lines=[];
-    const now=new Date().toLocaleDateString("pt-BR");
-    lines.push(`=== JIULAB EXPORT — ${user.name} — ${now} ===\n`);
-    // Sessões
-    if(jiuLog.length){
-      lines.push(`--- SESSÕES DE JIU (${jiuLog.length} total) ---`);
-      jiuLog.slice(0,30).forEach(s=>{
-        const f=s.fadiga?`Sono:${s.fadiga.sono} Disp:${s.fadiga.disposicao} Corpo:${s.fadiga.corpo}`:"";
-        lines.push(`${s.date} | ${s.tipo} | ${s.dur||"?"}min${f?" | "+f:""}`);
-        if(s.pos_trab?.length)lines.push(`  Posições: ${s.pos_trab.join(", ")}`);
-        if(s.pos_ok)lines.push(`  ✓ ${s.pos_ok}`);
-        if(s.pos_nok)lines.push(`  ✗ ${s.pos_nok}`);
-        if(s.notas)lines.push(`  → ${s.notas}`);
-      });
-      lines.push("");
-    }
-    // Rolas
-    if(rolas.length){
-      const wins=rolas.filter(r=>["Finalizei","Raspei","Passei"].includes(r.resultado)).length;
-      const losses=rolas.filter(r=>["Fui finalizado","Fui raspado","Fui passado"].includes(r.resultado)).length;
-      const wr=Math.round((wins/rolas.length)*100);
-      lines.push(`--- ROLAS (${rolas.length} total | ${wr}% positivos) ---`);
-      // Position stats
-      const pm={};rolas.forEach(r=>{if(!r.posicao)return;if(!pm[r.posicao])pm[r.posicao]={t:0,w:0};pm[r.posicao].t++;if(["Finalizei","Raspei","Passei"].includes(r.resultado))pm[r.posicao].w++;});
-      const pa=Object.entries(pm).filter(([,v])=>v.t>=2).sort((a,b)=>b[1].t-a[1].t);
-      if(pa.length){
-        lines.push("Aproveitamento por posição:");
-        pa.forEach(([pos,v])=>lines.push(`  ${pos}: ${Math.round((v.w/v.t)*100)}% (${v.t} rolas)`));
-      }
-      lines.push("Últimos 30 rolas:");
-      rolas.slice(0,30).forEach(r=>{
-        lines.push(`  ${r.date} | ${r.parceiro||"?"}${r.peso?" "+r.peso+"kg":""} | ${r.nivel||""} | ${r.resultado} | ${r.posicao||""}`);
-        if(r.notas)lines.push(`    → ${r.notas}`);
-      });
-      lines.push("");
-    }
-    // Técnico
-    if(tecnico.length){
-      lines.push(`--- BIBLIOTECA TÉCNICA (${tecnico.length} notas) ---`);
-      tecnico.forEach(t=>{ lines.push(`[${t.posicao}] ${t.titulo}`);if(t.detalhe)lines.push(`  ${t.detalhe}`);});
-      lines.push("");
-    }
-    // Evolução por posição (calculado dos rolas)
-    if(rolas.length){
-      const POSITIVOS2=["Finalizei","Raspei","Passei"];const NEGATIVOS2=["Fui finalizado","Fui raspado","Fui passado"];
-      const countR2=(r,list)=>r.resultados?Object.entries(r.resultados).filter(([k])=>list.includes(k)).reduce((a,[,v])=>a+v,0):(list.includes(r.resultado)?1:0);
-      const byPos2={};rolas.forEach(r=>{if(!r.posicao)return;if(!byPos2[r.posicao])byPos2[r.posicao]=[];byPos2[r.posicao].push(r);});
-      const ps=Object.entries(byPos2).filter(([,a])=>a.length>=2).map(([pos,arr])=>{const w=arr.reduce((a,r)=>a+countR2(r,POSITIVOS2),0);const l=arr.reduce((a,r)=>a+countR2(r,NEGATIVOS2),0);const score=(w+l)>0?Math.round((w/(w+l))*100)/10:5;return{pos,score,n:arr.length};}).sort((a,b)=>b.score-a.score);
-      if(ps.length){
-        lines.push("--- EVOLUÇÃO POR POSIÇÃO (calculado dos rolas) ---");
-        ps.forEach(({pos,score,n})=>lines.push(`  ${pos}: ${score.toFixed(1)}/10 (${n} rolas)`));
-        lines.push("");
-      }
-    }
-    // Adversários
-    if(adversarios.length){
-      lines.push(`--- ADVERSÁRIOS (${adversarios.length}) ---`);
-      adversarios.forEach(a=>{
-        lines.push(`${a.nome}${a.peso?" "+a.peso+"kg":""} — ${a.clube||""} — ${a.estilo||""}`);
-        if(a.forte)lines.push(`  ⚠ ${a.forte}`);
-        if(a.fraco)lines.push(`  🎯 ${a.fraco}`);
-      });
-      lines.push("");
-    }
-    // Competições
-    const comps=await sGet(sk(user.id,"comps"),[]);
-    if(comps.length){
-      lines.push(`--- COMPETIÇÕES (${comps.length}) ---`);
-      comps.forEach(c=>lines.push(`${c.date} | ${c.evento} | ${c.categoria||""} | ${c.peso||""}kg | ${c.resultado||""}`));
-      lines.push("");
-    }
-    lines.push("=== FIM DO EXPORT ===");
-    const text=lines.join("\n");
-    // Try clipboard first
-    try{await navigator.clipboard.writeText(text);window.__toast?.("Copiado para o clipboard!");}
-    catch{
-      // Fallback: download as file
-      const blob=new Blob([text],{type:"text/plain;charset=utf-8"});
-      const url=URL.createObjectURL(blob);
-      const a=document.createElement("a");a.href=url;
-      a.download=`jiulab_${user.name.toLowerCase()}_${todayStr()}.txt`;
-      document.body.appendChild(a);a.click();document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-      window.__toast?.("Arquivo baixado!");
-    }
-  };
-  
-  const isPos=r=>r.resultados?Object.keys(r.resultados).some(k=>["Finalizei","Raspei","Passei"].includes(k)):["Finalizei","Raspei","Passei"].includes(r.resultado);
-  const isNeg=r=>r.resultados?Object.keys(r.resultados).some(k=>["Fui finalizado","Fui raspado","Fui passado"].includes(k)):["Fui finalizado","Fui raspado","Fui passado"].includes(r.resultado);
-      const tabs=user.id==="G"
-    ?[{id:"sessao",l:"Sessão"},{id:"rolas",l:"Rolas"},{id:"tecnico",l:"Técnico"},{id:"posicoes",l:"Posições"},{id:"faixa",l:"🥋 Faixa"},{id:"adversarios",l:"Adversários"},{id:"timer",l:"⏱ Timer"}]
+  const tabs=user.id==="G"
+    ?[{id:"sessao",l:"Sessão"},{id:"tecnico",l:"Técnico"},{id:"posicoes",l:"Posições"},{id:"faixa",l:"🥋 Faixa"},{id:"adversarios",l:"Adversários"},{id:"timer",l:"⏱ Timer"}]
     :[{id:"faixa",l:"🥋 Faixa"},{id:"adversarios",l:"Adversários"}];
 
   useEffect(()=>{if(user.id==="B"&&tab!=="adversarios")setTab("adversarios");},[user.id]);
 
+  // ── Rola sub-form component (reused) ───────────────────────────────
+  const RolaForm=()=>(
+    <div style={{background:T.card,border:`1.5px solid ${user.accent}40`,borderRadius:14,padding:16,marginTop:10,marginBottom:6}}>
+      <div style={{fontSize:13,fontWeight:700,color:user.accent,marginBottom:12}}>Novo Rola</div>
+      <div style={{display:"flex",gap:8,marginBottom:10}}>
+        <input value={rolaInp.parceiro} onChange={e=>setRolaInp(p=>({...p,parceiro:e.target.value}))} placeholder="Parceiro" style={{...I,flex:2}}/>
+        <input value={rolaInp.peso} onChange={e=>setRolaInp(p=>({...p,peso:e.target.value}))} placeholder="Peso" inputMode="decimal" style={{...I,flex:1}}/>
+      </div>
+      <input value={rolaInp.nivel} onChange={e=>setRolaInp(p=>({...p,nivel:e.target.value}))} placeholder="Faixa / Nível" style={{...I,marginBottom:14}}/>
+
+      <div style={{fontSize:12,color:T.muted,marginBottom:8,fontWeight:600}}>Resultado</div>
+      {[{label:"Positivos",items:["Finalizei","Raspei","Passei"],color:T.done},{label:"Neutro",items:["Neutro"],color:T.sub},{label:"Negativos",items:["Fui finalizado","Fui raspado","Fui passado"],color:"#EF4444"}].map(({label,items,color})=>(
+        <div key={label} style={{marginBottom:10}}>
+          <div style={{fontSize:10,fontWeight:700,color,letterSpacing:0.6,marginBottom:6,textTransform:"uppercase"}}>{label}</div>
+          <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
+            {items.map(r=>{
+              const cnt=(rolaInp.resultados||{})[r]||0;
+              const setR=(n)=>setRolaInp(p=>{const rs={...(p.resultados||{})};if(n<=0)delete rs[r];else rs[r]=n;return{...p,resultados:rs};});
+              return(<div key={r} style={{display:"flex",alignItems:"center",gap:4}}>
+                <button onClick={()=>setR(cnt>0?0:1)} style={{padding:"7px 12px",borderRadius:20,border:`1.5px solid ${cnt>0?color:T.border}`,background:cnt>0?`${color}18`:T.inpBg,color:cnt>0?color:T.sub,fontSize:12,fontWeight:cnt>0?700:400,cursor:"pointer",minHeight:36}}>{r}</button>
+                {cnt>0&&<>
+                  <button onClick={()=>setR(cnt-1)} style={{width:28,height:28,borderRadius:"50%",border:`1px solid ${T.border}`,background:T.inpBg,color:T.sub,fontSize:15,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",lineHeight:1}}>−</button>
+                  <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:13,fontWeight:700,color,minWidth:20,textAlign:"center"}}>×{cnt}</span>
+                  <button onClick={()=>setR(cnt+1)} style={{width:28,height:28,borderRadius:"50%",border:`1px solid ${color}`,background:`${color}12`,color,fontSize:15,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",lineHeight:1}}>+</button>
+                </>}
+              </div>);
+            })}
+          </div>
+        </div>
+      ))}
+
+      <div style={{fontSize:12,color:T.muted,marginBottom:8,marginTop:4,fontWeight:600}}>Posição</div>
+      <div style={{display:"flex",flexWrap:"wrap",gap:6,marginBottom:14}}>
+        {POS.map(p=>(<PillBtn key={p} label={p} active={rolaInp.posicao===p} onClick={()=>setRolaInp(prev=>({...prev,posicao:p}))}/>))}
+      </div>
+
+      <input value={rolaInp.notas} onChange={e=>setRolaInp(p=>({...p,notas:e.target.value}))} placeholder="Observação (opcional)" style={{...I,marginBottom:12}}/>
+      <div style={{display:"flex",gap:8}}>
+        <button onClick={()=>{setShowRolaForm(false);setRolaInp({parceiro:"",peso:"",nivel:"",resultados:{},posicao:"Meia-guarda",notas:""});}} style={{flex:1,padding:12,borderRadius:10,border:`1px solid ${T.border}`,background:"transparent",color:T.sub,fontSize:14,cursor:"pointer",minHeight:46}}>Cancelar</button>
+        <button onClick={addDraftRola} style={{flex:2,padding:12,borderRadius:10,border:"none",background:user.accent,color:"#FFF",fontSize:14,fontWeight:700,cursor:"pointer",minHeight:46}}>+ Adicionar Rola</button>
+      </div>
+    </div>
+  );
+
   const weekCardio=cardioLog.filter(c=>{const d=new Date();d.setDate(d.getDate()-7);return c.date>=d.toISOString().split("T")[0];}).reduce((a,c)=>a+parseInt(c.dur||0),0);
-  const CARDIO_TARGET=150;
-  const filtTec=tecnico.filter(t=>!tecSearch||[t.titulo,t.detalhe,t.posicao].some(x=>x?.toLowerCase().includes(tecSearch.toLowerCase())));
 
   return(
     <div>
-      {/* Scrollable tab strip */}
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",marginBottom:10}}>
+        <div style={{fontSize:9,fontWeight:700,color:T.muted,letterSpacing:2,textTransform:"uppercase"}}>Jiu-Jitsu</div>
+        <button onClick={exportJiu} style={{display:"flex",alignItems:"center",gap:5,padding:"6px 12px",borderRadius:9,border:`1px solid ${T.border}`,background:T.inpBg,color:T.sub,fontSize:11,fontWeight:600,cursor:"pointer"}}>📤 Exportar para análise</button>
+      </div>
       <div style={{display:"flex",gap:5,marginBottom:16,overflowX:"auto",paddingBottom:4,WebkitOverflowScrolling:"touch"}}>
         {tabs.map(t=>(<button key={t.id} onClick={()=>setTab(t.id)} style={{padding:"7px 14px",borderRadius:20,border:`1px solid ${tab===t.id?user.accent:T.border}`,background:tab===t.id?`${user.accent}15`:T.inpBg,color:tab===t.id?user.accent:T.sub,fontSize:12,fontWeight:tab===t.id?700:400,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0}}>{t.l}</button>))}
       </div>
 
-      {/* ── SESSÃO ─────────────────────────────────────────────── */}
+      {/* ── SESSÃO (unificada com Rolas) ───────────────────────── */}
       {tab==="sessao"&&(<>
         {(topIssues.length>0||weakestPos)&&(<Box mb={12}>
           <div style={{display:"flex",gap:10,alignItems:"flex-start"}}>
@@ -1098,165 +1284,106 @@ function JiuView({user}){
         </Box>)}
 
         <Box>
-          <Hdr t="Como você está hoje?"/>
-          <Stars label="Sono" val={fadiga.sono} onChange={v=>setFadiga(p=>({...p,sono:v}))}/>
+          <Hdr t="Nova Sessão"/>
+          <div style={{display:"flex",gap:6,marginBottom:10}}>
+            {["Técnico","Forte","Open"].map(t=>(<button key={t} onClick={()=>setSessTipo(t)} style={{flex:1,padding:"10px 4px",borderRadius:9,border:`1.5px solid ${sessTipo===t?TIPO_COLOR[t]:T.border}`,background:sessTipo===t?`${TIPO_COLOR[t]}14`:T.inpBg,color:sessTipo===t?TIPO_COLOR[t]:T.sub,fontSize:13,fontWeight:sessTipo===t?700:400,cursor:"pointer",minHeight:44}}>{t}</button>))}
+          </div>
+          <input value={sessDur} onChange={e=>setSessDur(e.target.value)} placeholder="Duração total (min)" inputMode="decimal" style={{...I,marginBottom:12}}/>
+
+          <Hdr t="Como você está hoje?" mb={8}/>
+          <Stars label="Qualidade do sono" val={fadiga.sono} onChange={v=>setFadiga(p=>({...p,sono:v}))}/>
+          <div style={{marginBottom:10}}>
+            <div style={{display:"flex",justifyContent:"space-between",marginBottom:5}}>
+              <span style={{fontSize:13,color:T.sub}}>Horas dormidas</span>
+              <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:13,color:user.accent,fontWeight:700}}>{fadiga.horas}h</span>
+            </div>
+            <div style={{display:"flex",alignItems:"center",gap:8}}>
+              <button onClick={()=>setFadiga(p=>({...p,horas:Math.max(0,Math.round((p.horas-0.5)*10)/10)}))} style={{width:36,height:36,borderRadius:9,border:`1px solid ${T.border}`,background:T.inpBg,color:T.text,fontSize:18,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>−</button>
+              <div style={{flex:1,height:34,borderRadius:8,background:T.inpBg,position:"relative",overflow:"hidden"}}>
+                <div style={{position:"absolute",inset:0,width:`${Math.min(100,(fadiga.horas/12)*100)}%`,background:`${user.accent}25`,borderRadius:8,transition:"width 0.2s ease"}}/>
+              </div>
+              <button onClick={()=>setFadiga(p=>({...p,horas:Math.min(12,Math.round((p.horas+0.5)*10)/10)}))} style={{width:36,height:36,borderRadius:9,border:`1px solid ${T.border}`,background:T.inpBg,color:T.text,fontSize:18,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>+</button>
+            </div>
+          </div>
           <Stars label="Disposição" val={fadiga.disposicao} onChange={v=>setFadiga(p=>({...p,disposicao:v}))}/>
           <Stars label="Corpo / Dores" val={fadiga.corpo} onChange={v=>setFadiga(p=>({...p,corpo:v}))}/>
-        </Box>
 
-        <Box>
-          <Hdr t="Registrar Sessão"/>
-          <div style={{display:"flex",gap:6,marginBottom:10}}>
-            {["Técnico","Forte","Open"].map(t=>(<button key={t} onClick={()=>setJiuInp(p=>({...p,tipo:t}))} style={{flex:1,padding:"10px 4px",borderRadius:9,border:`1.5px solid ${jiuInp.tipo===t?TIPO_COLOR[t]:T.border}`,background:jiuInp.tipo===t?`${TIPO_COLOR[t]}14`:T.inpBg,color:jiuInp.tipo===t?TIPO_COLOR[t]:T.sub,fontSize:13,fontWeight:jiuInp.tipo===t?700:400,cursor:"pointer",minHeight:44}}>{t}</button>))}
-          </div>
-          <div style={{display:"flex",gap:8,marginBottom:8}}>
-            <input value={jiuInp.dur} onChange={e=>setJiuInp(p=>({...p,dur:e.target.value}))} placeholder="Duração (min)" inputMode="decimal" style={{...I,flex:1}}/>
-            <input value={jiuInp.parceiros} onChange={e=>setJiuInp(p=>({...p,parceiros:e.target.value}))} placeholder="Parceiros" style={{...I,flex:1.5}}/>
-          </div>
-          <div style={{marginBottom:10}}>
-            <div style={{fontSize:12,color:T.muted,marginBottom:7}}>Posições trabalhadas</div>
-            <div style={{display:"flex",flexWrap:"wrap",gap:5}}>
-              {POS.map(p=>(<PillBtn key={p} label={p} small active={(jiuInp.pos_trab||[]).includes(p)} onClick={()=>setJiuInp(prev=>{const a=prev.pos_trab||[];return{...prev,pos_trab:a.includes(p)?a.filter(x=>x!==p):[...a,p]};})}/>))}
-            </div>
-          </div>
-          <input value={jiuInp.pos_ok} onChange={e=>setJiuInp(p=>({...p,pos_ok:e.target.value}))} placeholder="✓ O que funcionou? (posição, detalhe)" style={{...I,marginBottom:8}}/>
-          <input value={jiuInp.pos_nok} onChange={e=>setJiuInp(p=>({...p,pos_nok:e.target.value}))} placeholder="✗ O que não funcionou?" style={{...I,marginBottom:8}}/>
-          <textarea value={jiuInp.notas} onChange={e=>setJiuInp(p=>({...p,notas:e.target.value}))} placeholder="Notas livres, insights, detalhes técnicos..." rows={2} style={{...I,resize:"none",marginBottom:4}}/>
-          {Sv("Salvar Sessão",saveJiu)}
-        </Box>
+          <div style={{height:1,background:T.border,margin:"14px 0"}}/>
 
-        <div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:14,overflow:"hidden"}}>
-          {jiuLog.slice(0,8).map((s,i,arr)=>(<div key={i} style={{padding:"11px 14px",borderBottom:i<arr.length-1?`1px solid ${T.border}`:"none"}}>
-            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4}}>
-              <div style={{display:"flex",alignItems:"center",gap:8}}>
-                <span style={{fontSize:13,fontWeight:700,color:TIPO_COLOR[s.tipo]||T.text}}>{s.tipo}</span>
-                {s.fadiga&&<span style={{fontSize:10,color:T.muted}}>😴{s.fadiga.sono} 💪{s.fadiga.disposicao} 🦵{s.fadiga.corpo}</span>}
-              </div>
-              <div style={{display:"flex",gap:8,alignItems:"center"}}>
-                {s.dur&&<span style={{fontSize:12,color:T.muted,fontFamily:"'JetBrains Mono',monospace"}}>{s.dur}min</span>}
-                <span style={{fontSize:11,color:T.muted}}>{s.date}</span>
-              </div>
-            </div>
-            {s.pos_trab?.length>0&&<div style={{display:"flex",flexWrap:"wrap",gap:4,marginBottom:4}}>{s.pos_trab.map(p=>(<span key={p} style={{fontSize:10,padding:"2px 7px",borderRadius:10,background:`${user.accent}12`,color:user.accent}}>{p}</span>))}</div>}
-            {s.pos_ok&&<div style={{fontSize:12,color:T.done,marginBottom:2}}>✓ {s.pos_ok}</div>}
-            {s.pos_nok&&<div style={{fontSize:12,color:"#EF4444",marginBottom:2}}>✗ {s.pos_nok}</div>}
-            {s.notas&&<div style={{fontSize:11,color:T.muted,fontStyle:"italic"}}>{s.notas}</div>}
-          </div>))}
-          {jiuLog.length===0&&<div style={{padding:14,fontSize:13,color:T.muted}}>Nenhuma sessão registrada ainda.</div>}
-        </div>
-      </>)}
-
-      {/* ── ROLAS ──────────────────────────────────────────────── */}
-      {tab==="rolas"&&(<>
-        {rolas.length>0&&(<Box mb={12}>
-          <Hdr t="Resumo"/>
-          <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr 1fr",gap:6}}>
-            {[{l:"Total",v:rolas.length},{l:"Positivos",v:rolas.filter(r=>["Finalizei","Raspei","Passei"].includes(r.resultado)).length},{l:"Neutros",v:rolas.filter(r=>r.resultado==="Neutro").length},{l:"Negativos",v:rolas.filter(r=>["Fui passado","Fui raspado","Fui finalizado"].includes(r.resultado)).length}].map(({l,v})=>(<div key={l} style={{textAlign:"center",padding:"8px 4px",background:T.inpBg,borderRadius:8}}><div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:18,color:user.accent,fontWeight:700}}>{v}</div><div style={{fontSize:10,color:T.muted,marginTop:1}}>{l}</div></div>))}
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
+            <Hdr t={`Rolas desta sessão (${draftRolas.length})`} mb={0}/>
+            {!showRolaForm&&<button onClick={()=>setShowRolaForm(true)} style={{padding:"6px 12px",borderRadius:9,border:`1px solid ${user.accent}`,background:"transparent",color:user.accent,fontSize:11,fontWeight:700,cursor:"pointer"}}>+ Rola</button>}
           </div>
-        </Box>)}
 
-        <Box>
-          <Hdr t="Registrar Rola"/>
-          <div style={{display:"flex",gap:8,marginBottom:8}}>
-            <input value={rolaInp.parceiro} onChange={e=>setRolaInp(p=>({...p,parceiro:e.target.value}))} placeholder="Parceiro" style={{...I,flex:2}}/>
-            <input value={rolaInp.peso} onChange={e=>setRolaInp(p=>({...p,peso:e.target.value}))} placeholder="Peso" inputMode="decimal" style={{...I,flex:1}}/>
-          </div>
-          <input value={rolaInp.nivel} onChange={e=>setRolaInp(p=>({...p,nivel:e.target.value}))} placeholder="Faixa / Nível" style={{...I,marginBottom:10}}/>
-          <div style={{marginBottom:10}}>
-            <div style={{fontSize:12,color:T.muted,marginBottom:8}}>Resultado — toque para selecionar, + para repetições</div>
-            {[{label:"Positivos",items:["Finalizei","Raspei","Passei"],color:T.done},{label:"Neutro",items:["Neutro"],color:T.sub},{label:"Negativos",items:["Fui finalizado","Fui raspado","Fui passado"],color:"#EF4444"}].map(({label,items,color})=>(
-              <div key={label} style={{marginBottom:8}}>
-                <div style={{fontSize:9,fontWeight:700,color:color,letterSpacing:1,marginBottom:5,textTransform:"uppercase"}}>{label}</div>
-                <div style={{display:"flex",flexWrap:"wrap",gap:5}}>
-                  {items.map(r=>{
-                    const cnt=(rolaInp.resultados||{})[r]||0;
-                    const setR=(n)=>setRolaInp(p=>{const rs={...(p.resultados||{})};if(n<=0)delete rs[r];else rs[r]=n;return{...p,resultados:rs};});
-                    return(<div key={r} style={{display:"flex",alignItems:"center",gap:3}}>
-                      <button onClick={()=>setR(cnt>0?0:1)} style={{padding:"6px 10px",borderRadius:20,border:`1.5px solid ${cnt>0?color:T.border}`,background:cnt>0?`${color}18`:T.inpBg,color:cnt>0?color:T.sub,fontSize:11,fontWeight:cnt>0?700:400,cursor:"pointer"}}>{r}</button>
-                      {cnt>0&&<>
-                        <button onClick={()=>setR(cnt-1)} style={{width:24,height:24,borderRadius:"50%",border:`1px solid ${T.border}`,background:T.inpBg,color:T.sub,fontSize:14,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",lineHeight:1}}>−</button>
-                        <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:13,fontWeight:700,color,minWidth:18,textAlign:"center"}}>×{cnt}</span>
-                        <button onClick={()=>setR(cnt+1)} style={{width:24,height:24,borderRadius:"50%",border:`1px solid ${color}`,background:`${color}12`,color,fontSize:14,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",lineHeight:1}}>+</button>
-                      </>}
-                    </div>);
-                  })}
+          {draftRolas.map(r=>{
+            const resEntries=Object.entries(r.resultados||{}).filter(([,v])=>v>0);
+            return(<div key={r.id} style={{background:T.inpBg,borderRadius:10,padding:"10px 12px",marginBottom:8,border:`1px solid ${T.border}`}}>
+              <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:6}}>
+                <div>
+                  <div style={{fontSize:14,fontWeight:700,color:T.text}}>{r.parceiro}</div>
+                  <div style={{fontSize:11,color:T.muted,marginTop:1}}>{r.peso?`${r.peso}kg`:""}{r.peso&&r.nivel?" · ":""}{r.nivel||""}</div>
                 </div>
+                <button onClick={()=>removeDraftRola(r.id)} style={{background:"transparent",border:"none",color:T.muted,fontSize:20,cursor:"pointer",padding:"0 4px",lineHeight:1}}>×</button>
               </div>
-            ))}
-          </div>
-          <div style={{marginBottom:10}}>
-            <div style={{fontSize:12,color:T.muted,marginBottom:7}}>Posição dominante do rola</div>
-            <div style={{display:"flex",flexWrap:"wrap",gap:5}}>
-              {POS.slice(0,9).map(p=>(<PillBtn key={p} label={p} small active={rolaInp.posicao===p} onClick={()=>setRolaInp(prev=>({...prev,posicao:p}))}/>))}
-            </div>
-          </div>
-          <textarea value={rolaInp.notas} onChange={e=>setRolaInp(p=>({...p,notas:e.target.value}))} placeholder="Observação do rola..." rows={2} style={{...I,resize:"none",marginBottom:4}}/>
-          {Sv("Salvar Rola",saveRola)}
+              {resEntries.length>0&&<div style={{display:"flex",flexWrap:"wrap",gap:5,marginBottom:6}}>
+                {resEntries.map(([k,v])=>(<span key={k} style={{fontSize:11,fontWeight:700,padding:"3px 9px",borderRadius:20,background:`${RES_C[k]||T.sub}15`,color:RES_C[k]||T.sub}}>{v>1?`${k} ×${v}`:k}</span>))}
+              </div>}
+              <div style={{display:"flex",alignItems:"center",gap:6}}>
+                <span style={{fontSize:11,color:user.accent,background:`${user.accent}12`,padding:"2px 9px",borderRadius:10,fontWeight:600}}>{r.posicao}</span>
+              </div>
+              {r.notas&&<div style={{fontSize:12,color:T.sub,fontStyle:"italic",marginTop:6}}>{r.notas}</div>}
+            </div>);
+          })}
+
+          {showRolaForm&&<RolaForm/>}
+
+          <div style={{height:1,background:T.border,margin:"14px 0"}}/>
+
+          <input value={posOk} onChange={e=>setPosOk(e.target.value)} placeholder="✓ O que funcionou? (resumo geral)" style={{...I,marginBottom:8}}/>
+          <input value={posNok} onChange={e=>setPosNok(e.target.value)} placeholder="✗ O que não funcionou?" style={{...I,marginBottom:8}}/>
+          <textarea value={sessNotas} onChange={e=>setSessNotas(e.target.value)} placeholder="Notas gerais, feedback do professor..." rows={2} style={{...I,resize:"none",marginBottom:4}}/>
+          {Sv("Salvar Sessão",saveSession)}
         </Box>
 
-        <div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:14,overflow:"hidden"}}>
-          
-        {/* ── Análise acumulada ────────────────────── */}
-        {rolas.length>=5&&(()=>{
-          const wins=rolas.filter(r=>isPos(r)).length;
-          const losses=rolas.filter(r=>isNeg(r)).length;
-          const wr=Math.round((wins/rolas.length)*100);
-          const posMap={};rolas.forEach(r=>{if(!r.posicao)return;if(!posMap[r.posicao])posMap[r.posicao]={t:0,w:0};posMap[r.posicao].t++;if(isPos(r))posMap[r.posicao].w++;});
-          const posArr=Object.entries(posMap).filter(([,v])=>v.t>=2);
-          const bestPos=posArr.length?[...posArr].sort((a,b)=>(b[1].w/b[1].t)-(a[1].w/a[1].t))[0]:null;
-          const worstPos=posArr.length?[...posArr].sort((a,b)=>(a[1].w/a[1].t)-(b[1].w/b[1].t))[0]:null;
-          const partMap={};rolas.forEach(r=>{if(!r.parceiro)return;if(!partMap[r.parceiro])partMap[r.parceiro]={t:0,w:0};partMap[r.parceiro].t++;if(isPos(r))partMap[r.parceiro].w++;});
-          const topPartner=Object.entries(partMap).sort((a,b)=>b[1].t-a[1].t)[0];
-          return(<div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:14,overflow:"hidden",marginBottom:14}}>
-            <div style={{padding:"12px 14px 10px",borderBottom:`1px solid ${T.border}`}}>
-              <div style={{fontSize:10,fontWeight:700,color:T.muted,letterSpacing:1.2,marginBottom:10,textTransform:"uppercase"}}>Análise — {rolas.length} rolas</div>
-              <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
-                <span style={{fontSize:13,color:T.text,fontWeight:600}}>Aproveitamento geral</span>
-                <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:18,fontWeight:700,color:wr>=50?T.done:"#EF4444"}}>{wr}%</span>
-              </div>
-              <div style={{height:8,background:T.inpBg,borderRadius:4,overflow:"hidden",display:"flex"}}>
-                <div style={{width:`${wr}%`,background:T.done,transition:"width 0.5s ease"}}/>
-                <div style={{width:`${Math.round(((rolas.length-wins-losses)/rolas.length)*100)}%`,background:"#94A3B8"}}/>
-                <div style={{flex:1,background:"#EF4444"}}/>
-              </div>
-              <div style={{display:"flex",gap:12,marginTop:6}}>
-                {[{l:"Positivos",v:wins,c:T.done},{l:"Neutros",v:rolas.length-wins-losses,c:"#94A3B8"},{l:"Negativos",v:losses,c:"#EF4444"}].map(({l,v,c})=>(<span key={l} style={{fontSize:11,color:T.muted}}><span style={{color:c,fontWeight:700}}>{v}</span> {l}</span>))}
-              </div>
-            </div>
-            {bestPos&&<div style={{padding:"10px 14px",borderBottom:`1px solid ${T.border}`}}>
-              <div style={{fontSize:11,color:T.muted,fontWeight:700,letterSpacing:0.5,textTransform:"uppercase",marginBottom:8}}>Por Posição (mín. 2 rolas)</div>
-              <div style={{display:"flex",gap:8}}>
-                <div style={{flex:1,padding:"8px",background:`${T.done}12`,borderRadius:8,border:`1px solid ${T.done}30`}}><div style={{fontSize:9,color:T.done,fontWeight:700,marginBottom:2}}>✓ MELHOR</div><div style={{fontSize:12,color:T.text,fontWeight:600}}>{bestPos[0]}</div><div style={{fontSize:11,color:T.muted}}>{Math.round((bestPos[1].w/bestPos[1].t)*100)}% · {bestPos[1].t}x</div></div>
-                {worstPos&&worstPos[0]!==bestPos[0]&&<div style={{flex:1,padding:"8px",background:"#EF444412",borderRadius:8,border:"1px solid #EF444430"}}><div style={{fontSize:9,color:"#EF4444",fontWeight:700,marginBottom:2}}>✗ TRABALHAR</div><div style={{fontSize:12,color:T.text,fontWeight:600}}>{worstPos[0]}</div><div style={{fontSize:11,color:T.muted}}>{Math.round((worstPos[1].w/worstPos[1].t)*100)}% · {worstPos[1].t}x</div></div>}
-              </div>
-            </div>}
-            {topPartner&&<div style={{padding:"10px 14px",display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-              <div><div style={{fontSize:10,color:T.muted,fontWeight:700,letterSpacing:0.5,textTransform:"uppercase",marginBottom:2}}>Parceiro mais frequente</div><div style={{fontSize:13,color:T.text,fontWeight:600}}>{topPartner[0]}</div><div style={{fontSize:11,color:T.muted}}>{Math.round((topPartner[1].w/topPartner[1].t)*100)}% positivos</div></div>
-              <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:24,fontWeight:700,color:user.accent}}>{topPartner[1].t}</div>
-            </div>}
-          </div>);
-        })()}
-        
-        {rolas.slice(0,25).map((r,i,arr)=>(<div key={i} style={{padding:"10px 14px",borderBottom:i<arr.length-1?`1px solid ${T.border}`:"none"}}>
-            <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:3}}>
-              <div style={{display:"flex",alignItems:"center",gap:8}}>
-                <span style={{fontSize:13,fontWeight:700,color:T.text}}>{r.parceiro}</span>
-                {r.peso&&<span style={{fontSize:11,color:T.muted,fontFamily:"'JetBrains Mono',monospace"}}>{r.peso}kg</span>}
-                {r.nivel&&<span style={{fontSize:11,color:T.muted}}>{r.nivel}</span>}
-              </div>
-              <div style={{display:"flex",flexWrap:"wrap",gap:3,justifyContent:"flex-end",maxWidth:160}}>
-                  {r.resultados&&Object.keys(r.resultados).length>0
-                    ?Object.entries(r.resultados).filter(([,v])=>v>0).map(([k,v])=>(<span key={k} style={{fontSize:11,fontWeight:700,color:RES_C[k]||T.sub,whiteSpace:"nowrap"}}>{v>1?`${k} ×${v}`:k}</span>))
-                    :<span style={{fontSize:11,fontWeight:700,color:RES_C[r.resultado]||T.sub}}>{r.resultado}</span>}
+        <Hdr t="Histórico" mb={8}/>
+        <div style={{display:"flex",flexDirection:"column",gap:8}}>
+          {jiuSessions.slice(0,15).map(s=>{
+            const wins=(s.rolas||[]).reduce((a,r)=>a+countR(r,["Finalizei","Raspei","Passei"]),0);
+            const losses=(s.rolas||[]).reduce((a,r)=>a+countR(r,["Fui finalizado","Fui raspado","Fui passado"]),0);
+            return(<div key={s.id} style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:12,overflow:"hidden"}}>
+              <div style={{padding:"11px 14px"}}>
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:4}}>
+                  <div style={{display:"flex",alignItems:"center",gap:8}}>
+                    <span style={{fontSize:13,fontWeight:700,color:TIPO_COLOR[s.tipo]||T.text}}>{s.tipo}</span>
+                    {s.fadiga&&<span style={{fontSize:10,color:T.muted}}>😴{s.fadiga.sono}{s.fadiga.horas?` (${s.fadiga.horas}h)`:""} 💪{s.fadiga.disposicao} 🦵{s.fadiga.corpo}</span>}
+                  </div>
+                  <div style={{display:"flex",gap:8,alignItems:"center"}}>
+                    {s.dur&&<span style={{fontSize:12,color:T.muted,fontFamily:"'JetBrains Mono',monospace"}}>{s.dur}min</span>}
+                    <span style={{fontSize:11,color:T.muted}}>{s.date}</span>
+                    <button onClick={()=>deleteSession(s.id)} style={{background:"transparent",border:"none",color:T.muted,fontSize:16,cursor:"pointer",padding:"0 2px"}}>×</button>
+                  </div>
                 </div>
-            </div>
-            <div style={{display:"flex",gap:8,alignItems:"center"}}>
-              {r.posicao&&<span style={{fontSize:10,color:user.accent,background:`${user.accent}12`,padding:"1px 7px",borderRadius:10}}>{r.posicao}</span>}
-              <span style={{fontSize:10,color:T.muted}}>{r.date}</span>
-            </div>
-            {r.notas&&<div style={{fontSize:11,color:T.muted,fontStyle:"italic",marginTop:3}}>{r.notas}</div>}
-          </div>))}
-          {rolas.length===0&&<div style={{padding:14,fontSize:13,color:T.muted}}>Nenhum rola registrado ainda.</div>}
+                {(s.rolas||[]).length>0&&<div style={{display:"flex",alignItems:"center",gap:6,marginBottom:4}}>
+                  <span style={{fontSize:11,color:T.sub}}>{s.rolas.length} rolas</span>
+                  {wins>0&&<span style={{fontSize:11,color:T.done}}>{wins} ✓</span>}
+                  {losses>0&&<span style={{fontSize:11,color:"#EF4444"}}>{losses} ✗</span>}
+                </div>}
+                {s.pos_ok&&<div style={{fontSize:12,color:T.done,marginBottom:2}}>✓ {s.pos_ok}</div>}
+                {s.pos_nok&&<div style={{fontSize:12,color:"#EF4444",marginBottom:2}}>✗ {s.pos_nok}</div>}
+                {s.notas&&<div style={{fontSize:11,color:T.muted,fontStyle:"italic"}}>{s.notas}</div>}
+              </div>
+              {(s.rolas||[]).length>0&&<div style={{borderTop:`1px solid ${T.border}`,padding:"8px 14px",background:T.inpBg}}>
+                {s.rolas.map((r,ri)=>{
+                  const resStr=r.resultados?Object.entries(r.resultados).filter(([,v])=>v>0).map(([k,v])=>v>1?`${k}×${v}`:k).join(" · "):r.resultado;
+                  return(<div key={ri} style={{display:"flex",justifyContent:"space-between",padding:"4px 0",fontSize:11}}>
+                    <span style={{color:T.sub}}>{r.parceiro}{r.posicao?` · ${r.posicao}`:""}</span>
+                    <span style={{color:T.muted}}>{resStr}</span>
+                  </div>);
+                })}
+              </div>}
+            </div>);
+          })}
+          {jiuSessions.length===0&&<div style={{fontSize:13,color:T.muted,fontStyle:"italic",padding:"10px 0"}}>Nenhuma sessão registrada ainda.</div>}
         </div>
       </>)}
 
@@ -1276,7 +1403,7 @@ function JiuView({user}){
         </Box>
         <input value={tecSearch} onChange={e=>setTecSearch(e.target.value)} placeholder="🔍 Buscar posição, palavra-chave..." style={{...I,marginBottom:12}}/>
         <div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:14,overflow:"hidden"}}>
-          {filtTec.map((t,i,arr)=>(<div key={t.id} style={{padding:"12px 14px",borderBottom:i<arr.length-1?`1px solid ${T.border}`:"none"}}>
+          {tecnico.filter(t=>!tecSearch||[t.titulo,t.detalhe,t.posicao].some(x=>x?.toLowerCase().includes(tecSearch.toLowerCase()))).map((t,i,arr)=>(<div key={t.id} style={{padding:"12px 14px",borderBottom:i<arr.length-1?`1px solid ${T.border}`:"none"}}>
             <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:6}}>
               <span style={{fontSize:10,color:user.accent,background:`${user.accent}12`,padding:"2px 8px",borderRadius:10,fontWeight:700}}>{t.posicao}</span>
               <span style={{fontSize:10,color:T.muted}}>{t.date}</span>
@@ -1284,7 +1411,7 @@ function JiuView({user}){
             <div style={{fontSize:14,fontWeight:700,color:T.text,marginBottom:4}}>{t.titulo}</div>
             {t.detalhe&&<div style={{fontSize:13,color:T.sub,lineHeight:1.65}}>{t.detalhe}</div>}
           </div>))}
-          {filtTec.length===0&&<div style={{padding:14,fontSize:13,color:T.muted}}>{tecSearch?"Nenhum resultado para essa busca.":"Comece a registrar detalhes técnicos após os treinos."}</div>}
+          {tecnico.length===0&&<div style={{padding:14,fontSize:13,color:T.muted}}>Comece a registrar detalhes técnicos após os treinos.</div>}
         </div>
       </>)}
 
@@ -1292,20 +1419,14 @@ function JiuView({user}){
       {tab==="posicoes"&&(()=>{
         const POSITIVOS=["Finalizei","Raspei","Passei"];
         const NEGATIVOS=["Fui finalizado","Fui raspado","Fui passado"];
-        const countR=(r,list)=>r.resultados?Object.entries(r.resultados).filter(([k])=>list.includes(k)).reduce((a,[,v])=>a+v,0):(list.includes(r.resultado)?1:0);
         const byPos={};
-        rolas.forEach(r=>{
-          if(!r.posicao)return;
-          if(!byPos[r.posicao])byPos[r.posicao]=[];
-          byPos[r.posicao].push(r);
-        });
+        allRolas.forEach(r=>{if(!r.posicao)return;if(!byPos[r.posicao])byPos[r.posicao]=[];byPos[r.posicao].push(r);});
         const posStats=Object.entries(byPos).filter(([,arr])=>arr.length>=2).map(([pos,arr])=>{
           const sorted=[...arr].sort((a,b)=>a.date.localeCompare(b.date));
           const totalW=sorted.reduce((a,r)=>a+countR(r,POSITIVOS),0);
           const totalL=sorted.reduce((a,r)=>a+countR(r,NEGATIVOS),0);
           const totalEvents=totalW+totalL;
           const score=totalEvents>0?Math.round((totalW/totalEvents)*10*10)/10:5;
-          // Trend: compare first half vs second half
           let trend=null;
           if(sorted.length>=4){
             const mid=Math.floor(sorted.length/2);
@@ -1340,11 +1461,25 @@ function JiuView({user}){
               </div>
             ))}
           </Box>
-          {posStats.length>0&&(<Box>
-            <Hdr t="Como o Score é Calculado"/>
-            <div style={{fontSize:12,color:T.sub,lineHeight:1.7}}>
-              O score (0-10) reflete seu aproveitamento real nessa posição: Finalizei/Raspei/Passei contam como positivo, Fui finalizado/raspado/passado como negativo. A seta mostra a tendência comparando a primeira metade dos rolas registrados com a mais recente — evolução de verdade, não percepção.
-            </div>
+          {posStats.length>0&&(<Box mb={14}>
+            <Hdr t="Análise Geral"/>
+            {(()=>{
+              const wins=allRolas.filter(r=>isPos(r)).length;
+              const losses=allRolas.filter(r=>isNeg(r)).length;
+              const wr=allRolas.length?Math.round((wins/allRolas.length)*100):0;
+              const partMap={};allRolas.forEach(r=>{if(!r.parceiro)return;if(!partMap[r.parceiro])partMap[r.parceiro]={t:0,w:0};partMap[r.parceiro].t++;if(isPos(r))partMap[r.parceiro].w++;});
+              const topPartner=Object.entries(partMap).sort((a,b)=>b[1].t-a[1].t)[0];
+              return(<>
+                <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
+                  <span style={{fontSize:13,color:T.text,fontWeight:600}}>Aproveitamento geral ({allRolas.length} rolas)</span>
+                  <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:18,fontWeight:700,color:wr>=50?T.done:"#EF4444"}}>{wr}%</span>
+                </div>
+                {topPartner&&<div style={{display:"flex",justifyContent:"space-between",paddingTop:8,borderTop:`1px solid ${T.border}`}}>
+                  <span style={{fontSize:12,color:T.sub}}>Parceiro mais frequente</span>
+                  <span style={{fontSize:12,color:T.text,fontWeight:600}}>{topPartner[0]} ({topPartner[1].t}x)</span>
+                </div>}
+              </>);
+            })()}
           </Box>)}
         </>);
       })()}
@@ -1409,6 +1544,7 @@ function JiuView({user}){
         </>);
       })()}
 
+      {/* ── ADVERSÁRIOS ────────────────────────────────────────── */}
       {tab==="adversarios"&&(<>
         <Box>
           <Hdr t="Adicionar Adversário"/>
@@ -1424,7 +1560,6 @@ function JiuView({user}){
           <input value={advInp.fraco} onChange={e=>setAdvInp(p=>({...p,fraco:e.target.value}))} placeholder="🎯 Pontos fracos / o que explorar" style={{...I,marginBottom:4}}/>
           {Sv("Salvar Adversário",saveAdv)}
         </Box>
-
         {adversarios.length>0&&(<><Hdr t="Adversários Mapeados" mb={8}/>
         <div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:14,overflow:"hidden",marginBottom:14}}>
           {adversarios.map((a,i,arr)=>(<div key={a.id} style={{padding:"12px 14px",borderBottom:i<arr.length-1?`1px solid ${T.border}`:"none"}}>
@@ -1437,7 +1572,6 @@ function JiuView({user}){
             {a.fraco&&<div style={{fontSize:12,color:T.done}}>🎯 {a.fraco}</div>}
           </div>))}
         </div></>)}
-
         <Box>
           <Hdr t="Registrar Competição"/>
           <input value={compInp.evento} onChange={e=>setCompInp(p=>({...p,evento:e.target.value}))} placeholder="Evento / Nome da competição" style={{...I,marginBottom:8}}/>
@@ -1449,7 +1583,6 @@ function JiuView({user}){
           <textarea value={compInp.notas} onChange={e=>setCompInp(p=>({...p,notas:e.target.value}))} placeholder="Aprendizados, o que mudar..." rows={2} style={{...I,resize:"none",marginBottom:4}}/>
           {Sv("Salvar Competição",saveComp)}
         </Box>
-
         {comps.length>0&&(<><Hdr t="Competições" mb={8}/>
         <div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:14,overflow:"hidden"}}>
           {comps.map((c,i,arr)=>(<div key={i} style={{padding:"11px 14px",borderBottom:i<arr.length-1?`1px solid ${T.border}`:"none"}}>
@@ -1466,42 +1599,13 @@ function JiuView({user}){
         </div></>)}
       </>)}
 
-      {/* ── CARDIO ─────────────────────────────────────────────── */}
-      {tab==="cardio"&&(<>
-        <Box>
-          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
-            <div style={{fontSize:14,fontWeight:600,color:T.text}}>Esta semana</div>
-            <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:14,fontWeight:700,color:weekCardio>=CARDIO_TARGET?T.done:user.accent}}>{weekCardio}<span style={{color:T.muted,fontWeight:400}}>/{CARDIO_TARGET}min</span></div>
-          </div>
-          <div style={{height:8,background:T.inpBg,borderRadius:4,marginBottom:6}}><div style={{height:"100%",width:`${Math.min(100,(weekCardio/CARDIO_TARGET)*100)}%`,background:weekCardio>=CARDIO_TARGET?T.done:user.accent,borderRadius:4}}/></div>
-          <div style={{fontSize:11,color:T.muted}}>{weekCardio<CARDIO_TARGET?`Faltam ${CARDIO_TARGET-weekCardio}min para a meta`:"Meta semanal atingida! ✓"}</div>
-        </Box>
-        <Box>
-          <Hdr t="Registrar Cardio"/>
-          <div style={{display:"flex",gap:8,marginBottom:8}}>
-            <input value={cardInp.dur} onChange={e=>setCardInp(p=>({...p,dur:e.target.value}))} placeholder="Duração (min)" inputMode="decimal" style={{...I,flex:1}}/>
-            <select value={cardInp.hora} onChange={e=>setCardInp(p=>({...p,hora:e.target.value}))} style={{...I,flex:1}}>{["Manhã","Tarde","Noite"].map(h=>(<option key={h}>{h}</option>))}</select>
-          </div>
-          <div style={{display:"flex",gap:8,marginBottom:4}}>
-            <select value={cardInp.zona} onChange={e=>setCardInp(p=>({...p,zona:e.target.value}))} style={{...I,flex:1}}>{["1","2","3"].map(z=>(<option key={z} value={z}>Zona {z}</option>))}</select>
-            <input value={cardInp.rpe} onChange={e=>setCardInp(p=>({...p,rpe:e.target.value}))} placeholder="RPE (1–10)" inputMode="decimal" style={{...I,flex:1}}/>
-          </div>
-          {Sv("Salvar Cardio",saveCardio)}
-        </Box>
-        <div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:14,overflow:"hidden"}}>
-          {cardioLog.slice(0,15).map((c,i,arr)=>(<div key={i} style={{display:"flex",justifyContent:"space-between",alignItems:"center",padding:"10px 14px",borderBottom:i<arr.length-1?`1px solid ${T.border}`:"none"}}>
-            <div><span style={{fontSize:13,fontWeight:600,color:T.text}}>Zona {c.zona}</span><span style={{fontSize:12,color:T.muted}}> · {c.hora}</span></div>
-            <div style={{display:"flex",gap:10,alignItems:"center"}}>{c.rpe&&<span style={{fontSize:11,color:T.muted}}>RPE {c.rpe}</span>}<span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:13,fontWeight:700,color:user.accent}}>{c.dur}min</span><span style={{fontSize:10,color:T.muted}}>{c.date}</span></div>
-          </div>))}
-          {cardioLog.length===0&&<div style={{padding:14,fontSize:13,color:T.muted}}>Nenhum cardio registrado ainda.</div>}
-        </div>
-      </>)}
+      {/* ── TIMER ──────────────────────────────────────────────── */}
+      {tab==="timer"&&<BJJTimer user={user}/>}
     </div>
   );
 }
 
 
-/* ─── HISTORY VIEW ───────────────────────────────────────────────────── */
 function HistoryView({user,plans}){
   const[sessions,setSessions]=useState(null);
   useEffect(()=>{(async()=>{const keys=await sList(sk(user.id,"sess",""));const out=[];for(const k of keys){const s=await sGet(k);if(s)out.push(s);}setSessions(out.sort((a,b)=>b.date.localeCompare(a.date)));})();},[user.id]);
@@ -1573,7 +1677,7 @@ function SettingsView({user,onClose,onConfigSaved}){
 }
 
 
-function DashboardView({user,plans,setPillar}){
+function DashboardView({user,plans,setPillar,setShowSettings}){
   const[data,setData]=useState(null);
   useEffect(()=>{
     (async()=>{
@@ -1581,19 +1685,21 @@ function DashboardView({user,plans,setPillar}){
       // Treinos semana
       const skeys=await sList(sk(user.id,"sess",""));let treinos=0;
       for(const k of skeys){const s=await sGet(k);if(s&&s.date>=wsStr)treinos++;}
-      // Jiu sessões + fadiga
-      const jiuLog=await sGet(sk(user.id,"jiu"),[]);
+      // Jiu sessões + fadiga (lê da estrutura unificada jiu_sessions)
+      const jiuSessionsRaw=await sGet(sk(user.id,"jiu_sessions"),[]);
+      const jiuLog=jiuSessionsRaw;
       const jiuWeek=jiuLog.filter(s=>s.date>=wsStr);
       const avgFadiga=jiuWeek.length?Math.round(jiuWeek.reduce((a,s)=>{const f=s.fadiga||{};return a+((f.sono||0)+(f.disposicao||0)+(f.corpo||0))/3;},0)/jiuWeek.length*10)/10:null;
       // Nutrição (dias com 3+ refeições)
       let nutriOk=0;
-      for(let i=0;i<7;i++){const d=new Date();d.setDate(d.getDate()-i);const ds=d.toISOString().split("T")[0];const n=await sGet(sk(user.id,"nutri",ds),null);if(n&&(n.done_meals||[]).length>=3)nutriOk++;}
+      const nutriMeals=user.id==="G"?MEALS_G:MEALS_B;
+      for(let i=0;i<7;i++){const d=new Date();d.setDate(d.getDate()-i);const ds=d.toISOString().split("T")[0];const n=await sGet(sk(user.id,"nutri",ds),null);if(n){const sl=nutriSlots(nutriMeals,n);if(sl.total>0&&sl.done>=Math.ceil(sl.total*0.6))nutriOk++;}}
       // Peso atual + meta
       const pesos=await sGet(sk(user.id,"weight"),[]);
       const pesoAtual=pesos.length?pesos[pesos.length-1].weight:null;
       const pesoAnterior=pesos.length>1?pesos[pesos.length-2].weight:null;
-      // Rolas semana
-      const rolas=await sGet(sk(user.id,"rolas"),[]);
+      // Rolas semana (derivado dos rolas embutidos em cada sessão)
+      const rolas=jiuSessionsRaw.flatMap(s=>(s.rolas||[]).map(r=>({...r,date:s.date})));
       const rolasWeek=rolas.filter(r=>r.date>=wsStr);
       const winsWeek=rolasWeek.filter(r=>["Finalizei","Raspei","Passei"].some(p=>r.resultado?.includes(p)||(r.resultados&&r.resultados[p]>0))).length;
       // Correlações: sono vs rolas
@@ -1608,7 +1714,10 @@ function DashboardView({user,plans,setPillar}){
       // Fator 1: Sono (última sessão de Jiu com fadiga)
       const lastJiuFadiga=jiuLog.find(s=>s.fadiga?.sono);
       const sonoScore=lastJiuFadiga?.fadiga?.sono||3;
-      const sonoFactor=(sonoScore/5)*3; // 0–3
+      const sonoHoras=lastJiuFadiga?.fadiga?.horas;
+      const sonoFactor=sonoHoras
+        ?((sonoScore/5)*0.6+(Math.min(sonoHoras,8)/8)*0.4)*3 // combina qualidade (60%) + quantidade (40%), 0–3
+        :(sonoScore/5)*3; // fallback só qualidade
 
       // Fator 2: Carga semanal (inversamente proporcional)
       const cargaFactor=Math.max(0,2.5-(treinos*0.45)); // 0–2.5
@@ -1620,12 +1729,12 @@ function DashboardView({user,plans,setPillar}){
 
       // Fator 4: Nutrição (proteína média últimos 2 dias)
       let protSum=0,protN=0;
-      for(let i=1;i<=2;i++){const d=new Date();d.setDate(d.getDate()-i);const ds=d.toISOString().split("T")[0];const n=await sGet(sk(user.id,"nutri",ds),null);if(n){const pr=user.id==="G"?MEALS_G:MEALS_B;const k=pr.filter(m=>(n.done_meals||[]).includes(m.id)).reduce((a,m)=>a+m.prot,0)+(n.extras||[]).reduce((a,e)=>a+(e.prot||0),0);if(k>0){protSum+=k;protN++;}}}
+      for(let i=1;i<=2;i++){const d=new Date();d.setDate(d.getDate()-i);const ds=d.toISOString().split("T")[0];const n=await sGet(sk(user.id,"nutri",ds),null);if(n){const k=nutriTotals(user.id==="G"?MEALS_G:MEALS_B,n).prot;if(k>0){protSum+=k;protN++;}}}
       const avgProt2=protN>0?protSum/protN:0;
       const nutFactor=cfg.proteinTarget>0?Math.min(2,( avgProt2/cfg.proteinTarget)*2):1.2; // 0–2
 
       const readiness=Math.min(10,Math.max(1,Math.round((sonoFactor+cargaFactor+consecFactor+nutFactor)*10)/10));
-      const readinessFactors={sono:sonoScore,carga:treinos,consec,prot:Math.round(avgProt2),protTarget:cfg.proteinTarget};
+      const readinessFactors={sono:sonoScore,sonoHoras,carga:treinos,consec,prot:Math.round(avgProt2),protTarget:cfg.proteinTarget};
 
       // ── Padrões de Alto Desempenho ──────────────────────────
       const padroes=[];
@@ -1688,7 +1797,8 @@ function DashboardView({user,plans,setPillar}){
         // Nutrição: dias com 3+ refeições no mês
         let mNutriOk=0,mNutriDays=0;
         const lmStartD=new Date(lmStart);const lmEndD=new Date(lmEnd);
-        for(let d=new Date(lmStartD);d<=lmEndD;d.setDate(d.getDate()+1)){const ds=d.toISOString().split("T")[0];const n=await sGet(sk(user.id,"nutri",ds),null);if(n){mNutriDays++;if((n.done_meals||[]).length>=3)mNutriOk++;}}
+        const monthNutriMeals=user.id==="G"?MEALS_G:MEALS_B;
+        for(let d=new Date(lmStartD);d<=lmEndD;d.setDate(d.getDate()+1)){const ds=d.toISOString().split("T")[0];const n=await sGet(sk(user.id,"nutri",ds),null);if(n){mNutriDays++;const sl=nutriSlots(monthNutriMeals,n);if(sl.total>0&&sl.done>=Math.ceil(sl.total*0.6))mNutriOk++;}}
         // Melhor e pior semana (por treinos combinados)
         const weekCounts={};
         for(const k of skeys){const s=await sGet(k);if(s&&s.date>=lmStart&&s.date<=lmEnd){const wn=Math.ceil((new Date(s.date)-lmStartD)/(7*864e5));weekCounts[wn]=(weekCounts[wn]||0)+1;}}
@@ -1764,6 +1874,56 @@ function DashboardView({user,plans,setPillar}){
       </div>)}
     </div>)}
 
+    {/* ── Índice de Prontidão ──────────────────────── */}
+    {data.readiness!=null&&(()=>{
+      const r=data.readiness;
+      const f=data.readinessFactors||{};
+      const color=r>=8?"#4ADE80":r>=6.5?user.accent:r>=5?"#F97316":"#EF4444";
+      const label=r>=8?"Excelente":r>=6.5?"Bom":r>=5?"Moderado":"Baixo";
+      const tip=r>=8?"Pode treinar forte hoje.":r>=6.5?"Treino normal — monitore o RPE.":r>=5?"Cuide da intensidade, priorize técnica.":"Considere recuperação ativa ou descanso.";
+      return(<div style={{background:T.card,border:`2px solid ${color}30`,borderRadius:14,padding:"14px 16px",marginBottom:12}}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:12}}>
+          <div>
+            <div style={{fontSize:10,fontWeight:700,color:T.muted,letterSpacing:1.2,marginBottom:3,textTransform:"uppercase"}}>Índice de Prontidão</div>
+            <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:20,fontWeight:700,color:color}}>{label}</div>
+            <div style={{fontSize:12,color:T.sub,marginTop:2}}>{tip}</div>
+          </div>
+          <div style={{textAlign:"center",minWidth:64}}>
+            <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:40,fontWeight:700,color:color,lineHeight:1,letterSpacing:-2}}>{r.toFixed(1)}</div>
+            <div style={{fontSize:10,color:T.muted}}>de 10</div>
+          </div>
+        </div>
+        <div style={{display:"flex",flexDirection:"column",gap:6}}>
+          {[
+            {l:"Sono",v:f.sono||0,max:5,fmt:v=>`${v}/5${f.sonoHoras?` · ${f.sonoHoras}h`:""}`},
+            {l:"Carga semanal",v:Math.max(0,5-f.carga),max:5,fmt:()=>`${f.carga} treinos`},
+            {l:"Recuperação",v:Math.max(0,5-(f.consec||0)),max:5,fmt:()=>f.consec===0?"Descansado":f.consec===1?"1 dia consecutivo":`${f.consec} dias seguidos`},
+            {l:"Proteína",v:f.protTarget>0?Math.min(5,(f.prot/f.protTarget)*5):3,max:5,fmt:()=>f.prot>0?`${f.prot}g / ${f.protTarget}g`:"Sem dados"},
+          ].map(({l,v,max,fmt})=>(<div key={l} style={{display:"flex",alignItems:"center",gap:8}}>
+            <span style={{fontSize:11,color:T.muted,minWidth:100,textAlign:"right"}}>{l}</span>
+            <div style={{flex:1,height:5,background:T.inpBg,borderRadius:3,overflow:"hidden"}}><div style={{height:"100%",width:`${Math.min(100,(v/max)*100)}%`,background:color,borderRadius:3,transition:"width 0.5s ease"}}/></div>
+            <span style={{fontSize:10,color:T.sub,minWidth:90}}>{fmt(v)}</span>
+          </div>))}
+        </div>
+      </div>);
+    })()}
+
+    {/* ── Padrões de Alto Desempenho ─────────────────── */}
+    {data.padroes?.length>0&&(<div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:14,padding:"14px 16px",marginBottom:12}}>
+      <div style={{fontSize:10,fontWeight:700,color:T.muted,letterSpacing:1.2,marginBottom:10,textTransform:"uppercase"}}>Padrões de Alto Desempenho</div>
+      <div style={{fontSize:12,color:T.sub,marginBottom:12,lineHeight:1.5}}>Baseado nos seus dados acumulados:</div>
+      {data.padroes.map((p,i,arr)=>(<div key={i} style={{padding:"10px 12px",background:T.inpBg,borderRadius:10,marginBottom:i<arr.length-1?6:0}}>
+        <div style={{display:"flex",gap:8,alignItems:"flex-start"}}>
+          <span style={{fontSize:18,flexShrink:0}}>{p.icon}</span>
+          <div>
+            <div style={{fontSize:12,fontWeight:700,color:T.text}}>{p.val}</div>
+            <div style={{fontSize:11,color:user.accent,marginTop:2}}>quando: {p.cond}</div>
+            {p.vs&&<div style={{fontSize:11,color:T.muted,marginTop:1}}>{p.vs}</div>}
+          </div>
+        </div>
+      </div>))}
+    </div>)}
+
     {/* Insights */}
     {insights.length>0&&(<div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:14,padding:"14px 16px",marginBottom:12}}>
       <div style={{fontSize:10,fontWeight:700,color:T.muted,letterSpacing:1.2,marginBottom:10,textTransform:"uppercase"}}>Insights da Semana</div>
@@ -1781,6 +1941,18 @@ function DashboardView({user,plans,setPillar}){
         <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:28,fontWeight:700,color:data.avgFadiga<=2?"#EF4444":data.avgFadiga<=3.5?"#F59E0B":T.done}}>{data.avgFadiga}</div>
       </div>
     </div>)}
+
+    {/* ── Sem data de competição: prompt para configurar ── */}
+    {!((window.__config?.goalDate)||data.goalDate)&&(
+      <button onClick={()=>setShowSettings(true)} style={{width:"100%",display:"flex",alignItems:"center",gap:12,background:T.card,border:`1px dashed ${T.border}`,borderRadius:14,padding:"14px 16px",marginBottom:12,cursor:"pointer",textAlign:"left"}}>
+        <span style={{fontSize:24}}>🏆</span>
+        <div style={{flex:1}}>
+          <div style={{fontSize:13,fontWeight:700,color:T.text}}>Configure sua próxima competição</div>
+          <div style={{fontSize:12,color:T.muted,marginTop:2}}>Defina a data para ativar o protocolo de preparação e o índice de prontidão completo</div>
+        </div>
+        <span style={{fontSize:18,color:T.muted}}>›</span>
+      </button>
+    )}
 
     {/* ── Protocolo de Competição ──────────────────── */}
     {(()=>{
@@ -1945,7 +2117,7 @@ function App(){
           </div>
         </div>
         <div style={{padding:16,paddingBottom:90}}>
-          {pillar==="home"&&<DashboardView key={uid} user={user} plans={plans} setPillar={setPillar}/>}
+          {pillar==="home"&&<DashboardView key={uid} user={user} plans={plans} setPillar={setPillar} setShowSettings={setShowSettings}/>}
           {pillar==="fisico"&&<FisicoView key={uid} user={user} plans={plans}/>}
           {pillar==="nutricao"&&<NutricaoView key={uid} user={user}/>}
           {pillar==="jiu"&&<JiuView key={uid} user={user}/>}
