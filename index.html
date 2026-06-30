@@ -2007,7 +2007,7 @@ function DashboardView({user,plans,setPillar,setShowSettings}){
       const checkinsByDate={};
       for(let i=0;i<14;i++){const d=new Date();d.setDate(d.getDate()-i);const ds=d.toISOString().split("T")[0];const c=await sGet(sk(user.id,"checkin",ds),null);if(c)checkinsByDate[ds]=c;}
       const checkinsWeek=Object.entries(checkinsByDate).filter(([ds])=>ds>=wsStr).map(([,c])=>c);
-      const avgFadiga=checkinsWeek.length?Math.round(checkinsWeek.reduce((a,f)=>a+((f.sono||0)+(f.disposicao||0)+(f.corpo||0))/3,0)/checkinsWeek.length*10)/10:null;
+      const avgFadiga=checkinsWeek.length?Math.round(checkinsWeek.reduce((a,f)=>a+((f.sono||0)+(f.disposicao||0)+(f.corpo||0))/3,0)/checkinsWeek.length*2*10)/10:null;
 
       // Correlações: sono vs rolas (usa check-in do dia, não fadiga da sessão)
       let hW=0,hT=0,lW=0,lT=0;
@@ -2029,25 +2029,31 @@ function DashboardView({user,plans,setPillar,setShowSettings}){
       const dispScore=recentCheckin?.disposicao||3;
       const corpoScore=recentCheckin?.corpo||3;
       const sonoFactor=sonoHoras
-        ?((sonoScore/5)*0.6+(Math.min(sonoHoras,8)/8)*0.4)*3 // combina qualidade (60%) + quantidade (40%), 0–3
-        :(sonoScore/5)*3; // fallback só qualidade
+        ?((sonoScore/5)*0.6+(Math.min(sonoHoras,8)/8)*0.4)*2.5 // combina qualidade (60%) + quantidade (40%), 0–2.5
+        :(sonoScore/5)*2.5; // fallback só qualidade
 
-      // Fator 2: Carga semanal (inversamente proporcional)
-      const cargaFactor=Math.max(0,2.5-(treinos*0.45)); // 0–2.5
+      // Fator 2: Disposição (energia percebida)
+      const dispFactor=(dispScore/5)*1.5; // 0–1.5
 
-      // Fator 3: Dias consecutivos de treino (recuperação)
+      // Fator 3: Corpo / dores (5=sem dor, 1=com dor)
+      const corpoFactor=(corpoScore/5)*1.0; // 0–1
+
+      // Fator 4: Carga semanal (inversamente proporcional)
+      const cargaFactor=Math.max(0,2-(treinos*0.36)); // 0–2
+
+      // Fator 5: Dias consecutivos de treino (recuperação)
       let consec=0;
       for(let i=1;i<=7;i++){const d=new Date();d.setDate(d.getDate()-i);const ds=d.toISOString().split("T")[0];const hasJiu=jiuLog.some(s=>s.date===ds);let hasGym=false;for(const k of skeys){const s=await sGet(k);if(s&&s.date===ds){hasGym=true;break;}}if(hasJiu||hasGym)consec++;else break;}
-      const consecFactor=consec<=1?2.5:consec<=2?2.0:consec<=3?1.3:consec<=4?0.8:0.3; // 0–2.5
+      const consecFactor=consec<=1?1.5:consec<=2?1.2:consec<=3?0.8:consec<=4?0.5:0.2; // 0–1.5
 
-      // Fator 4: Nutrição (proteína média últimos 2 dias)
+      // Fator 6: Nutrição (proteína média últimos 2 dias)
       let protSum=0,protN=0;
       for(let i=1;i<=2;i++){const d=new Date();d.setDate(d.getDate()-i);const ds=d.toISOString().split("T")[0];const n=await sGet(sk(user.id,"nutri",ds),null);if(n){const k=nutriTotals(user.id==="G"?MEALS_G:MEALS_B,n).prot;if(k>0){protSum+=k;protN++;}}}
       const avgProt2=protN>0?protSum/protN:0;
-      const nutFactor=cfg.proteinTarget>0?Math.min(2,( avgProt2/cfg.proteinTarget)*2):1.2; // 0–2
+      const nutFactor=cfg.proteinTarget>0?Math.min(1.5,(avgProt2/cfg.proteinTarget)*1.5):0.9; // 0–1.5
 
-      const readiness=Math.min(10,Math.max(1,Math.round((sonoFactor+cargaFactor+consecFactor+nutFactor)*10)/10));
-      const readinessFactors={sono:sonoScore,sonoHoras,carga:treinos,consec,prot:Math.round(avgProt2),protTarget:cfg.proteinTarget};
+      const readiness=Math.min(10,Math.max(1,Math.round((sonoFactor+dispFactor+corpoFactor+cargaFactor+consecFactor+nutFactor)*10)/10));
+      const readinessFactors={sono:sonoScore,sonoHoras,disp:dispScore,corpo:corpoScore,carga:treinos,consec,prot:Math.round(avgProt2),protTarget:cfg.proteinTarget};
 
       // ── Padrões de Alto Desempenho ──────────────────────────
       const padroes=[];
@@ -2174,7 +2180,7 @@ function DashboardView({user,plans,setPillar,setShowSettings}){
   if(data.jiuSess>=2)insights.push({icon:"🥋",text:`${data.jiuSess} treinos de Jiu — volume bom.`,c:"#EF4444"});
   if(data.nutriOk>=5)insights.push({icon:"🥗",text:"Nutrição em dia — 5+ dias com metas.",c:"#10B981"});
   else if(data.nutriOk<=2)insights.push({icon:"⚠️",text:"Nutrição abaixo — menos de 3 dias ok.",c:"#F59E0B"});
-  if(data.avgFadiga&&data.avgFadiga<=2.5)insights.push({icon:"😴",text:"Fadiga alta nas sessões — priorize o sono.",c:"#8B5CF6"});
+  if(data.avgFadiga&&data.avgFadiga<=5)insights.push({icon:"😴",text:"Fadiga alta nas sessões — priorize o sono.",c:"#8B5CF6"});
   if(data.winsWeek>0&&data.rolasWeek>0){const wr=Math.round((data.winsWeek/data.rolasWeek)*100);insights.push({icon:"⚡",text:`${wr}% de aproveitamento nos rolas da semana.`,c:user.accent});}
   if(pesoTrend!==null){const dir=pesoTrend<0?"↓ ":"↑ ";insights.push({icon:"⚖️",text:`Peso ${dir}${Math.abs(pesoTrend).toFixed(1)}kg desde última medição.`,c:pesoTrend<=0?T.done:"#EF4444"});}
 
@@ -2257,11 +2263,15 @@ function DashboardView({user,plans,setPillar,setShowSettings}){
       </div>
       <div>
         <div style={{display:"flex",justifyContent:"space-between",marginBottom:5}}>
-          <span style={{fontSize:12,color:T.sub}}>Corpo / Dores</span>
+          <span style={{fontSize:12,color:T.sub}}>Corpo</span>
           <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:12,color:user.accent,fontWeight:700}}>{checkin.corpo}/5</span>
         </div>
         <div style={{display:"flex",gap:4}}>
           {[1,2,3,4,5].map(n=>(<button key={n} onClick={()=>saveCheckin({...checkin,corpo:n})} style={{flex:1,height:30,borderRadius:7,border:`1.5px solid ${checkin.corpo>=n?user.accent:T.border}`,background:checkin.corpo>=n?`${user.accent}18`:T.inpBg,color:checkin.corpo>=n?user.accent:T.muted,fontSize:12,fontWeight:checkin.corpo>=n?700:400,cursor:"pointer"}}>{n}</button>))}
+        </div>
+        <div style={{display:"flex",justifyContent:"space-between",marginTop:3}}>
+          <span style={{fontSize:9,color:T.muted}}>1 = com dor</span>
+          <span style={{fontSize:9,color:T.muted}}>5 = sem dor</span>
         </div>
       </div>
     </div>
@@ -2317,6 +2327,8 @@ function DashboardView({user,plans,setPillar,setShowSettings}){
         <div style={{display:"flex",flexDirection:"column",gap:6}}>
           {[
             {l:"Sono",v:f.sono||0,max:5,fmt:v=>`${v}/5${f.sonoHoras?` · ${f.sonoHoras}h`:""}`},
+            {l:"Disposição",v:f.disp||0,max:5,fmt:v=>`${v}/5`},
+            {l:"Corpo",v:f.corpo||0,max:5,fmt:v=>`${v}/5`},
             {l:"Carga semanal",v:Math.max(0,5-f.carga),max:5,fmt:()=>`${f.carga} treinos`},
             {l:"Recuperação",v:Math.max(0,5-(f.consec||0)),max:5,fmt:()=>f.consec===0?"Descansado":f.consec===1?"1 dia consecutivo":`${f.consec} dias seguidos`},
             {l:"Proteína",v:f.protTarget>0?Math.min(5,(f.prot/f.protTarget)*5):3,max:5,fmt:()=>f.prot>0?`${f.prot}g / ${f.protTarget}g`:"Sem dados"},
@@ -2358,8 +2370,8 @@ function DashboardView({user,plans,setPillar,setShowSettings}){
     {data.avgFadiga&&(<div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:14,padding:"14px 16px"}}>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
         <div><div style={{fontSize:11,color:T.muted,fontWeight:700,textTransform:"uppercase",letterSpacing:0.5,marginBottom:4}}>Fadiga Média da Semana</div>
-        <div style={{fontSize:12,color:T.sub}}>{data.avgFadiga<=2?"Alta fadiga — considere descanso":data.avgFadiga<=3.5?"Moderada — atenção ao sono":"Boa prontidão"}</div></div>
-        <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:28,fontWeight:700,color:data.avgFadiga<=2?"#EF4444":data.avgFadiga<=3.5?"#F59E0B":T.done}}>{data.avgFadiga}</div>
+        <div style={{fontSize:12,color:T.sub}}>{data.avgFadiga<=4?"Alta fadiga — considere descanso":data.avgFadiga<=7?"Moderada — atenção ao sono":"Boa prontidão"}</div></div>
+        <div style={{display:"flex",alignItems:"baseline",gap:3}}><span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:28,fontWeight:700,color:data.avgFadiga<=4?"#EF4444":data.avgFadiga<=7?"#F59E0B":T.done}}>{data.avgFadiga}</span><span style={{fontSize:13,color:T.muted}}>/10</span></div>
       </div>
     </div>)}
 
