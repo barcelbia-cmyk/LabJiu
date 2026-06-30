@@ -2357,7 +2357,7 @@ function DashboardView({user,plans,setPillar,setShowSettings}){
     {/* Fadiga */}
     {data.avgFadiga&&(<div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:14,padding:"14px 16px"}}>
       <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
-        <div><div style={{fontSize:11,color:T.muted,fontWeight:700,textTransform:"uppercase",letterSpacing:0.5,marginBottom:4}}>Fadiga Média no Jiu</div>
+        <div><div style={{fontSize:11,color:T.muted,fontWeight:700,textTransform:"uppercase",letterSpacing:0.5,marginBottom:4}}>Fadiga Média da Semana</div>
         <div style={{fontSize:12,color:T.sub}}>{data.avgFadiga<=2?"Alta fadiga — considere descanso":data.avgFadiga<=3.5?"Moderada — atenção ao sono":"Boa prontidão"}</div></div>
         <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:28,fontWeight:700,color:data.avgFadiga<=2?"#EF4444":data.avgFadiga<=3.5?"#F59E0B":T.done}}>{data.avgFadiga}</div>
       </div>
