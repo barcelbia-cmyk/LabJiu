@@ -713,6 +713,40 @@ function Box({children,mb=14}){
   return(<div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:14,padding:"14px 16px",marginBottom:mb}}>{children}</div>);
 }
 
+/* ─── LONG TERM STATS (módulo — seletor 30d/90d/6m/1ano) ─────────────── */
+function LongTermStats({treinoDates,jiuMeta,earliestDate,accent}){
+  const[period,setPeriod]=useState(30);
+  if(!earliestDate)return null;
+  const daysSinceStart=Math.floor((new Date()-new Date(earliestDate))/864e5);
+  if(daysSinceStart<30)return null; // só aparece com pelo menos 30 dias de histórico
+
+  const cutoff=new Date();cutoff.setDate(cutoff.getDate()-period);
+  const cutoffStr=cutoff.toISOString().split("T")[0];
+  const treinosCount=treinoDates.filter(d=>d>=cutoffStr).length;
+  const jiuFiltered=jiuMeta.filter(j=>j.date>=cutoffStr);
+  const jiuCount=jiuFiltered.length;
+  const rolasCount=jiuFiltered.reduce((a,j)=>a+j.rolas,0);
+
+  const periods=[{v:30,l:"30d"},{v:90,l:"90d"},{v:180,l:"6 meses"},{v:365,l:"1 ano"}].filter(p=>p.v<=daysSinceStart+5);
+
+  return(
+    <Box>
+      <div style={{fontSize:10,fontWeight:700,color:T.muted,letterSpacing:1.2,marginBottom:10,textTransform:"uppercase"}}>Visão de Longo Prazo</div>
+      <div style={{display:"flex",gap:6,marginBottom:14,flexWrap:"wrap"}}>
+        {periods.map(p=>(<button key={p.v} onClick={()=>setPeriod(p.v)} style={{padding:"7px 13px",borderRadius:20,border:`1.5px solid ${period===p.v?accent:T.border}`,background:period===p.v?`${accent}15`:T.inpBg,color:period===p.v?accent:T.sub,fontSize:12,fontWeight:period===p.v?700:400,cursor:"pointer"}}>{p.l}</button>))}
+      </div>
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8}}>
+        {[{l:"Treinos",v:treinosCount,c:accent},{l:"Sessões Jiu",v:jiuCount,c:"#EF4444"},{l:"Rolas",v:rolasCount,c:"#F59E0B"}].map(({l,v,c})=>(
+          <div key={l} style={{background:T.inpBg,borderRadius:10,padding:"12px 8px",textAlign:"center"}}>
+            <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:22,fontWeight:700,color:c}}>{v}</div>
+            <div style={{fontSize:10,color:T.muted,marginTop:3}}>{l}</div>
+          </div>
+        ))}
+      </div>
+    </Box>
+  );
+}
+
 /* ─── ROLA FORM (module-level — fixes input-refocus bug) ─────────────── */
 function RolaForm({rolaInp,setRolaInp,parceiros,accent,onAdd,onCancel}){
   const I={width:"100%",background:T.inpBg,border:`1px solid ${T.border}`,borderRadius:10,color:T.text,padding:"10px 12px",fontSize:15,outline:"none",minHeight:46,boxSizing:"border-box"};
@@ -1988,11 +2022,15 @@ function DashboardView({user,plans,setPillar,setShowSettings}){
       const ws=new Date();ws.setDate(ws.getDate()-7);const wsStr=ws.toISOString().split("T")[0];
       // Treinos semana
       const skeys=await sList(sk(user.id,"sess",""));let treinos=0;
-      for(const k of skeys){const s=await sGet(k);if(s&&s.date>=wsStr)treinos++;}
+      const allTreinoDates=[];
+      for(const k of skeys){const s=await sGet(k);if(s){allTreinoDates.push(s.date);if(s.date>=wsStr)treinos++;}}
       // Jiu sessões (lê da estrutura unificada jiu_sessions)
       const jiuSessionsRaw=await sGet(sk(user.id,"jiu_sessions"),[]);
       const jiuLog=jiuSessionsRaw;
       const jiuWeek=jiuLog.filter(s=>s.date>=wsStr);
+      const allJiuMeta=jiuSessionsRaw.map(s=>({date:s.date,rolas:(s.rolas||[]).length}));
+      const allDatesCombined=[...allTreinoDates,...allJiuMeta.map(j=>j.date)];
+      const earliestDate=allDatesCombined.length?allDatesCombined.sort()[0]:null;
       // Nutrição (dias com 3+ refeições)
       let nutriOk=0;
       const nutriMeals=user.id==="G"?MEALS_G:MEALS_B;
@@ -2161,7 +2199,7 @@ function DashboardView({user,plans,setPillar,setShowSettings}){
         challenge={streak,target:TARGET_DAYS,daysLeft:daysLeftChallenge,completed,todayIsWeekday,todayTrained};
       }
 
-      setData({treinos,jiuSess:jiuWeek.length,nutriOk,pesoAtual,pesoAnterior,avgFadiga,rolasWeek:rolasWeek.length,winsWeek,goalWeight:cfg.goalWeight,goalDate:cfg.goalDate,correlacoes,readiness,readinessFactors,padroes,monthSummary,challenge});
+      setData({treinos,jiuSess:jiuWeek.length,nutriOk,pesoAtual,pesoAnterior,avgFadiga,rolasWeek:rolasWeek.length,winsWeek,goalWeight:cfg.goalWeight,goalDate:cfg.goalDate,correlacoes,readiness,readinessFactors,padroes,monthSummary,challenge,allTreinoDates,allJiuMeta,earliestDate});
     })();
   },[user.id,reloadKey]);
 
@@ -2459,6 +2497,10 @@ function DashboardView({user,plans,setPillar,setShowSettings}){
         </div>}
       </div>);
     })()}
+
+    {/* ── Visão de Longo Prazo ────────────────────────── */}
+    <LongTermStats treinoDates={data.allTreinoDates||[]} jiuMeta={data.allJiuMeta||[]} earliestDate={data.earliestDate} accent={user.accent}/>
+
 
   </div>);
 }
