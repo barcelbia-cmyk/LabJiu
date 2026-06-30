@@ -705,6 +705,14 @@ function PillBtn({label,active,color,accent,onClick,small}){
   return(<button onClick={onClick} style={{padding:small?"4px 8px":"6px 11px",borderRadius:20,border:`1px solid ${active?c:T.border}`,background:active?`${c}15`:T.inpBg,color:active?c:T.sub,fontSize:small?10:11,fontWeight:active?700:400,cursor:"pointer",whiteSpace:"nowrap"}}>{label}</button>);
 }
 
+/* ─── BOX / HDR (module-level — fixes input-remount bug in JiuView etc) ── */
+function Hdr({t,mb=10}){
+  return(<div style={{fontSize:10,fontWeight:700,color:T.muted,letterSpacing:1.2,marginBottom:mb,textTransform:"uppercase"}}>{t}</div>);
+}
+function Box({children,mb=14}){
+  return(<div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:14,padding:"14px 16px",marginBottom:mb}}>{children}</div>);
+}
+
 /* ─── ROLA FORM (module-level — fixes input-refocus bug) ─────────────── */
 function RolaForm({rolaInp,setRolaInp,parceiros,accent,onAdd,onCancel}){
   const I={width:"100%",background:T.inpBg,border:`1px solid ${T.border}`,borderRadius:10,color:T.text,padding:"10px 12px",fontSize:15,outline:"none",minHeight:46,boxSizing:"border-box"};
@@ -852,8 +860,6 @@ function NutricaoView({user}){
   const wAvgK=weekData.length?Math.round(weekData.reduce((a,d)=>a+nutriTotals(user.id==="G"?MEALS_G:MEALS_B,d).kcal,0)/weekData.length):0;
 
   const I={width:"100%",background:T.inpBg,border:`1px solid ${T.border}`,borderRadius:10,color:T.text,padding:"10px 12px",fontSize:15,outline:"none",minHeight:46,boxSizing:"border-box"};
-  const Bx=({children,mb=12})=>(<div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:12,padding:"12px 14px",marginBottom:mb}}>{children}</div>);
-  const H=({t})=>(<div style={{fontSize:10,fontWeight:700,color:T.muted,letterSpacing:1.2,marginBottom:10,textTransform:"uppercase"}}>{t}</div>);
   const Btn=(l,fn)=>(<button onClick={fn} style={{width:"100%",padding:11,borderRadius:9,border:"none",background:user.accent,color:"#FFF",fontSize:14,fontWeight:700,cursor:"pointer",minHeight:46,marginTop:4}}>{l}</button>);
   const PC=({label,val,max,unit,color})=>{const p=Math.min(100,Math.round((val/max)*100));const ok=val>=max;return(<div style={{background:T.card,border:`1px solid ${ok?T.borderDone:T.border}`,borderRadius:12,padding:"11px 13px"}}><div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-end",marginBottom:7}}><span style={{fontSize:10,fontWeight:700,color:T.muted,letterSpacing:0.8,textTransform:"uppercase"}}>{label}</span><div><span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:19,fontWeight:700,color:ok?T.done:color}}>{unit==="L"?(val/1000).toFixed(1):val}</span><span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:11,color:T.muted}}>/{unit==="L"?max/1000:max}{unit}</span></div></div><div style={{height:6,background:T.inpBg,borderRadius:3}}><div style={{height:"100%",width:`${p}%`,background:ok?T.done:color,borderRadius:3,transition:"width 0.4s ease"}}/></div><div style={{fontSize:10,color:T.muted,marginTop:4,textAlign:"right"}}>{ok?"✓ Meta atingida":`faltam ${unit==="L"?((max-val)/1000).toFixed(1)+"L":max-val+unit}`}</div></div>);};
   const stabs=[{id:"hoje",l:"Hoje"},{id:"refeicoes",l:"Refeições"},{id:"hidratacao",l:"Hidratação"}];
@@ -865,7 +871,7 @@ function NutricaoView({user}){
       </div>
 
       {tab==="hoje"&&(<>
-        <Bx mb={12}><H t="Tipo de Dia"/>
+        <Box mb={12}><Hdr t="Tipo de Dia"/>
           <div style={{display:"flex",gap:6}}>
             {[["normal","Normal","1800 kcal"],["2treinos","2 Jiu","2100 kcal"],["descanso","Descanso","1700 kcal"]].map(([val,l,sub])=>(
               <button key={val} onClick={()=>save({...today,tipo_dia:val})} style={{flex:1,padding:"8px 4px",borderRadius:9,border:`1.5px solid ${today.tipo_dia===val?user.accent:T.border}`,background:today.tipo_dia===val?`${user.accent}12`:T.inpBg,cursor:"pointer"}}>
@@ -874,17 +880,17 @@ function NutricaoView({user}){
               </button>
             ))}
           </div>
-        </Bx>
+        </Box>
         <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:8}}>
           <PC label="Calorias" val={totals.kcal} max={KT} unit="kcal" color={user.accent}/>
           <PC label="Proteína" val={totals.prot} max={PT} unit="g" color="#3B82F6"/>
         </div>
         <div style={{marginBottom:14}}><PC label="Hidratação" val={ag} max={AT} unit="L" color="#06B6D4"/></div>
-        {totals.kcal>0&&<Bx mb={12}><H t="Macros de Hoje"/>
+        {totals.kcal>0&&<Box mb={12}><Hdr t="Macros de Hoje"/>
           <div style={{display:"flex",gap:8,justifyContent:"space-around"}}>
             {[{l:"Proteína",v:totals.prot,c:"#3B82F6"},{l:"Carbs",v:totals.carbs,c:user.accent},{l:"Gorduras",v:totals.fat,c:"#F59E0B"}].map(({l,v,c})=>(<div key={l} style={{textAlign:"center"}}><div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:22,fontWeight:700,color:c}}>{v}<span style={{fontSize:11,color:T.muted}}>g</span></div><div style={{fontSize:10,color:T.muted,marginTop:2}}>{l}</div></div>))}
           </div>
-        </Bx>}
+        </Box>}
 
         {/* Meal cards: fixed items (checkbox) + choice groups (single-select) */}
         <div style={{fontSize:10,fontWeight:700,color:T.muted,letterSpacing:1.2,marginBottom:8,textTransform:"uppercase"}}>Refeições de Hoje</div>
@@ -966,10 +972,10 @@ function NutricaoView({user}){
           <button onClick={()=>setShowExtra(true)} style={{width:"100%",padding:"10px",borderRadius:10,border:`1px dashed ${T.border}`,background:"transparent",color:T.muted,fontSize:12,cursor:"pointer",marginTop:10,marginBottom:14}}>+ item extra (lanche, suplemento...)</button>
         )}
 
-        {weekData.length>0&&<Bx mb={0}><H t="Últimos 7 dias — Média"/>
+        {weekData.length>0&&<Box mb={0}><Hdr t="Últimos 7 dias — Média"/>
           <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:30,fontWeight:700,color:user.accent,letterSpacing:-1,lineHeight:1}}>{wAvgK}<span style={{fontSize:13,color:T.muted,fontWeight:400}}> kcal/dia</span></div>
           <div style={{fontSize:12,color:T.muted,marginTop:5}}>{wAvgK>=KT-150&&wAvgK<=KT+200?"✓ Dentro da meta":"Abaixo da meta — revise as refeições"}</div>
-        </Bx>}
+        </Box>}
       </>)}
 
       {tab==="refeicoes"&&(<>
@@ -1343,8 +1349,6 @@ function JiuView({user}){
 
   const I={width:"100%",background:T.inpBg,border:`1px solid ${T.border}`,borderRadius:10,color:T.text,padding:"10px 12px",fontSize:15,outline:"none",minHeight:46,boxSizing:"border-box"};
   const Sv=(l,fn)=>(<button onClick={fn} style={{width:"100%",padding:12,borderRadius:10,border:"none",background:user.accent,color:"#FFF",fontSize:14,fontWeight:700,cursor:"pointer",minHeight:48,marginTop:4}}>{l}</button>);
-  const Hdr=({t,mb=10})=>(<div style={{fontSize:10,fontWeight:700,color:T.muted,letterSpacing:1.2,marginBottom:mb,textTransform:"uppercase"}}>{t}</div>);
-  const Box=({children,mb=14})=>(<div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:14,padding:"14px 16px",marginBottom:mb}}>{children}</div>);
 
   const RES_C={Finalizei:T.done,Raspei:user.accent,Passei:"#3B82F6",Neutro:T.sub,"Fui passado":"#F59E0B","Fui raspado":"#F97316","Fui finalizado":"#EF4444"};
 
