@@ -48,6 +48,7 @@ const { useState, useEffect, useRef } = React;
 const LIGHT_T={bg:"#F8F7F5",card:"#FFFFFF",border:"#E6E4E0",borderDone:"#BBF7D0",text:"#0A0A0A",sub:"#888880",muted:"#C0BFB8",done:"#15803D",doneBg:"#F0FDF4",inpBg:"#F4F3F0",timerBg:"#FFF8F0",timerBorder:"#FDDCB5",deloadBg:"#FFF7ED",deloadBorder:"#FED7AA",deloadText:"#9A3412",deloadSub:"#C2410C",scroll:"#DDDDDD"};
 const DARK_T={bg:"#0C0C0C",card:"#171717",border:"#282828",borderDone:"#1A3A1A",text:"#F0F0F0",sub:"#888880",muted:"#484848",done:"#4ADE80",doneBg:"#091409",inpBg:"#202020",timerBg:"#1C1400",timerBorder:"#3D2E00",deloadBg:"#1C1000",deloadBorder:"#3D2800",deloadText:"#FED7AA",deloadSub:"#FBBF24",scroll:"#333333"};
 let T=LIGHT_T;
+const APP_VERSION="2026.07.01-5";
 const USERS={G:{id:"G",name:"Guilherme",accent:"#EA6C00",goal:87,goalDate:"2026-08-31",ctx:"atleta BJJ faixa azul — meia-guarda, single leg, força de combate"},B:{id:"B",name:"Bianca",accent:"#E11D4B",goal:null,goalDate:null,ctx:"treino estético feminino — glúteo médio, posterior, afinar cintura"}};
 
 /* ─── DEFAULT CONFIG ─────────────────────────────────────────────────── */
@@ -82,11 +83,28 @@ const YT={
 
 /* ─── NUTRITION PRESETS ─────────────────────────────────────────────── */
 /* ─── JIU CONSTANTS (module-level, shared) ───────────────────────────── */
-const POS=["Meia-guarda","Meia-guarda (top)","Guarda fechada","Passagem","Costas","Em pé","Single leg","Underhook/Esgrima","Raspagem","Finalização","Defesa de queda"];
+const POS=["Meia-guarda","Meia-guarda (top)","Guarda fechada","Passagem","Costas","Montada","Em pé","Single leg","Underhook/Esgrima","Raspagem","Finalização","Defesa de queda","Queda/Takedown","Joelho na barriga"];
 const TIPO_COLOR={Técnico:"#F59E0B",Forte:"#EA6C00",Open:"#EF4444"};
-const RES=["Finalizei","Raspei","Passei","Neutro","Fui passado","Fui raspado","Fui finalizado"];
+const RES=["Finalizei","Passei","Raspei","Cheguei nas costas","Montei","Neutro","Fui passado","Fui raspado","Sofri pegada nas costas","Fui montado","Fui finalizado"];
 const FINALIZACOES=["Mata-leão","Triângulo","Armlock","Kimura","Americana","Guilhotina","Kneebar","Heel hook","Anaconda","Darce","Omoplata","Outra"];
+const GUARDAS=["Guarda fechada","Meia-guarda","Meia-guarda profunda","Guarda aranha","De la Riva","Reverse De la Riva","Guarda X","Guarda butterfly","Guarda lasso","50/50","Guarda de joelhos (knee shield)","Guarda z","Outra"];
+const PASSAGENS=["Passagem por cima (over-under)","Passagem torreão (toreando)","Passagem de joelhos (knee cut)","Long step","Passagem de perna (leg drag)","Empilhamento (stack pass)","Passagem 50/50","Outra"];
+const RASPAGENS=["Raspagem de tesoura (scissor)","Raspagem de gancho (hook sweep)","Raspagem pêndulo (pendulum)","Raspagem De la Riva","Raspagem berimbolo","Raspagem X-guard","Raspagem elevator","Raspagem butterfly","Outra"];
+// Pontuação oficial IBJJF: Queda/Raspagem 2 · Passagem de guarda 3 · Montada/Pegada pelas costas 4
+const PONTOS_RESULTADO={"Passei":3,"Fui passado":3,"Raspei":2,"Fui raspado":2,"Cheguei nas costas":4,"Sofri pegada nas costas":4,"Montei":4,"Fui montado":4};
+const MEUS_RESULTADOS=["Passei","Raspei","Cheguei nas costas","Montei"];
+const DELE_RESULTADOS=["Fui passado","Fui raspado","Sofri pegada nas costas","Fui montado"];
+const calcPontosIBJJF=(resultado)=>PONTOS_RESULTADO[resultado]||0;
 const FAIXA_COLORS={Branca:"#D4D4D4",Azul:"#2563EB",Roxa:"#7C3AED",Marrom:"#92400E",Preta:"#171717"};
+const FAIXAS_LIST=["Branca","Azul","Roxa","Marrom","Preta"];
+const RES_COLOR=(r,accent)=>({Finalizei:T.done,Passei:"#3B82F6",Raspei:accent,"Cheguei nas costas":"#8B5CF6","Montei":"#10B981",Neutro:T.sub,"Fui passado":"#F59E0B","Fui raspado":"#F97316","Sofri pegada nas costas":"#F97316","Fui montado":"#EF4444","Fui finalizado":"#EF4444"}[r]||T.sub);
+function FaixaSymbol({faixa,size=14}){
+  const c=FAIXA_COLORS[faixa]||"#888";
+  const idx=FAIXAS_LIST.indexOf(faixa);
+  return(<div style={{width:size*1.8,height:size*0.62,borderRadius:3,background:c,border:faixa==="Branca"?"1px solid #C4C4C4":"none",position:"relative",flexShrink:0,display:"flex",alignItems:"center",overflow:"hidden"}}>
+    {idx>=2&&<div style={{position:"absolute",right:0,top:0,bottom:0,width:"32%",background:"#111"}}/>}
+  </div>);
+}
 
 const MEALS_G=[
   {id:"cafe",nome:"Café da Manhã",horario:"07:00–09:00",
@@ -748,38 +766,116 @@ function LongTermStats({treinoDates,jiuMeta,earliestDate,accent}){
 }
 
 /* ─── ROLA FORM (module-level — fixes input-refocus bug) ─────────────── */
+function TecPicker({label,color,list,selected,onToggle,outraVal,onOutraChange}){
+  const hasOutra=selected.includes("Outra");
+  const inp={width:"100%",background:T.card,border:`1px solid ${T.border}`,borderRadius:10,color:T.text,padding:"8px 10px",fontSize:13,outline:"none",minHeight:38,boxSizing:"border-box"};
+  return(
+    <div style={{marginBottom:2}}>
+      <div style={{fontSize:10,fontWeight:700,color,letterSpacing:0.6,marginBottom:6,textTransform:"uppercase"}}>{label}</div>
+      <div style={{display:"flex",flexWrap:"wrap",gap:5,marginBottom:hasOutra?6:0}}>
+        {list.map(item=>(<PillBtn key={item} label={item} small color={color} active={selected.includes(item)} onClick={()=>onToggle(item)}/>))}
+      </div>
+      {hasOutra&&<input value={outraVal} onChange={e=>onOutraChange(e.target.value)} placeholder="Qual? (preencher manualmente)" style={inp}/>}
+    </div>
+  );
+}
+
+const NEEDS_TECNICA=["Raspei","Fui raspado","Passei","Fui passado","Finalizei","Fui finalizado"];
+const TECNICA_LIST_FOR=(tipo)=>({Raspei:RASPAGENS,"Fui raspado":RASPAGENS,Passei:PASSAGENS,"Fui passado":PASSAGENS,Finalizei:FINALIZACOES,"Fui finalizado":FINALIZACOES}[tipo]||[]);
+const TECNICA_LABEL_FOR=(tipo)=>({Raspei:"Qual raspagem você fez?","Fui raspado":"Qual raspagem você sofreu?",Passei:"Qual passagem você fez?","Fui passado":"Qual passagem você sofreu?",Finalizei:"Qual finalização você fez?","Fui finalizado":"Qual finalização você sofreu?"}[tipo]||"");
+
 function RolaForm({rolaInp,setRolaInp,parceiros,accent,onAdd,onCancel}){
   const I={width:"100%",background:T.inpBg,border:`1px solid ${T.border}`,borderRadius:10,color:T.text,padding:"10px 12px",fontSize:15,outline:"none",minHeight:46,boxSizing:"border-box"};
-  const matches=rolaInp.parceiro.trim().length>0
-    ?parceiros.filter(p=>p.nome.toLowerCase().includes(rolaInp.parceiro.toLowerCase())&&p.nome.toLowerCase()!==rolaInp.parceiro.toLowerCase())
-    :[];
-  const selectParceiro=(p)=>setRolaInp(prev=>({...prev,parceiroId:p.id,parceiro:p.nome,nivel:p.faixaAtual}));
-  const posicoes=rolaInp.posicoes||[];
-  const finFeita=rolaInp.finalizacaoFeita||[];
-  const finSofrida=rolaInp.finalizacaoSofrida||[];
-  const showFinFeita=(rolaInp.resultados?.["Finalizei"]||0)>0;
-  const showFinSofrida=(rolaInp.resultados?.["Fui finalizado"]||0)>0;
-  const toggleArr=(field,val)=>setRolaInp(prev=>{const arr=prev[field]||[];return{...prev,[field]:arr.includes(val)?arr.filter(x=>x!==val):[...arr,val]};});
+  const[showDrop,setShowDrop]=useState(false);
+  const[showEvForm,setShowEvForm]=useState(false);
+  const term=rolaInp.parceiro.trim().toLowerCase();
+  const sortedParceiros=[...parceiros].sort((a,b)=>a.nome.localeCompare(b.nome));
+  const matches=(term.length>0?sortedParceiros.filter(p=>p.nome.toLowerCase().includes(term)):sortedParceiros);
+  const exactMatch=sortedParceiros.find(p=>p.nome.toLowerCase()===term);
+  const selectParceiro=(p)=>{setRolaInp(prev=>({...prev,parceiroId:p.id,parceiro:p.nome,nivel:p.faixaAtual}));setShowDrop(false);};
+  const eventos=rolaInp.eventos||[];
+
+  const EV_DEFAULT={sequencia:[],activeStepId:null,guardaInicial:""};
+  const ev=rolaInp._evDraft||EV_DEFAULT;
+  const setEv=(patch)=>setRolaInp(p=>({...p,_evDraft:{...(p._evDraft||EV_DEFAULT),...patch}}));
+  const isNewPartner=!rolaInp.parceiroId&&rolaInp.parceiro.trim().length>0&&!exactMatch;
+
+  const sequencia=ev.sequencia||[];
+  const contagemPorTipo={};sequencia.forEach(s=>{contagemPorTipo[s.tipo]=(contagemPorTipo[s.tipo]||0)+1;});
+
+  // Toque num resultado sempre ADICIONA um novo passo na sequência (permite repetir)
+  const addStep=(tipo)=>{
+    if(tipo==="Neutro"){
+      setEv({sequencia:[{id:Date.now()+Math.random(),tipo:"Neutro",tecnica:[],tecnicaOutra:""}],activeStepId:null});
+      return;
+    }
+    const seq=sequencia.filter(s=>s.tipo!=="Neutro");
+    const newStep={id:Date.now()+Math.random(),tipo,tecnica:[],tecnicaOutra:""};
+    setEv({sequencia:[...seq,newStep],activeStepId:NEEDS_TECNICA.includes(tipo)?newStep.id:null});
+  };
+  const removeStep=(id)=>setEv({sequencia:sequencia.filter(s=>s.id!==id),activeStepId:ev.activeStepId===id?null:ev.activeStepId});
+  const updateStep=(id,patch)=>setEv({sequencia:sequencia.map(s=>s.id===id?{...s,...patch}:s)});
+  const toggleActiveStep=(id)=>setEv({activeStepId:ev.activeStepId===id?null:id});
+
+  const pontosCalc=sequencia.reduce((a,s)=>a+(PONTOS_RESULTADO[s.tipo]||0),0);
+  const pontosRelevant=sequencia.some(s=>PONTOS_RESULTADO[s.tipo]);
+  const meuRoundPontos=sequencia.filter(s=>MEUS_RESULTADOS.includes(s.tipo)).reduce((a,s)=>a+(PONTOS_RESULTADO[s.tipo]||0),0);
+  const deleRoundPontos=sequencia.filter(s=>DELE_RESULTADOS.includes(s.tipo)).reduce((a,s)=>a+(PONTOS_RESULTADO[s.tipo]||0),0);
+
+  const addEvento=()=>{
+    if(!sequencia.length)return;
+    const novoEv={id:Date.now(),sequencia:sequencia.map(s=>({tipo:s.tipo,tecnica:s.tecnica||[],tecnicaOutra:s.tecnicaOutra||""})),guardaInicial:ev.guardaInicial||""};
+    setRolaInp(p=>({...p,eventos:[...(p.eventos||[]),novoEv],_evDraft:EV_DEFAULT}));
+    setShowEvForm(false);
+    window.__toast?.(`Round adicionado — ${sequencia.length} passo${sequencia.length>1?"s":""}${pontosCalc?` · ${pontosCalc}pts`:""}`);
+  };
+  const removeEvento=(id)=>setRolaInp(p=>({...p,eventos:(p.eventos||[]).filter(e=>e.id!==id)}));
+
+  const pontosDoRound=(e)=>(e.sequencia||[]).reduce((a,s)=>a+(PONTOS_RESULTADO[s.tipo]||0),0);
+  const meusPontos=eventos.reduce((a,e)=>a+(e.sequencia||[]).filter(s=>MEUS_RESULTADOS.includes(s.tipo)).reduce((b,s)=>b+(PONTOS_RESULTADO[s.tipo]||0),0),0);
+  const delePontos=eventos.reduce((a,e)=>a+(e.sequencia||[]).filter(s=>DELE_RESULTADOS.includes(s.tipo)).reduce((b,s)=>b+(PONTOS_RESULTADO[s.tipo]||0),0),0);
+  const finFeitas=eventos.reduce((a,e)=>a+(e.sequencia||[]).filter(s=>s.tipo==="Finalizei").length,0);
+  const finSofridas=eventos.reduce((a,e)=>a+(e.sequencia||[]).filter(s=>s.tipo==="Fui finalizado").length,0);
+
+  const stepLabel=(s)=>{
+    const tec=(s.tecnica||[]).map(t=>t==="Outra"?(s.tecnicaOutra||"outra"):t);
+    return tec.length?`${s.tipo} (${tec.join(", ")})`:s.tipo;
+  };
 
   return(
     <div style={{background:T.card,border:`1.5px solid ${accent}40`,borderRadius:14,padding:16,marginTop:10,marginBottom:6}}>
       <div style={{fontSize:13,fontWeight:700,color:accent,marginBottom:12}}>Novo Rola</div>
 
-      <div style={{marginBottom:8}}>
-        <input value={rolaInp.parceiro} onChange={e=>setRolaInp(p=>({...p,parceiro:e.target.value,parceiroId:null}))} placeholder="Nome do parceiro" style={I}/>
-        {matches.length>0&&<div style={{display:"flex",flexWrap:"wrap",gap:5,marginTop:6}}>
-          {matches.slice(0,5).map(p=>(<button key={p.id} onClick={()=>selectParceiro(p)} style={{display:"flex",alignItems:"center",gap:5,padding:"5px 10px",borderRadius:20,border:`1px solid ${T.border}`,background:T.inpBg,cursor:"pointer"}}>
-            <div style={{width:8,height:8,borderRadius:"50%",background:FAIXA_COLORS[p.faixaAtual]||"#888"}}/>
-            <span style={{fontSize:11,color:T.text}}>{p.nome}</span>
-            <span style={{fontSize:10,color:T.muted}}>{p.faixaAtual}</span>
+      <div style={{marginBottom:8,position:"relative"}}>
+        <input
+          value={rolaInp.parceiro}
+          onFocus={()=>setShowDrop(true)}
+          onBlur={()=>setTimeout(()=>setShowDrop(false),150)}
+          onChange={e=>setRolaInp(p=>({...p,parceiro:e.target.value,parceiroId:null}))}
+          placeholder="Nome do parceiro — toque para ver a lista"
+          style={I}/>
+        {showDrop&&matches.length>0&&<div style={{position:"absolute",left:0,right:0,top:"calc(100% + 4px)",zIndex:50,background:T.card,border:`1px solid ${T.border}`,borderRadius:12,boxShadow:"0 8px 28px rgba(0,0,0,0.18)",maxHeight:220,overflowY:"auto",padding:6}}>
+          {matches.slice(0,30).map(p=>(<button key={p.id} onMouseDown={e=>e.preventDefault()} onClick={()=>selectParceiro(p)} style={{width:"100%",display:"flex",alignItems:"center",gap:8,padding:"9px 10px",borderRadius:8,border:"none",background:rolaInp.parceiroId===p.id?`${accent}15`:"transparent",cursor:"pointer",textAlign:"left"}}>
+            <FaixaSymbol faixa={p.faixaAtual} size={10}/>
+            <span style={{fontSize:13,color:T.text,fontWeight:600,flex:1}}>{p.nome}</span>
+            <span style={{fontSize:11,color:T.muted}}>{p.faixaAtual}</span>
           </button>))}
         </div>}
         {rolaInp.parceiroId&&<div style={{fontSize:11,color:T.done,marginTop:4}}>✓ Vinculado ao perfil de {rolaInp.parceiro}</div>}
       </div>
 
+      {isNewPartner&&<div style={{marginBottom:10}}>
+        <div style={{fontSize:11,color:T.muted,marginBottom:6,fontWeight:600}}>Novo parceiro — faixa atual</div>
+        <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
+          {FAIXAS_LIST.map(f=>(<button key={f} onClick={()=>setRolaInp(p=>({...p,nivel:f}))} style={{display:"flex",alignItems:"center",gap:6,padding:"6px 11px",borderRadius:20,border:`1.5px solid ${rolaInp.nivel===f?FAIXA_COLORS[f]:T.border}`,background:rolaInp.nivel===f?`${FAIXA_COLORS[f]}15`:T.inpBg,cursor:"pointer"}}>
+            <FaixaSymbol faixa={f} size={10}/>
+            <span style={{fontSize:12,color:rolaInp.nivel===f?T.text:T.sub,fontWeight:rolaInp.nivel===f?700:400}}>{f}</span>
+          </button>))}
+        </div>
+      </div>}
+
       <div style={{display:"flex",gap:8,marginBottom:10}}>
-        <input value={rolaInp.nivel} onChange={e=>setRolaInp(p=>({...p,nivel:e.target.value}))} placeholder="Faixa / Nível" style={{...I,flex:2}}/>
-        <input value={rolaInp.peso} onChange={e=>setRolaInp(p=>({...p,peso:e.target.value}))} placeholder="Peso" inputMode="decimal" style={{...I,flex:1}}/>
+        <input value={rolaInp.peso} onChange={e=>setRolaInp(p=>({...p,peso:e.target.value}))} placeholder="Peso do parceiro" inputMode="decimal" style={{...I,flex:1}}/>
       </div>
 
       <div style={{fontSize:12,color:T.muted,marginBottom:8,fontWeight:600}}>Intensidade deste rola</div>
@@ -787,44 +883,98 @@ function RolaForm({rolaInp,setRolaInp,parceiros,accent,onAdd,onCancel}){
         {["Técnico","Forte","Open"].map(t=>(<button key={t} onClick={()=>setRolaInp(p=>({...p,intensidade:t}))} style={{flex:1,padding:"9px 4px",borderRadius:9,border:`1.5px solid ${rolaInp.intensidade===t?TIPO_COLOR[t]:T.border}`,background:rolaInp.intensidade===t?`${TIPO_COLOR[t]}14`:T.inpBg,color:rolaInp.intensidade===t?TIPO_COLOR[t]:T.sub,fontSize:12,fontWeight:rolaInp.intensidade===t?700:400,cursor:"pointer",minHeight:40}}>{t}</button>))}
       </div>
 
-      <div style={{fontSize:12,color:T.muted,marginBottom:8,fontWeight:600}}>Resultado</div>
-      {[{label:"Positivos",items:["Finalizei","Raspei","Passei"],color:T.done},{label:"Neutro",items:["Neutro"],color:T.sub},{label:"Negativos",items:["Fui finalizado","Fui raspado","Fui passado"],color:"#EF4444"}].map(({label,items,color})=>(
-        <div key={label} style={{marginBottom:10}}>
-          <div style={{fontSize:10,fontWeight:700,color,letterSpacing:0.6,marginBottom:6,textTransform:"uppercase"}}>{label}</div>
-          <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
-            {items.map(r=>{
-              const cnt=(rolaInp.resultados||{})[r]||0;
-              const setR=(n)=>setRolaInp(p=>{const rs={...(p.resultados||{})};if(n<=0)delete rs[r];else rs[r]=n;return{...p,resultados:rs};});
-              return(<div key={r} style={{display:"flex",alignItems:"center",gap:4}}>
-                <button onClick={()=>setR(cnt>0?0:1)} style={{padding:"7px 12px",borderRadius:20,border:`1.5px solid ${cnt>0?color:T.border}`,background:cnt>0?`${color}18`:T.inpBg,color:cnt>0?color:T.sub,fontSize:12,fontWeight:cnt>0?700:400,cursor:"pointer",minHeight:36}}>{r}</button>
-                {cnt>0&&<>
-                  <button onClick={()=>setR(cnt-1)} style={{width:28,height:28,borderRadius:"50%",border:`1px solid ${T.border}`,background:T.inpBg,color:T.sub,fontSize:15,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",lineHeight:1}}>−</button>
-                  <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:13,fontWeight:700,color,minWidth:20,textAlign:"center"}}>×{cnt}</span>
-                  <button onClick={()=>setR(cnt+1)} style={{width:28,height:28,borderRadius:"50%",border:`1px solid ${color}`,background:`${color}12`,color,fontSize:15,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",lineHeight:1}}>+</button>
-                </>}
-              </div>);
-            })}
+      <div style={{height:1,background:T.border,margin:"4px 0 14px"}}/>
+
+      {/* Rounds dentro deste rola */}
+      <div style={{background:`${accent}08`,border:`1px solid ${accent}30`,borderRadius:12,padding:12,marginBottom:14}}>
+        <div style={{fontSize:12,fontWeight:700,color:accent,marginBottom:2}}>Um rola pode ter várias disputas</div>
+        <div style={{fontSize:11,color:T.muted,marginBottom:10,lineHeight:1.4}}>Ex: você raspou, passou e montou; depois o parceiro raspou, passou e montou de volta; depois você raspou e passou de novo → registre tudo isso NUM SÓ round, na ordem que aconteceu (pode repetir o mesmo resultado quantas vezes precisar). Só crie outro round se for uma disputa totalmente nova.</div>
+
+        {eventos.length>0&&<div style={{display:"flex",flexDirection:"column",gap:6,marginBottom:10}}>
+          {eventos.map((e,i)=>(<div key={e.id} style={{background:T.card,borderRadius:9,padding:"8px 10px",border:`1px solid ${T.border}`}}>
+            <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start"}}>
+              <div style={{fontSize:9,color:T.muted,fontFamily:"'JetBrains Mono',monospace",marginBottom:4}}>Round {i+1} · {pontosDoRound(e)}pts</div>
+              <button onClick={()=>removeEvento(e.id)} style={{background:"transparent",border:"none",color:T.muted,fontSize:17,cursor:"pointer",padding:"0 4px",lineHeight:1}}>×</button>
+            </div>
+            <div style={{display:"flex",flexWrap:"wrap",alignItems:"center",gap:4}}>
+              {(e.sequencia||[]).map((s,si)=>(<React.Fragment key={si}>
+                <span style={{fontSize:11,fontWeight:700,color:RES_COLOR(s.tipo,accent)}}>{stepLabel(s)}</span>
+                {si<e.sequencia.length-1&&<span style={{fontSize:11,color:T.muted}}>→</span>}
+              </React.Fragment>))}
+            </div>
+            {e.guardaInicial&&<div style={{fontSize:10,color:T.muted,marginTop:3}}>Iniciou na {e.guardaInicial}</div>}
+          </div>))}
+          <div style={{display:"flex",alignItems:"center",justifyContent:"space-between",background:T.card,borderRadius:9,padding:"8px 12px",border:`1px solid ${T.border}`,marginTop:2}}>
+            <div style={{textAlign:"center",flex:1}}>
+              <div style={{fontSize:9,color:T.muted,fontWeight:700,letterSpacing:0.5,textTransform:"uppercase"}}>Você</div>
+              <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:20,fontWeight:700,color:accent}}>{meusPontos}</div>
+            </div>
+            <div style={{fontSize:11,color:T.muted,padding:"0 8px"}}>pontos</div>
+            <div style={{textAlign:"center",flex:1}}>
+              <div style={{fontSize:9,color:T.muted,fontWeight:700,letterSpacing:0.5,textTransform:"uppercase"}}>Parceiro</div>
+              <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:20,fontWeight:700,color:"#EF4444"}}>{delePontos}</div>
+            </div>
           </div>
-        </div>
-      ))}
+          <div style={{display:"flex",gap:10,fontSize:11,color:T.muted,padding:"6px 2px 0",flexWrap:"wrap"}}>
+            {finFeitas>0&&<span style={{color:T.done,fontWeight:700}}>🏆 {finFeitas} finalização{finFeitas>1?"ões":""} sua{finFeitas>1?"s":""}</span>}
+            {finSofridas>0&&<span style={{color:"#EF4444",fontWeight:700}}>💀 {finSofridas} finalização{finSofridas>1?"ões":""} sofrida{finSofridas>1?"s":""}</span>}
+          </div>
+        </div>}
 
-      {showFinFeita&&<div style={{marginBottom:10}}>
-        <div style={{fontSize:10,fontWeight:700,color:T.done,letterSpacing:0.6,marginBottom:6,textTransform:"uppercase"}}>Qual finalização você fez?</div>
-        <div style={{display:"flex",flexWrap:"wrap",gap:5}}>
-          {FINALIZACOES.map(f=>(<PillBtn key={f} label={f} small color={T.done} active={finFeita.includes(f)} onClick={()=>toggleArr("finalizacaoFeita",f)}/>))}
-        </div>
-      </div>}
+        {!showEvForm&&<button onClick={()=>setShowEvForm(true)} style={{width:"100%",padding:11,borderRadius:9,border:`1.5px dashed ${accent}`,background:"transparent",color:accent,fontSize:13,fontWeight:700,cursor:"pointer",minHeight:42}}>+ Adicionar Round ({eventos.length} até agora)</button>}
 
-      {showFinSofrida&&<div style={{marginBottom:10}}>
-        <div style={{fontSize:10,fontWeight:700,color:"#EF4444",letterSpacing:0.6,marginBottom:6,textTransform:"uppercase"}}>Qual finalização você sofreu?</div>
-        <div style={{display:"flex",flexWrap:"wrap",gap:5}}>
-          {FINALIZACOES.map(f=>(<PillBtn key={f} label={f} small color="#EF4444" active={finSofrida.includes(f)} onClick={()=>toggleArr("finalizacaoSofrida",f)}/>))}
-        </div>
-      </div>}
+        {showEvForm&&<div style={{background:T.card,borderRadius:12,padding:12,border:`1px solid ${T.border}`}}>
+          <div style={{fontSize:11,color:T.muted,marginBottom:8,lineHeight:1.4}}>Toque na ordem que foi acontecendo — pode tocar o mesmo botão de novo se repetir (ex: raspei, passei, ele raspou, ele passou, raspei de novo...).</div>
+          <div style={{fontSize:11,fontWeight:700,color:T.sub,marginBottom:8,textTransform:"uppercase",letterSpacing:0.5}}>O que aconteceu agora?</div>
+          <div style={{display:"flex",flexWrap:"wrap",gap:6,marginBottom:12}}>
+            {RES.map(r=>(<button key={r} onClick={()=>addStep(r)} style={{position:"relative",padding:"7px 11px",borderRadius:20,border:`1.5px solid ${RES_COLOR(r,accent)}`,background:T.inpBg,color:RES_COLOR(r,accent),fontSize:12,fontWeight:600,cursor:"pointer",minHeight:34}}>
+              {r}{contagemPorTipo[r]>0&&<span style={{marginLeft:5,fontFamily:"'JetBrains Mono',monospace",fontWeight:700}}>×{contagemPorTipo[r]}</span>}
+            </button>))}
+          </div>
 
-      <div style={{fontSize:12,color:T.muted,marginBottom:8,marginTop:4,fontWeight:600}}>Posições (pode marcar mais de uma)</div>
-      <div style={{display:"flex",flexWrap:"wrap",gap:6,marginBottom:14}}>
-        {POS.map(p=>(<PillBtn key={p} label={p} accent={accent} active={posicoes.includes(p)} onClick={()=>toggleArr("posicoes",p)}/>))}
+          {sequencia.length>0&&<div style={{marginBottom:12}}>
+            <div style={{fontSize:10,fontWeight:700,color:T.muted,letterSpacing:0.6,marginBottom:6,textTransform:"uppercase"}}>Sequência deste round</div>
+            <div style={{display:"flex",flexDirection:"column",gap:6}}>
+              {sequencia.map((s,si)=>(<div key={s.id}>
+                <div style={{display:"flex",alignItems:"center",gap:8,background:T.inpBg,borderRadius:9,padding:"7px 10px",border:`1px solid ${ev.activeStepId===s.id?RES_COLOR(s.tipo,accent):T.border}`}}>
+                  <span style={{fontSize:10,color:T.muted,fontFamily:"'JetBrains Mono',monospace"}}>{si+1}.</span>
+                  <span style={{fontSize:12,fontWeight:700,color:RES_COLOR(s.tipo,accent),flex:1}}>{stepLabel(s)}</span>
+                  {NEEDS_TECNICA.includes(s.tipo)&&<button onClick={()=>toggleActiveStep(s.id)} style={{background:"transparent",border:"none",color:accent,fontSize:11,fontWeight:700,cursor:"pointer"}}>{ev.activeStepId===s.id?"fechar":"detalhar"}</button>}
+                  <button onClick={()=>removeStep(s.id)} style={{background:"transparent",border:"none",color:T.muted,fontSize:16,cursor:"pointer",padding:"0 2px",lineHeight:1}}>×</button>
+                </div>
+                {ev.activeStepId===s.id&&NEEDS_TECNICA.includes(s.tipo)&&<div style={{marginTop:6,paddingLeft:10,borderLeft:`3px solid ${RES_COLOR(s.tipo,accent)}`}}>
+                  <TecPicker
+                    label={TECNICA_LABEL_FOR(s.tipo)}
+                    color={RES_COLOR(s.tipo,accent)}
+                    list={TECNICA_LIST_FOR(s.tipo)}
+                    selected={s.tecnica||[]}
+                    onToggle={v=>{const arr=s.tecnica||[];updateStep(s.id,{tecnica:arr.includes(v)?arr.filter(x=>x!==v):[...arr,v]});}}
+                    outraVal={s.tecnicaOutra||""}
+                    onOutraChange={v=>updateStep(s.id,{tecnicaOutra:v})}
+                  />
+                </div>}
+              </div>))}
+            </div>
+          </div>}
+
+          {sequencia.length>0&&<div style={{marginBottom:10}}>
+            <div style={{fontSize:10,fontWeight:700,color:T.muted,letterSpacing:0.6,marginBottom:6,textTransform:"uppercase"}}>Guarda inicial do round (opcional)</div>
+            <div style={{display:"flex",flexWrap:"wrap",gap:5}}>
+              {GUARDAS.filter(g=>g!=="Outra").map(g=>(<PillBtn key={g} label={g} small accent={accent} active={ev.guardaInicial===g} onClick={()=>setEv({guardaInicial:ev.guardaInicial===g?"":g})}/>))}
+            </div>
+          </div>}
+
+          {pontosRelevant&&<div style={{display:"flex",alignItems:"center",gap:14,marginBottom:10,padding:"8px 10px",background:T.inpBg,borderRadius:9}}>
+            <div><div style={{fontSize:9,color:T.muted,fontWeight:700,textTransform:"uppercase"}}>Você</div><div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:16,fontWeight:700,color:accent}}>{meuRoundPontos}</div></div>
+            <div><div style={{fontSize:9,color:T.muted,fontWeight:700,textTransform:"uppercase"}}>Parceiro</div><div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:16,fontWeight:700,color:"#EF4444"}}>{deleRoundPontos}</div></div>
+            <div style={{fontSize:10,color:T.muted,marginLeft:"auto"}}>calculado automático (regra IBJJF)</div>
+          </div>}
+
+          <div style={{display:"flex",gap:8,marginTop:4}}>
+            <button onClick={()=>{setShowEvForm(false);setRolaInp(p=>({...p,_evDraft:EV_DEFAULT}));}} style={{flex:1,padding:10,borderRadius:9,border:`1px solid ${T.border}`,background:"transparent",color:T.sub,fontSize:13,cursor:"pointer"}}>Cancelar</button>
+            <button onClick={addEvento} disabled={!sequencia.length} style={{flex:2,padding:10,borderRadius:9,border:"none",background:sequencia.length?accent:T.border,color:"#FFF",fontSize:13,fontWeight:700,cursor:sequencia.length?"pointer":"default",opacity:sequencia.length?1:0.6}}>+ Salvar Round</button>
+          </div>
+        </div>}
       </div>
 
       <input value={rolaInp.notas} onChange={e=>setRolaInp(p=>({...p,notas:e.target.value}))} placeholder="Observação (opcional)" style={{...I,marginBottom:12}}/>
@@ -873,7 +1023,9 @@ function NutricaoView({user}){
     })();
   },[user.id]);
 
-  const save=async d=>{setToday(d);await sSet(sk(user.id,"nutri",todayStr()),d);};
+  const[dietaDirty,setDietaDirty]=useState(false);
+  const update=d=>{setToday(d);setDietaDirty(true);};
+  const save=async d=>{setToday(d);await sSet(sk(user.id,"nutri",todayStr()),d);setDietaDirty(false);window.__toast?.("Dieta de hoje salva");};
   const cfg=window.__config||DEF_CFG[user.id];
   const KT=today.tipo_dia==="2treinos"?cfg.calorie2treinos:today.tipo_dia==="descanso"?cfg.calorieDescanso:cfg.calorieNormal;
   const PT=cfg.proteinTarget;
@@ -885,11 +1037,11 @@ function NutricaoView({user}){
   const totals=nutriTotals(PR,today);
   const ag=today.agua_ml||0;
 
-  const toggleItem=(id)=>{const nd=di.includes(id)?di.filter(x=>x!==id):[...di,id];save({...today,done_items:nd});if(!di.includes(id))window.__toast?.("Item marcado");};
-  const selectOption=(groupId,optId)=>{const ne={...esc};if(ne[groupId]===optId)delete ne[groupId];else ne[groupId]=optId;save({...today,escolhas:ne});if(ne[groupId])window.__toast?.("Escolha registrada");};
-  const addCi=()=>{if(!ci.nome||!ci.kcal)return;save({...today,extras:[...ex,{id:Date.now(),nome:ci.nome,kcal:parseFloat(ci.kcal)||0,prot:parseFloat(ci.prot)||0}]});setCi({nome:"",kcal:"",prot:""});setShowExtra(false);window.__toast?.("Item adicionado");};
-  const delEx=id=>save({...today,extras:ex.filter(e=>e.id!==id)});
-  const addAg=ml=>save({...today,agua_ml:ag+ml});
+  const toggleItem=(id)=>{const nd=di.includes(id)?di.filter(x=>x!==id):[...di,id];update({...today,done_items:nd});};
+  const selectOption=(groupId,optId)=>{const ne={...esc};if(ne[groupId]===optId)delete ne[groupId];else ne[groupId]=optId;update({...today,escolhas:ne});};
+  const addCi=()=>{if(!ci.nome||!ci.kcal)return;update({...today,extras:[...ex,{id:Date.now(),nome:ci.nome,kcal:parseFloat(ci.kcal)||0,prot:parseFloat(ci.prot)||0}]});setCi({nome:"",kcal:"",prot:""});setShowExtra(false);};
+  const delEx=id=>update({...today,extras:ex.filter(e=>e.id!==id)});
+  const addAg=ml=>update({...today,agua_ml:ag+ml});
 
   const wAvgK=weekData.length?Math.round(weekData.reduce((a,d)=>a+nutriTotals(user.id==="G"?MEALS_G:MEALS_B,d).kcal,0)/weekData.length):0;
 
@@ -905,10 +1057,11 @@ function NutricaoView({user}){
       </div>
 
       {tab==="hoje"&&(<>
+        <button onClick={()=>save(today)} style={{width:"100%",padding:13,borderRadius:11,border:"none",background:dietaDirty?user.accent:T.done,color:"#FFF",fontSize:14,fontWeight:700,cursor:"pointer",minHeight:48,marginBottom:12,display:"flex",alignItems:"center",justifyContent:"center",gap:8}}>{dietaDirty?"💾 Salvar Dieta de Hoje":"✓ Dieta salva — toque para salvar de novo"}</button>
         <Box mb={12}><Hdr t="Tipo de Dia"/>
           <div style={{display:"flex",gap:6}}>
             {[["normal","Normal","1800 kcal"],["2treinos","2 Jiu","2100 kcal"],["descanso","Descanso","1700 kcal"]].map(([val,l,sub])=>(
-              <button key={val} onClick={()=>save({...today,tipo_dia:val})} style={{flex:1,padding:"8px 4px",borderRadius:9,border:`1.5px solid ${today.tipo_dia===val?user.accent:T.border}`,background:today.tipo_dia===val?`${user.accent}12`:T.inpBg,cursor:"pointer"}}>
+              <button key={val} onClick={()=>update({...today,tipo_dia:val})} style={{flex:1,padding:"8px 4px",borderRadius:9,border:`1.5px solid ${today.tipo_dia===val?user.accent:T.border}`,background:today.tipo_dia===val?`${user.accent}12`:T.inpBg,cursor:"pointer"}}>
                 <div style={{fontSize:12,fontWeight:700,color:today.tipo_dia===val?user.accent:T.text}}>{l}</div>
                 <div style={{fontSize:10,color:T.muted,marginTop:1}}>{sub}</div>
               </button>
@@ -1006,6 +1159,8 @@ function NutricaoView({user}){
           <button onClick={()=>setShowExtra(true)} style={{width:"100%",padding:"10px",borderRadius:10,border:`1px dashed ${T.border}`,background:"transparent",color:T.muted,fontSize:12,cursor:"pointer",marginTop:10,marginBottom:14}}>+ item extra (lanche, suplemento...)</button>
         )}
 
+        <button onClick={()=>save(today)} style={{width:"100%",padding:13,borderRadius:11,border:"none",background:dietaDirty?user.accent:T.done,color:"#FFF",fontSize:14,fontWeight:700,cursor:"pointer",minHeight:48,marginBottom:14,marginTop:4}}>{dietaDirty?"💾 Salvar Dieta de Hoje":"✓ Dieta salva — toque para salvar de novo"}</button>
+
         {weekData.length>0&&<Box mb={0}><Hdr t="Últimos 7 dias — Média"/>
           <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:30,fontWeight:700,color:user.accent,letterSpacing:-1,lineHeight:1}}>{wAvgK}<span style={{fontSize:13,color:T.muted,fontWeight:400}}> kcal/dia</span></div>
           <div style={{fontSize:12,color:T.muted,marginTop:5}}>{wAvgK>=KT-150&&wAvgK<=KT+200?"✓ Dentro da meta":"Abaixo da meta — revise as refeições"}</div>
@@ -1047,7 +1202,7 @@ function NutricaoView({user}){
           <div style={{display:"flex",gap:6,justifyContent:"center",marginBottom:8}}>
             {[[250,"250ml"],[500,"500ml"],[750,"750ml"],[1000,"1L"]].map(([ml,l])=>(<button key={ml} onClick={()=>addAg(ml)} style={{padding:"10px 12px",borderRadius:9,border:"1px solid #06B6D4",background:"#06B6D410",color:"#06B6D4",fontSize:13,fontWeight:700,cursor:"pointer",minHeight:44}}>{l}</button>))}
           </div>
-          {ag>0&&<div style={{textAlign:"center"}}><button onClick={()=>save({...today,agua_ml:Math.max(0,ag-250)})} style={{fontSize:11,color:T.muted,background:"transparent",border:"none",cursor:"pointer"}}>← Desfazer 250ml</button></div>}
+          {ag>0&&<div style={{textAlign:"center"}}><button onClick={()=>update({...today,agua_ml:Math.max(0,ag-250)})} style={{fontSize:11,color:T.muted,background:"transparent",border:"none",cursor:"pointer"}}>← Desfazer 250ml</button></div>}
         </div>
         {user.id==="G"&&<><div style={{background:T.deloadBg,border:`1px solid ${T.deloadBorder}`,borderRadius:12,padding:"12px 14px",marginBottom:10}}>
           <div style={{fontSize:12,fontWeight:700,color:T.deloadText,marginBottom:4}}>⚠ Tirzepatida + Hidratação</div>
@@ -1164,6 +1319,7 @@ function JiuView({user}){
   // Active session draft (form state)
 
   const[sessDur,setSessDur]=useState("");
+  const[editingSessionId,setEditingSessionId]=useState(null);
   const[posicaoEnsinada,setPosicaoEnsinada]=useState("");
   const[detalhesPosicaoEnsinada,setDetalhesPosicaoEnsinada]=useState("");
   const[draftRolas,setDraftRolas]=useState([]);
@@ -1173,7 +1329,7 @@ function JiuView({user}){
 
   // Rola entry sub-form
   const[showRolaForm,setShowRolaForm]=useState(false);
-  const[rolaInp,setRolaInp]=useState({parceiroId:null,parceiro:"",peso:"",nivel:"",intensidade:"Técnico",resultados:{},posicoes:[],finalizacaoFeita:[],finalizacaoSofrida:[],notas:""});
+  const[rolaInp,setRolaInp]=useState({parceiroId:null,parceiro:"",peso:"",nivel:"",intensidade:"Técnico",eventos:[],notas:""});
 
   const[tecInp,setTecInp]=useState({posicao:"Meia-guarda",titulo:"",detalhe:""});
   const[tecSearch,setTecSearch]=useState("");
@@ -1217,8 +1373,8 @@ function JiuView({user}){
   // ── Derived: flat list of all rolas across all sessions (for analysis) ──
   const allRolas=jiuSessions.flatMap(s=>(s.rolas||[]).map(r=>({...r,date:s.date})));
 
-  const isPos=r=>r.resultados?Object.keys(r.resultados).some(k=>["Finalizei","Raspei","Passei"].includes(k)):["Finalizei","Raspei","Passei"].includes(r.resultado);
-  const isNeg=r=>r.resultados?Object.keys(r.resultados).some(k=>["Fui finalizado","Fui raspado","Fui passado"].includes(k)):["Fui finalizado","Fui raspado","Fui passado"].includes(r.resultado);
+  const isPos=r=>r.resultados?Object.keys(r.resultados).some(k=>["Finalizei","Raspei","Passei","Cheguei nas costas","Montei"].includes(k)):["Finalizei","Raspei","Passei","Cheguei nas costas","Montei"].includes(r.resultado);
+  const isNeg=r=>r.resultados?Object.keys(r.resultados).some(k=>["Fui finalizado","Fui raspado","Fui passado","Sofri pegada nas costas","Fui montado"].includes(k)):["Fui finalizado","Fui raspado","Fui passado","Sofri pegada nas costas","Fui montado"].includes(r.resultado);
   const countR=(r,list)=>r.resultados?Object.entries(r.resultados).filter(([k])=>list.includes(k)).reduce((a,[,v])=>a+v,0):(list.includes(r.resultado)?1:0);
   const getPos=(r)=>r.posicoes&&r.posicoes.length?r.posicoes:(r.posicao?[r.posicao]:[]);
 
@@ -1229,7 +1385,7 @@ function JiuView({user}){
   },{})).filter(([,v])=>v>=2).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([k])=>k);
 
   const weakestPos=(()=>{
-    const POSITIVOS3=["Finalizei","Raspei","Passei"];const NEGATIVOS3=["Fui finalizado","Fui raspado","Fui passado"];
+    const POSITIVOS3=["Finalizei","Raspei","Passei","Cheguei nas costas","Montei"];const NEGATIVOS3=["Fui finalizado","Fui raspado","Fui passado","Sofri pegada nas costas","Fui montado"];
     const byPos3={};allRolas.forEach(r=>{getPos(r).forEach(pos=>{if(!byPos3[pos])byPos3[pos]=[];byPos3[pos].push(r);});});
     const stats=Object.entries(byPos3).filter(([,a])=>a.length>=3).map(([pos,arr])=>{const w=arr.reduce((a,r)=>a+countR(r,POSITIVOS3),0);const l=arr.reduce((a,r)=>a+countR(r,NEGATIVOS3),0);const score=(w+l)>0?(w/(w+l))*10:5;return{pos,score,n:arr.length};});
     if(!stats.length)return null;
@@ -1244,8 +1400,25 @@ function JiuView({user}){
       const p=await findOrCreateParceiro(rolaInp.parceiro,rolaInp.nivel);
       pId=p.id;
     }
-    setDraftRolas(p=>[...p,{...rolaInp,parceiroId:pId,id:Date.now()}]);
-    setRolaInp({parceiroId:null,parceiro:"",peso:"",nivel:"",intensidade:"Técnico",resultados:{},posicoes:[],finalizacaoFeita:[],finalizacaoSofrida:[],notas:""});
+    const eventos=rolaInp.eventos||[];
+    // Agrega eventos (rounds, cada um com uma sequência ordenada de passos) em campos legados para manter stats/histórico funcionando
+    const resultados={};const posicoesSet=new Set();const finalizacaoFeita=[];const finalizacaoSofrida=[];
+    eventos.forEach(rnd=>{
+      if(rnd.guardaInicial)posicoesSet.add(rnd.guardaInicial);
+      (rnd.sequencia||[]).forEach(s=>{
+        if(s.tipo==="Neutro")return;
+        resultados[s.tipo]=(resultados[s.tipo]||0)+1;
+        const tec=(s.tecnica||[]).map(t=>t==="Outra"?(s.tecnicaOutra||"Outra"):t);
+        if(s.tipo==="Raspei"||s.tipo==="Fui raspado"||s.tipo==="Passei"||s.tipo==="Fui passado"){tec.forEach(t=>posicoesSet.add(t));}
+        if(s.tipo==="Finalizei")finalizacaoFeita.push(...tec);
+        if(s.tipo==="Fui finalizado")finalizacaoSofrida.push(...tec);
+        if(s.tipo==="Cheguei nas costas"||s.tipo==="Sofri pegada nas costas")posicoesSet.add("Costas");
+        if(s.tipo==="Montei"||s.tipo==="Fui montado")posicoesSet.add("Montada");
+      });
+    });
+    const novaRola={...rolaInp,parceiroId:pId,id:Date.now(),eventos,resultados,posicoes:[...posicoesSet],finalizacaoFeita,finalizacaoSofrida};
+    setDraftRolas(p=>[...p,novaRola]);
+    setRolaInp({parceiroId:null,parceiro:"",peso:"",nivel:"",intensidade:"Técnico",eventos:[],notas:""});
     setShowRolaForm(false);
     window.__toast?.("Rola adicionado à sessão");
   };
@@ -1253,16 +1426,35 @@ function JiuView({user}){
 
   const saveSession=async()=>{
     if(!sessDur&&draftRolas.length===0){window.__toast?.("Adicione duração ou pelo menos um rola");return;}
-    const newSession={id:Date.now(),date:todayStr(),dur:sessDur,posicaoEnsinada,detalhesPosicaoEnsinada,rolas:draftRolas,pos_ok:posOk,pos_nok:posNok,notas:sessNotas};
-    const nl=[newSession,...jiuSessions].slice(0,300);
-    setJiuSessions(nl);await sSet(sk(user.id,"jiu_sessions"),nl);
-    window.__toast?.("Sessão salva");
+    if(editingSessionId){
+      const nl=jiuSessions.map(s=>s.id===editingSessionId?{...s,dur:sessDur,posicaoEnsinada,detalhesPosicaoEnsinada,rolas:draftRolas,pos_ok:posOk,pos_nok:posNok,notas:sessNotas}:s);
+      setJiuSessions(nl);await sSet(sk(user.id,"jiu_sessions"),nl);
+      window.__toast?.("Sessão atualizada");
+      setEditingSessionId(null);
+    }else{
+      const newSession={id:Date.now(),date:todayStr(),dur:sessDur,posicaoEnsinada,detalhesPosicaoEnsinada,rolas:draftRolas,pos_ok:posOk,pos_nok:posNok,notas:sessNotas};
+      const nl=[newSession,...jiuSessions].slice(0,300);
+      setJiuSessions(nl);await sSet(sk(user.id,"jiu_sessions"),nl);
+      window.__toast?.("Sessão salva");
+    }
+    setSessDur("");setPosicaoEnsinada("");setDetalhesPosicaoEnsinada("");setDraftRolas([]);setPosOk("");setPosNok("");setSessNotas("");
+  };
+
+  const editSession=(s)=>{
+    setEditingSessionId(s.id);
+    setSessDur(s.dur||"");setPosicaoEnsinada(s.posicaoEnsinada||"");setDetalhesPosicaoEnsinada(s.detalhesPosicaoEnsinada||"");
+    setDraftRolas(s.rolas||[]);setPosOk(s.pos_ok||"");setPosNok(s.pos_nok||"");setSessNotas(s.notas||"");
+    window.__toast?.("Editando sessão — role para cima");
+  };
+  const cancelEditSession=()=>{
+    setEditingSessionId(null);
     setSessDur("");setPosicaoEnsinada("");setDetalhesPosicaoEnsinada("");setDraftRolas([]);setPosOk("");setPosNok("");setSessNotas("");
   };
 
   const deleteSession=async(id)=>{
     const nl=jiuSessions.filter(s=>s.id!==id);
     setJiuSessions(nl);await sSet(sk(user.id,"jiu_sessions"),nl);
+    if(editingSessionId===id)cancelEditSession();
   };
 
   const saveTec=async()=>{
@@ -1384,7 +1576,7 @@ function JiuView({user}){
   const I={width:"100%",background:T.inpBg,border:`1px solid ${T.border}`,borderRadius:10,color:T.text,padding:"10px 12px",fontSize:15,outline:"none",minHeight:46,boxSizing:"border-box"};
   const Sv=(l,fn)=>(<button onClick={fn} style={{width:"100%",padding:12,borderRadius:10,border:"none",background:user.accent,color:"#FFF",fontSize:14,fontWeight:700,cursor:"pointer",minHeight:48,marginTop:4}}>{l}</button>);
 
-  const RES_C={Finalizei:T.done,Raspei:user.accent,Passei:"#3B82F6",Neutro:T.sub,"Fui passado":"#F59E0B","Fui raspado":"#F97316","Fui finalizado":"#EF4444"};
+  const RES_C={Finalizei:T.done,Passei:"#3B82F6",Raspei:user.accent,"Cheguei nas costas":"#8B5CF6",Montei:"#10B981",Neutro:T.sub,"Fui passado":"#F59E0B","Fui raspado":"#F97316","Sofri pegada nas costas":"#F97316","Fui montado":"#EF4444","Fui finalizado":"#EF4444"};
 
 
   const Stars=({label,val,onChange})=>(<div style={{marginBottom:10}}>
@@ -1432,7 +1624,11 @@ function JiuView({user}){
         </Box>)}
 
         <Box>
-          <Hdr t="Nova Sessão"/>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:8}}>
+            <Hdr t={editingSessionId?"✏️ Editando Sessão":"Nova Sessão"} mb={0}/>
+            {editingSessionId&&<button onClick={cancelEditSession} style={{padding:"5px 10px",borderRadius:8,border:`1px solid ${T.border}`,background:"transparent",color:T.muted,fontSize:11,cursor:"pointer"}}>Cancelar edição</button>}
+          </div>
+          <div style={{height:8}}/>
           <input value={sessDur} onChange={e=>setSessDur(e.target.value)} placeholder="Duração total (min)" inputMode="decimal" style={{...I,marginBottom:12}}/>
 
           <div style={{fontSize:12,color:T.muted,marginBottom:8,fontWeight:600}}>Posição ensinada pelo professor</div>
@@ -1474,21 +1670,21 @@ function JiuView({user}){
             </div>);
           })}
 
-          {showRolaForm&&<RolaForm rolaInp={rolaInp} setRolaInp={setRolaInp} parceiros={parceiros} accent={user.accent} onAdd={addDraftRola} onCancel={()=>{setShowRolaForm(false);setRolaInp({parceiroId:null,parceiro:"",peso:"",nivel:"",intensidade:"Técnico",resultados:{},posicoes:[],finalizacaoFeita:[],finalizacaoSofrida:[],notas:""});}}/>}
+          {showRolaForm&&<RolaForm rolaInp={rolaInp} setRolaInp={setRolaInp} parceiros={parceiros} accent={user.accent} onAdd={addDraftRola} onCancel={()=>{setShowRolaForm(false);setRolaInp({parceiroId:null,parceiro:"",peso:"",nivel:"",intensidade:"Técnico",eventos:[],notas:""});}}/>}
 
           <div style={{height:1,background:T.border,margin:"14px 0"}}/>
 
           <input value={posOk} onChange={e=>setPosOk(e.target.value)} placeholder="✓ O que funcionou? (resumo geral)" style={{...I,marginBottom:8}}/>
           <input value={posNok} onChange={e=>setPosNok(e.target.value)} placeholder="✗ O que não funcionou?" style={{...I,marginBottom:8}}/>
           <textarea value={sessNotas} onChange={e=>setSessNotas(e.target.value)} placeholder="Notas gerais, feedback do professor..." rows={2} style={{...I,resize:"none",marginBottom:4}}/>
-          {Sv("Salvar Sessão",saveSession)}
+          {Sv(editingSessionId?"Salvar Alterações":"Salvar Sessão",saveSession)}
         </Box>
 
         <Hdr t="Histórico" mb={8}/>
         <div style={{display:"flex",flexDirection:"column",gap:8}}>
           {jiuSessions.slice(0,15).map(s=>{
-            const wins=(s.rolas||[]).reduce((a,r)=>a+countR(r,["Finalizei","Raspei","Passei"]),0);
-            const losses=(s.rolas||[]).reduce((a,r)=>a+countR(r,["Fui finalizado","Fui raspado","Fui passado"]),0);
+            const wins=(s.rolas||[]).reduce((a,r)=>a+countR(r,["Finalizei","Raspei","Passei","Cheguei nas costas","Montei"]),0);
+            const losses=(s.rolas||[]).reduce((a,r)=>a+countR(r,["Fui finalizado","Fui raspado","Fui passado","Sofri pegada nas costas","Fui montado"]),0);
             const intensCounts={};(s.rolas||[]).forEach(r=>{const t=r.intensidade||s.tipo||"Técnico";intensCounts[t]=(intensCounts[t]||0)+1;});
             const intensSummary=Object.entries(intensCounts).sort((a,b)=>b[1]-a[1]);
             return(<div key={s.id} style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:12,overflow:"hidden"}}>
@@ -1501,6 +1697,7 @@ function JiuView({user}){
                   <div style={{display:"flex",gap:8,alignItems:"center"}}>
                     {s.dur&&<span style={{fontSize:12,color:T.muted,fontFamily:"'JetBrains Mono',monospace"}}>{s.dur}min</span>}
                     <span style={{fontSize:11,color:T.muted}}>{s.date}</span>
+                    <button onClick={()=>editSession(s)} style={{background:"transparent",border:"none",color:user.accent,fontSize:12,fontWeight:700,cursor:"pointer",padding:"0 4px"}}>✎</button>
                     <button onClick={()=>deleteSession(s.id)} style={{background:"transparent",border:"none",color:T.muted,fontSize:16,cursor:"pointer",padding:"0 2px"}}>×</button>
                   </div>
                 </div>
@@ -1532,8 +1729,8 @@ function JiuView({user}){
 
       {/* ── PARCEIROS ──────────────────────────────────────────── */}
       {tab==="parceiros"&&(()=>{
-        const POSITIVOS5=["Finalizei","Raspei","Passei"];
-        const NEGATIVOS5=["Fui finalizado","Fui raspado","Fui passado"];
+        const POSITIVOS5=["Finalizei","Raspei","Passei","Cheguei nas costas","Montei"];
+        const NEGATIVOS5=["Fui finalizado","Fui raspado","Fui passado","Sofri pegada nas costas","Fui montado"];
         const byParceiro={};
         allRolas.forEach(r=>{
           const key=r.parceiroId||r.parceiro;
@@ -1694,8 +1891,8 @@ function JiuView({user}){
       {/* ── TÉCNICO ────────────────────────────────────────────── */}
       {/* ── POSIÇÕES (fundida com Técnico) ──────────────────────── */}
       {tab==="posicoes"&&(()=>{
-        const POSITIVOS=["Finalizei","Raspei","Passei"];
-        const NEGATIVOS=["Fui finalizado","Fui raspado","Fui passado"];
+        const POSITIVOS=["Finalizei","Raspei","Passei","Cheguei nas costas","Montei"];
+        const NEGATIVOS=["Fui finalizado","Fui raspado","Fui passado","Sofri pegada nas costas","Fui montado"];
         const getPos2=(r)=>r.posicoes&&r.posicoes.length?r.posicoes:(r.posicao?[r.posicao]:[]);
         const byPos={};
         allRolas.forEach(r=>{getPos2(r).forEach(pos=>{if(!byPos[pos])byPos[pos]=[];byPos[pos].push(r);});});
@@ -1964,6 +2161,23 @@ function SettingsView({user,onClose,onConfigSaved}){
   useEffect(()=>{sGet(sk(user.id,"config"),DEF_CFG[user.id]).then(c=>setCfg({...DEF_CFG[user.id],...(c||{})}));},[user.id]);
   const handleImport=e=>{const f=e.target.files[0];if(!f)return;importBackup(f,()=>{});e.target.value="";};
   const saveCfg=async()=>{if(!cfg)return;await sSet(sk(user.id,"config"),cfg);window.__config=cfg;window.__toast?.("Configurações salvas");onConfigSaved&&onConfigSaved();};
+  const [checkingUpd,setCheckingUpd]=useState(false);
+  const checkUpdate=async()=>{
+    setCheckingUpd(true);
+    try{
+      if(location.protocol==="file:"){
+        window.__toast?.("Arquivo local — não dá pra verificar automaticamente. Baixe o HTML mais novo e substitua o arquivo salvo no celular.");
+        setCheckingUpd(false);
+        return;
+      }
+      if("caches" in window){const keys=await caches.keys();await Promise.all(keys.map(k=>caches.delete(k)));}
+      if("serviceWorker" in navigator){const regs=await navigator.serviceWorker.getRegistrations();await Promise.all(regs.map(r=>r.unregister()));}
+      const url=new URL(location.href);
+      url.searchParams.set("_v",Date.now());
+      window.__toast?.("Buscando versão mais recente...");
+      setTimeout(()=>{location.href=url.toString();},400);
+    }catch(e){location.reload();}
+  };
   const fi={background:T.inpBg,border:`1px solid ${T.border}`,borderRadius:8,color:T.text,padding:"8px 10px",fontSize:14,outline:"none",flex:1,minHeight:40};
   const Row=({l,children})=>(<div style={{display:"flex",alignItems:"center",justifyContent:"space-between",gap:12,padding:"8px 0",borderBottom:`1px solid ${T.border}`}}><span style={{fontSize:13,color:T.sub,flex:1}}>{l}</span>{children}</div>);
   return(
@@ -1972,6 +2186,14 @@ function SettingsView({user,onClose,onConfigSaved}){
         <div style={{width:36,height:4,background:T.border,borderRadius:2,margin:"0 auto 16px"}}/>
         <div style={{fontSize:16,fontWeight:700,color:T.text,marginBottom:16}}>Configurações — {user.name}</div>
         <input ref={fileRef} type="file" accept=".json" onChange={handleImport} style={{display:"none"}}/>
+        {/* Atualização */}
+        <button onClick={checkUpdate} disabled={checkingUpd} style={{width:"100%",display:"flex",alignItems:"center",gap:12,padding:"12px",borderRadius:12,border:`1px solid ${user.accent}`,background:`${user.accent}10`,cursor:checkingUpd?"default":"pointer",marginBottom:8,textAlign:"left"}}>
+          <div style={{width:36,height:36,borderRadius:9,background:user.accent,display:"flex",alignItems:"center",justifyContent:"center",color:"#FFF",fontSize:16,flexShrink:0}}>{checkingUpd?"…":"⟳"}</div>
+          <div style={{flex:1}}>
+            <div style={{fontSize:13,fontWeight:600,color:T.text}}>{checkingUpd?"Verificando...":"Verificar atualização"}</div>
+            <div style={{fontSize:10,color:T.muted,marginTop:1}}>versão atual: {APP_VERSION}</div>
+          </div>
+        </button>
         {/* Backup */}
         {[{label:"Exportar Backup",icon:"↓",action:()=>exportBackup(user.id)},{label:"Importar Backup",icon:"↑",action:()=>fileRef.current.click()}].map(({label,icon,action})=>(<button key={label} onClick={action} style={{width:"100%",display:"flex",alignItems:"center",gap:12,padding:"12px",borderRadius:12,border:`1px solid ${T.border}`,background:T.inpBg,cursor:"pointer",marginBottom:8,textAlign:"left"}}><div style={{width:36,height:36,borderRadius:9,background:user.accent,display:"flex",alignItems:"center",justifyContent:"center",color:"#FFF",fontSize:16,flexShrink:0}}>{icon}</div><div style={{fontSize:13,fontWeight:600,color:T.text}}>{label}</div></button>))}
         {/* Metas */}
@@ -2011,10 +2233,13 @@ function DashboardView({user,plans,setPillar,setShowSettings}){
   useEffect(()=>{
     sGet(sk(user.id,"checkin",todayStr()),null).then(c=>{if(c){setCheckin(c);setCheckinSaved(true);}else{setCheckin({sono:3,horas:7,disposicao:3,corpo:3});setCheckinSaved(false);}});
   },[user.id]);
+  const [checkinDirty,setCheckinDirty]=useState(false);
+  const updCheckin=(newC)=>{setCheckin(newC);setCheckinDirty(true);};
   const saveCheckin=async(newC)=>{
     setCheckin(newC);
     await sSet(sk(user.id,"checkin",todayStr()),newC);
-    if(!checkinSaved){window.__toast?.("Check-in de hoje salvo");setCheckinSaved(true);}
+    window.__toast?.("Check-in de hoje salvo");
+    setCheckinSaved(true);setCheckinDirty(false);
     setReloadKey(k=>k+1);
   };
   useEffect(()=>{
@@ -2042,7 +2267,7 @@ function DashboardView({user,plans,setPillar,setShowSettings}){
       // Rolas semana (derivado dos rolas embutidos em cada sessão)
       const rolas=jiuSessionsRaw.flatMap(s=>(s.rolas||[]).map(r=>({...r,date:s.date})));
       const rolasWeek=rolas.filter(r=>r.date>=wsStr);
-      const winsWeek=rolasWeek.filter(r=>["Finalizei","Raspei","Passei"].some(p=>r.resultado?.includes(p)||(r.resultados&&r.resultados[p]>0))).length;
+      const winsWeek=rolasWeek.filter(r=>["Finalizei","Raspei","Passei","Cheguei nas costas","Montei"].some(p=>r.resultado?.includes(p)||(r.resultados&&r.resultados[p]>0))).length;
       const rolasByDate={};rolas.forEach(r=>{if(!rolasByDate[r.date])rolasByDate[r.date]=[];rolasByDate[r.date].push(r);});
 
       // ── Check-ins diários (sono/disposição/corpo — independente de treino) ──
@@ -2055,7 +2280,7 @@ function DashboardView({user,plans,setPillar,setShowSettings}){
       let hW=0,hT=0,lW=0,lT=0;
       Object.entries(rolasByDate).forEach(([ds,dr])=>{
         const c=checkinsByDate[ds];if(!c?.sono)return;
-        const w=dr.filter(r=>["Finalizei","Raspei","Passei"].some(p=>r.resultado?.includes(p)||(r.resultados&&r.resultados[p]>0))).length;
+        const w=dr.filter(r=>["Finalizei","Raspei","Passei","Cheguei nas costas","Montei"].some(p=>r.resultado?.includes(p)||(r.resultados&&r.resultados[p]>0))).length;
         if(c.sono>=4){hW+=w;hT+=dr.length;}else{lW+=w;lT+=dr.length;}
       });
       const correlacoes=[];
@@ -2108,7 +2333,7 @@ function DashboardView({user,plans,setPillar,setShowSettings}){
         let aW=0,aT=0,bW=0,bT=0;
         Object.entries(rolasByDate).forEach(([ds,dr])=>{
           const c=checkinsByDate[ds];if(!c?.disposicao)return;
-          const w=dr.filter(r=>["Finalizei","Raspei","Passei"].some(p=>r.resultado?.includes(p)||(r.resultados&&r.resultados[p]>0))).length;
+          const w=dr.filter(r=>["Finalizei","Raspei","Passei","Cheguei nas costas","Montei"].some(p=>r.resultado?.includes(p)||(r.resultados&&r.resultados[p]>0))).length;
           if(c.disposicao>=4){aW+=w;aT+=dr.length;}else if(c.disposicao<=2){bW+=w;bT+=dr.length;}
         });
         if(aT>=4&&bT>=4){
@@ -2119,7 +2344,7 @@ function DashboardView({user,plans,setPillar,setShowSettings}){
         let bW2=0,bT2=0,bestN=0;
         Object.entries(rolasByDate).forEach(([ds,dr])=>{
           const c=checkinsByDate[ds];if(!c||c.sono<4||c.disposicao<4)return;
-          bestN++;bW2+=dr.filter(r=>["Finalizei","Raspei","Passei"].some(p=>r.resultado?.includes(p)||(r.resultados&&r.resultados[p]>0))).length;bT2+=dr.length;
+          bestN++;bW2+=dr.filter(r=>["Finalizei","Raspei","Passei","Cheguei nas costas","Montei"].some(p=>r.resultado?.includes(p)||(r.resultados&&r.resultados[p]>0))).length;bT2+=dr.length;
         });
         if(bestN>=3&&bT2>0){
           const bR=Math.round((bW2/bT2)*100);
@@ -2141,7 +2366,7 @@ function DashboardView({user,plans,setPillar,setShowSettings}){
         const mJiu=jiuLog.filter(s=>s.date>=lmStart&&s.date<=lmEnd);
         // Rolas do mês
         const mRolas=rolas.filter(r=>r.date>=lmStart&&r.date<=lmEnd);
-        const POSITIVOS4=["Finalizei","Raspei","Passei"];const NEGATIVOS4=["Fui finalizado","Fui raspado","Fui passado"];
+        const POSITIVOS4=["Finalizei","Raspei","Passei","Cheguei nas costas","Montei"];const NEGATIVOS4=["Fui finalizado","Fui raspado","Fui passado","Sofri pegada nas costas","Fui montado"];
         const countR4=(r,list)=>r.resultados?Object.entries(r.resultados).filter(([k])=>list.includes(k)).reduce((a,[,v])=>a+v,0):(list.includes(r.resultado)?1:0);
         const mWins=mRolas.reduce((a,r)=>a+countR4(r,POSITIVOS4),0);
         const mLosses=mRolas.reduce((a,r)=>a+countR4(r,NEGATIVOS4),0);
@@ -2278,7 +2503,7 @@ function DashboardView({user,plans,setPillar,setShowSettings}){
           <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:12,color:user.accent,fontWeight:700}}>{checkin.sono}/5</span>
         </div>
         <div style={{display:"flex",gap:4}}>
-          {[1,2,3,4,5].map(n=>(<button key={n} onClick={()=>saveCheckin({...checkin,sono:n})} style={{flex:1,height:30,borderRadius:7,border:`1.5px solid ${checkin.sono>=n?user.accent:T.border}`,background:checkin.sono>=n?`${user.accent}18`:T.inpBg,color:checkin.sono>=n?user.accent:T.muted,fontSize:12,fontWeight:checkin.sono>=n?700:400,cursor:"pointer"}}>{n}</button>))}
+          {[1,2,3,4,5].map(n=>(<button key={n} onClick={()=>updCheckin({...checkin,sono:n})} style={{flex:1,height:30,borderRadius:7,border:`1.5px solid ${checkin.sono>=n?user.accent:T.border}`,background:checkin.sono>=n?`${user.accent}18`:T.inpBg,color:checkin.sono>=n?user.accent:T.muted,fontSize:12,fontWeight:checkin.sono>=n?700:400,cursor:"pointer"}}>{n}</button>))}
         </div>
       </div>
       <div style={{marginBottom:10}}>
@@ -2287,11 +2512,11 @@ function DashboardView({user,plans,setPillar,setShowSettings}){
           <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:12,color:user.accent,fontWeight:700}}>{checkin.horas}h</span>
         </div>
         <div style={{display:"flex",alignItems:"center",gap:6}}>
-          <button onClick={()=>saveCheckin({...checkin,horas:Math.max(0,Math.round((checkin.horas-0.5)*10)/10)})} style={{width:30,height:30,borderRadius:7,border:`1px solid ${T.border}`,background:T.inpBg,color:T.text,fontSize:15,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>−</button>
+          <button onClick={()=>updCheckin({...checkin,horas:Math.max(0,Math.round((checkin.horas-0.5)*10)/10)})} style={{width:30,height:30,borderRadius:7,border:`1px solid ${T.border}`,background:T.inpBg,color:T.text,fontSize:15,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>−</button>
           <div style={{flex:1,height:28,borderRadius:7,background:T.inpBg,position:"relative",overflow:"hidden"}}>
             <div style={{position:"absolute",inset:0,width:`${Math.min(100,(checkin.horas/12)*100)}%`,background:`${user.accent}25`,borderRadius:7,transition:"width 0.2s ease"}}/>
           </div>
-          <button onClick={()=>saveCheckin({...checkin,horas:Math.min(12,Math.round((checkin.horas+0.5)*10)/10)})} style={{width:30,height:30,borderRadius:7,border:`1px solid ${T.border}`,background:T.inpBg,color:T.text,fontSize:15,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>+</button>
+          <button onClick={()=>updCheckin({...checkin,horas:Math.min(12,Math.round((checkin.horas+0.5)*10)/10)})} style={{width:30,height:30,borderRadius:7,border:`1px solid ${T.border}`,background:T.inpBg,color:T.text,fontSize:15,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0}}>+</button>
         </div>
       </div>
       <div style={{marginBottom:10}}>
@@ -2300,7 +2525,7 @@ function DashboardView({user,plans,setPillar,setShowSettings}){
           <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:12,color:user.accent,fontWeight:700}}>{checkin.disposicao}/5</span>
         </div>
         <div style={{display:"flex",gap:4}}>
-          {[1,2,3,4,5].map(n=>(<button key={n} onClick={()=>saveCheckin({...checkin,disposicao:n})} style={{flex:1,height:30,borderRadius:7,border:`1.5px solid ${checkin.disposicao>=n?user.accent:T.border}`,background:checkin.disposicao>=n?`${user.accent}18`:T.inpBg,color:checkin.disposicao>=n?user.accent:T.muted,fontSize:12,fontWeight:checkin.disposicao>=n?700:400,cursor:"pointer"}}>{n}</button>))}
+          {[1,2,3,4,5].map(n=>(<button key={n} onClick={()=>updCheckin({...checkin,disposicao:n})} style={{flex:1,height:30,borderRadius:7,border:`1.5px solid ${checkin.disposicao>=n?user.accent:T.border}`,background:checkin.disposicao>=n?`${user.accent}18`:T.inpBg,color:checkin.disposicao>=n?user.accent:T.muted,fontSize:12,fontWeight:checkin.disposicao>=n?700:400,cursor:"pointer"}}>{n}</button>))}
         </div>
       </div>
       <div>
@@ -2309,13 +2534,14 @@ function DashboardView({user,plans,setPillar,setShowSettings}){
           <span style={{fontFamily:"'JetBrains Mono',monospace",fontSize:12,color:user.accent,fontWeight:700}}>{checkin.corpo}/5</span>
         </div>
         <div style={{display:"flex",gap:4}}>
-          {[1,2,3,4,5].map(n=>(<button key={n} onClick={()=>saveCheckin({...checkin,corpo:n})} style={{flex:1,height:30,borderRadius:7,border:`1.5px solid ${checkin.corpo>=n?user.accent:T.border}`,background:checkin.corpo>=n?`${user.accent}18`:T.inpBg,color:checkin.corpo>=n?user.accent:T.muted,fontSize:12,fontWeight:checkin.corpo>=n?700:400,cursor:"pointer"}}>{n}</button>))}
+          {[1,2,3,4,5].map(n=>(<button key={n} onClick={()=>updCheckin({...checkin,corpo:n})} style={{flex:1,height:30,borderRadius:7,border:`1.5px solid ${checkin.corpo>=n?user.accent:T.border}`,background:checkin.corpo>=n?`${user.accent}18`:T.inpBg,color:checkin.corpo>=n?user.accent:T.muted,fontSize:12,fontWeight:checkin.corpo>=n?700:400,cursor:"pointer"}}>{n}</button>))}
         </div>
         <div style={{display:"flex",justifyContent:"space-between",marginTop:3}}>
           <span style={{fontSize:9,color:T.muted}}>1 = com dor</span>
           <span style={{fontSize:9,color:T.muted}}>5 = sem dor</span>
         </div>
       </div>
+      <button onClick={()=>saveCheckin(checkin)} style={{width:"100%",marginTop:14,padding:12,borderRadius:10,border:"none",background:checkinDirty?user.accent:(checkinSaved?T.done:user.accent),color:"#FFF",fontSize:14,fontWeight:700,cursor:"pointer",minHeight:46}}>{checkinDirty?"💾 Salvar Check-in":checkinSaved?"✓ Salvo — toque para salvar de novo":"💾 Salvar Check-in"}</button>
     </div>
 
     {/* 4 main stats */}
