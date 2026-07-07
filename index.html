@@ -48,13 +48,13 @@ const { useState, useEffect, useRef } = React;
 const LIGHT_T={bg:"#F8F7F5",card:"#FFFFFF",border:"#E6E4E0",borderDone:"#BBF7D0",text:"#0A0A0A",sub:"#888880",muted:"#C0BFB8",done:"#15803D",doneBg:"#F0FDF4",inpBg:"#F4F3F0",timerBg:"#FFF8F0",timerBorder:"#FDDCB5",deloadBg:"#FFF7ED",deloadBorder:"#FED7AA",deloadText:"#9A3412",deloadSub:"#C2410C",scroll:"#DDDDDD"};
 const DARK_T={bg:"#0C0C0C",card:"#171717",border:"#282828",borderDone:"#1A3A1A",text:"#F0F0F0",sub:"#888880",muted:"#484848",done:"#4ADE80",doneBg:"#091409",inpBg:"#202020",timerBg:"#1C1400",timerBorder:"#3D2E00",deloadBg:"#1C1000",deloadBorder:"#3D2800",deloadText:"#FED7AA",deloadSub:"#FBBF24",scroll:"#333333"};
 let T=LIGHT_T;
-const APP_VERSION="2026.07.02-1";
+const APP_VERSION="2026.07.06-3";
 const USERS={G:{id:"G",name:"Guilherme",accent:"#EA6C00",goal:87,goalDate:"2026-08-31",ctx:"atleta BJJ faixa azul — meia-guarda, single leg, força de combate"},B:{id:"B",name:"Bianca",accent:"#E11D4B",goal:null,goalDate:null,ctx:"treino estético feminino — glúteo médio, posterior, afinar cintura"}};
 
 /* ─── DEFAULT CONFIG ─────────────────────────────────────────────────── */
 const DEF_CFG={
   G:{goalWeight:87,goalDate:"2026-08-31",proteinTarget:200,calorieNormal:1800,calorie2treinos:2100,calorieDescanso:1700,hydrationTarget:4000,roundMin:5,restMin:1,numRounds:6},
-  B:{goalWeight:null,goalDate:null,proteinTarget:130,calorieNormal:1800,calorie2treinos:1900,calorieDescanso:1600,hydrationTarget:2500,roundMin:5,restMin:1,numRounds:6},
+  B:{goalWeight:null,goalDate:null,proteinTarget:133,calorieNormal:1600,calorie2treinos:1900,calorieDescanso:1600,hydrationTarget:2500,roundMin:5,restMin:1,numRounds:6},
 };
 const MC={"glúteo":"#EA6C00","glúteo médio":"#FB923C","isquiotibiais":"#EF4444","posterior":"#DC2626","lombar":"#B91C1C","quadríceps":"#3B82F6","adutor":"#EC4899","panturrilha":"#06B6D4","sóleo":"#0891B2","dorsal":"#10B981","bíceps":"#059669","romboides":"#16A34A","trapézio":"#D97706","ombro":"#F59E0B","manguito rotador":"#FBBF24","peitoral":"#6366F1","tríceps":"#4F46E5","core":"#8B5CF6","transverso":"#A78BFA","oblíquos":"#7C3AED","pegada":"#78716C","antebraço":"#92400E","dedos":"#A16207","cardio":"#64748B"};
 
@@ -157,6 +157,7 @@ const MEALS_B=[
   {id:"cafe_b",nome:"Café da Manhã",horario:"07:00–09:00",
     fixos:[
       {id:"cafeb_ovo",nome:"2 ovos",kcal:140,prot:12,carbs:1,fat:10},
+      {id:"cafeb_pao",nome:"Pão integral (2 fatias)",kcal:140,prot:6,carbs:24,fat:2},
       {id:"cafeb_iog",nome:"Iogurte grego",kcal:100,prot:17,carbs:6,fat:1},
       {id:"cafeb_fruta",nome:"Fruta",kcal:40,prot:1,carbs:21,fat:0},
     ],
@@ -170,8 +171,8 @@ const MEALS_B=[
     escolhas:[]},
   {id:"lanche_b",nome:"Lanche",horario:"15:00–16:00",
     fixos:[
-      {id:"lanb_iog",nome:"Iogurte grego",kcal:100,prot:17,carbs:6,fat:1},
-      {id:"lanb_fruta",nome:"Fruta",kcal:80,prot:0,carbs:12,fat:0},
+      {id:"lanb_pao",nome:"Pão integral (2 fatias)",kcal:140,prot:6,carbs:24,fat:2},
+      {id:"lanb_ovo",nome:"Ovo",kcal:78,prot:6,carbs:1,fat:5},
     ],
     escolhas:[]},
   {id:"jantar_b",nome:"Jantar",horario:"20:00–21:00",
@@ -1024,7 +1025,7 @@ function NutricaoView({user}){
   },[user.id]);
 
   const[dietaDirty,setDietaDirty]=useState(false);
-  const update=d=>{setToday(d);setDietaDirty(true);};
+  const update=async(d)=>{setToday(d);setDietaDirty(false);await sSet(sk(user.id,"nutri",todayStr()),d);};
   const save=async d=>{setToday(d);await sSet(sk(user.id,"nutri",todayStr()),d);setDietaDirty(false);window.__toast?.("Dieta de hoje salva");};
   const cfg=window.__config||DEF_CFG[user.id];
   const KT=today.tipo_dia==="2treinos"?cfg.calorie2treinos:today.tipo_dia==="descanso"?cfg.calorieDescanso:cfg.calorieNormal;
@@ -2225,6 +2226,159 @@ function SettingsView({user,onClose,onConfigSaved}){
 }
 
 
+const CAMP_DEFAULT_CFG={startDate:"2026-07-06",startWeight:66.6,weighInDate:"2026-07-25",targetWeight:62,phase1Days:12,phase1Fraction:0.75};
+function computeCampExpected(dateStr,cfg){
+  const start=new Date(cfg.startDate+"T00:00:00");
+  const end=new Date(cfg.weighInDate+"T00:00:00");
+  const d=new Date(dateStr+"T00:00:00");
+  const totalDays=Math.max(1,(end-start)/86400000);
+  const totalLoss=cfg.startWeight-cfg.targetWeight;
+  const p1Days=Math.min(cfg.phase1Days,totalDays);
+  const p1Loss=totalLoss*cfg.phase1Fraction;
+  const p2Days=Math.max(1,totalDays-p1Days);
+  const p2Loss=totalLoss-p1Loss;
+  const elapsed=Math.max(0,Math.min(totalDays,(d-start)/86400000));
+  if(elapsed<=p1Days)return cfg.startWeight-(p1Loss*(elapsed/p1Days));
+  const e2=elapsed-p1Days;
+  return(cfg.startWeight-p1Loss)-(p2Loss*(e2/p2Days));
+}
+function CampCard({user}){
+  const I={width:"100%",background:T.inpBg,border:`1px solid ${T.border}`,borderRadius:10,color:T.text,padding:"9px 11px",fontSize:14,outline:"none",minHeight:42,boxSizing:"border-box"};
+  const[cfg,setCfg]=useState(CAMP_DEFAULT_CFG);
+  const[entries,setEntries]=useState([]);
+  const[inp,setInp]=useState("");
+  const[showCfg,setShowCfg]=useState(false);
+  const[loaded,setLoaded]=useState(false);
+
+  useEffect(()=>{
+    (async()=>{
+      const c=await sGet(sk(user.id,"camp_config"),CAMP_DEFAULT_CFG);
+      const e=await sGet(sk(user.id,"camp_weights"),[]);
+      setCfg({...CAMP_DEFAULT_CFG,...(c||{})});
+      setEntries((e||[]).sort((a,b)=>a.date.localeCompare(b.date)));
+      setLoaded(true);
+    })();
+  },[user.id]);
+
+  if(!loaded)return null;
+
+  const today=todayStr();
+  const daysLeft=Math.ceil((new Date(cfg.weighInDate)-new Date(today))/86400000);
+  const expectedToday=computeCampExpected(today,cfg).toFixed(1);
+  const todayEntry=entries.find(e=>e.date===today);
+  const lastEntry=entries[entries.length-1];
+
+  const saveCfg=async(patch)=>{const nc={...cfg,...patch};setCfg(nc);await sSet(sk(user.id,"camp_config"),nc);};
+  const saveWeight=async()=>{
+    const w=parseFloat(inp.replace(",","."));
+    if(isNaN(w)||w<30||w>200){window.__toast?.("Peso inválido");return;}
+    const nl=[...entries.filter(e=>e.date!==today),{date:today,weight:w}].sort((a,b)=>a.date.localeCompare(b.date));
+    setEntries(nl);setInp("");
+    await sSet(sk(user.id,"camp_weights"),nl);
+    window.__toast?.("Peso de hoje registrado");
+  };
+  const delEntry=async(date)=>{
+    const nl=entries.filter(e=>e.date!==date);
+    setEntries(nl);
+    await sSet(sk(user.id,"camp_weights"),nl);
+  };
+
+  const exportText=()=>{
+    let txt=`ACOMPANHAMENTO DE CAMP — ${user.name}\n`;
+    txt+=`Início do plano: ${cfg.startWeight}kg em ${cfg.startDate}\n`;
+    txt+=`Pesagem: ${cfg.weighInDate} (kimono)\n`;
+    txt+=`Meta: ${cfg.targetWeight}kg\n`;
+    txt+=`Dias restantes: ${daysLeft}\n\n`;
+    txt+=`DATA        REAL     ESPERADO   DIF\n`;
+    entries.forEach(e=>{
+      const exp=computeCampExpected(e.date,cfg).toFixed(1);
+      const dif=(e.weight-exp).toFixed(1);
+      txt+=`${e.date}  ${e.weight.toFixed(1).padStart(5)}   ${exp.padStart(5)}     ${dif>0?"+":""}${dif}\n`;
+    });
+    return txt;
+  };
+  const doExport=async()=>{
+    const txt=exportText();
+    try{
+      await navigator.clipboard.writeText(txt);
+      window.__toast?.("Copiado! Cola aqui no chat");
+    }catch{
+      const blob=new Blob([txt],{type:"text/plain"});
+      const url=URL.createObjectURL(blob);
+      const a=document.createElement("a");a.href=url;a.download=`camp_${user.name.toLowerCase()}_${today}.txt`;a.click();
+      URL.revokeObjectURL(url);
+      window.__toast?.("Baixado — envia o arquivo aqui no chat");
+    }
+  };
+
+  return(
+    <div style={{background:T.card,border:`1.5px solid ${user.accent}40`,borderRadius:14,padding:16,marginBottom:12}}>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12}}>
+        <div style={{fontSize:13,fontWeight:700,color:user.accent}}>🥊 Camp — {daysLeft}{daysLeft===1?" dia":" dias"} p/ pesagem</div>
+        <button onClick={()=>setShowCfg(s=>!s)} style={{background:"transparent",border:"none",color:T.muted,fontSize:13,cursor:"pointer"}}>⚙</button>
+      </div>
+
+      {showCfg&&<div style={{background:T.inpBg,borderRadius:10,padding:10,marginBottom:12,display:"flex",gap:8,flexWrap:"wrap"}}>
+        <div style={{flex:1,minWidth:130}}>
+          <div style={{fontSize:10,color:T.muted,marginBottom:4}}>Início do plano</div>
+          <input type="date" value={cfg.startDate} onChange={e=>saveCfg({startDate:e.target.value})} style={{...I,minHeight:38}}/>
+        </div>
+        <div style={{flex:1,minWidth:100}}>
+          <div style={{fontSize:10,color:T.muted,marginBottom:4}}>Peso inicial (kg)</div>
+          <input value={cfg.startWeight} onChange={e=>saveCfg({startWeight:parseFloat(e.target.value)||cfg.startWeight})} inputMode="decimal" style={{...I,minHeight:38}}/>
+        </div>
+        <div style={{flex:1,minWidth:130}}>
+          <div style={{fontSize:10,color:T.muted,marginBottom:4}}>Data da pesagem</div>
+          <input type="date" value={cfg.weighInDate} onChange={e=>saveCfg({weighInDate:e.target.value})} style={{...I,minHeight:38}}/>
+        </div>
+        <div style={{flex:1,minWidth:100}}>
+          <div style={{fontSize:10,color:T.muted,marginBottom:4}}>Meta (kg)</div>
+          <input value={cfg.targetWeight} onChange={e=>saveCfg({targetWeight:parseFloat(e.target.value)||cfg.targetWeight})} inputMode="decimal" style={{...I,minHeight:38}}/>
+        </div>
+      </div>}
+
+      <div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:12}}>
+        <div style={{background:T.inpBg,borderRadius:9,padding:"9px 8px",textAlign:"center"}}>
+          <div style={{fontSize:16,fontWeight:700,color:user.accent,fontFamily:"'JetBrains Mono',monospace"}}>{lastEntry?lastEntry.weight:"—"}</div>
+          <div style={{fontSize:9,color:T.muted,marginTop:2}}>último peso</div>
+        </div>
+        <div style={{background:T.inpBg,borderRadius:9,padding:"9px 8px",textAlign:"center"}}>
+          <div style={{fontSize:16,fontWeight:700,color:T.text,fontFamily:"'JetBrains Mono',monospace"}}>{expectedToday??"—"}</div>
+          <div style={{fontSize:9,color:T.muted,marginTop:2}}>esperado hoje</div>
+        </div>
+        <div style={{background:T.inpBg,borderRadius:9,padding:"9px 8px",textAlign:"center"}}>
+          <div style={{fontSize:16,fontWeight:700,color:T.done,fontFamily:"'JetBrains Mono',monospace"}}>{cfg.targetWeight}</div>
+          <div style={{fontSize:9,color:T.muted,marginTop:2}}>meta pesagem</div>
+        </div>
+      </div>
+
+      <div style={{display:"flex",gap:8,marginBottom:10}}>
+        <input value={todayEntry?String(todayEntry.weight):inp} onChange={e=>setInp(e.target.value)} onKeyDown={e=>e.key==="Enter"&&saveWeight()} placeholder="Peso em jejum hoje (kg)" inputMode="decimal" style={{...I,flex:1}}/>
+        <button onClick={saveWeight} style={{padding:"0 16px",borderRadius:10,border:"none",background:user.accent,color:"#FFF",fontSize:13,fontWeight:700,cursor:"pointer"}}>Salvar</button>
+      </div>
+
+      {entries.length>0&&<div style={{marginBottom:10}}>
+        <div style={{fontSize:10,color:T.muted,fontWeight:700,marginBottom:6,textTransform:"uppercase",letterSpacing:0.5}}>Histórico ({entries.length})</div>
+        <div style={{display:"flex",flexDirection:"column",gap:4,maxHeight:180,overflowY:"auto"}}>
+          {[...entries].reverse().map(e=>{
+            const exp=parseFloat(computeCampExpected(e.date,cfg).toFixed(1));
+            const dif=(e.weight-exp).toFixed(1);
+            return(<div key={e.date} style={{display:"flex",alignItems:"center",justifyContent:"space-between",fontSize:11,padding:"5px 8px",background:T.inpBg,borderRadius:7}}>
+              <span style={{color:T.muted,fontFamily:"'JetBrains Mono',monospace"}}>{e.date.slice(5)}</span>
+              <span style={{color:T.text,fontWeight:700,fontFamily:"'JetBrains Mono',monospace"}}>{e.weight}kg</span>
+              <span style={{color:T.muted,fontFamily:"'JetBrains Mono',monospace"}}>esp. {exp}</span>
+              <span style={{color:parseFloat(dif)>0?"#EF4444":T.done,fontFamily:"'JetBrains Mono',monospace",fontWeight:700}}>{dif>0?"+":""}{dif}</span>
+              <button onClick={()=>delEntry(e.date)} style={{background:"transparent",border:"none",color:T.muted,fontSize:14,cursor:"pointer",padding:"0 2px"}}>×</button>
+            </div>);
+          })}
+        </div>
+      </div>}
+
+      <button onClick={doExport} style={{width:"100%",padding:10,borderRadius:9,border:`1px solid ${user.accent}`,background:"transparent",color:user.accent,fontSize:12,fontWeight:700,cursor:"pointer"}}>📤 Exportar histórico</button>
+    </div>
+  );
+}
+
 function DashboardView({user,plans,setPillar,setShowSettings}){
   const[data,setData]=useState(null);
   const[checkin,setCheckin]=useState({sono:3,horas:7,disposicao:3,corpo:3});
@@ -2234,7 +2388,12 @@ function DashboardView({user,plans,setPillar,setShowSettings}){
     sGet(sk(user.id,"checkin",todayStr()),null).then(c=>{if(c){setCheckin(c);setCheckinSaved(true);}else{setCheckin({sono:3,horas:7,disposicao:3,corpo:3});setCheckinSaved(false);}});
   },[user.id]);
   const [checkinDirty,setCheckinDirty]=useState(false);
-  const updCheckin=(newC)=>{setCheckin(newC);setCheckinDirty(true);};
+  const updCheckin=async(newC)=>{
+    setCheckin(newC);setCheckinDirty(false);
+    await sSet(sk(user.id,"checkin",todayStr()),newC);
+    setCheckinSaved(true);
+    setReloadKey(k=>k+1);
+  };
   const saveCheckin=async(newC)=>{
     setCheckin(newC);
     await sSet(sk(user.id,"checkin",todayStr()),newC);
@@ -2392,39 +2551,7 @@ function DashboardView({user,plans,setPillar,setShowSettings}){
         return{monthName,mTreinos,mJiuCount:mJiu.length,mRolasCount:mRolas.length,mWinRate,pesoDelta,mNutriOk,mNutriDays,bestWeekNum:bestWeek?bestWeek[0]:null,bestWeekCount:bestWeek?bestWeek[1]:null};
       })();
 
-      // ── Desafio de Consistência (apenas Bianca) ─────────────
-      let challenge=null;
-      if(user.id==="B"){
-        const trainedDates=new Set();
-        for(const k of skeys){const s=await sGet(k);if(s)trainedDates.add(s.date);}
-        const TARGET_DAYS=44; // ~2 meses corridos (≈61 dias) × 5/7 dias úteis ≈ 44
-        let streak=0;
-        let cursor=new Date();
-        const todayDow=cursor.getDay(); // 0=Dom,6=Sáb
-        const todayStr2=cursor.toISOString().split("T")[0];
-        const todayIsWeekday=todayDow>=1&&todayDow<=5;
-        const todayTrained=trainedDates.has(todayStr2);
-        // Se hoje é dia útil e ainda não treinou, começa a contagem de ontem (hoje ainda "em aberto")
-        if(!(todayIsWeekday&&!todayTrained)){
-          // hoje conta (já treinou, ou é fim de semana — não quebra nem soma)
-        }
-        let d=new Date();
-        if(todayIsWeekday&&!todayTrained){d.setDate(d.getDate()-1);} // hoje ainda em aberto, começa contagem de ontem
-        for(let i=0;i<120;i++){
-          const dow=d.getDay();
-          const ds=d.toISOString().split("T")[0];
-          if(dow>=1&&dow<=5){
-            if(trainedDates.has(ds))streak++;
-            else break;
-          }
-          d.setDate(d.getDate()-1);
-        }
-        const daysLeftChallenge=Math.max(0,TARGET_DAYS-streak);
-        const completed=streak>=TARGET_DAYS;
-        challenge={streak,target:TARGET_DAYS,daysLeft:daysLeftChallenge,completed,todayIsWeekday,todayTrained};
-      }
-
-      setData({treinos,jiuSess:jiuWeek.length,nutriOk,pesoAtual,pesoAnterior,avgFadiga,rolasWeek:rolasWeek.length,winsWeek,goalWeight:cfg.goalWeight,goalDate:cfg.goalDate,correlacoes,readiness,readinessFactors,padroes,monthSummary,challenge,allTreinoDates,allJiuMeta,earliestDate});
+      setData({treinos,jiuSess:jiuWeek.length,nutriOk,pesoAtual,pesoAnterior,avgFadiga,rolasWeek:rolasWeek.length,winsWeek,goalWeight:cfg.goalWeight,goalDate:cfg.goalDate,correlacoes,readiness,readinessFactors,padroes,monthSummary,allTreinoDates,allJiuMeta,earliestDate});
     })();
   },[user.id,reloadKey]);
 
@@ -2458,38 +2585,6 @@ function DashboardView({user,plans,setPillar,setShowSettings}){
       <div style={{fontSize:12,color:T.muted,marginBottom:2,textTransform:"capitalize"}}>{today}</div>
       <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:28,fontWeight:700,color:T.text,letterSpacing:-0.5}}>Semana de {user.name}</div>
     </div>
-
-    {/* ── Desafio de Consistência (Bianca) ────────────── */}
-    {data.challenge&&(()=>{
-      const c=data.challenge;
-      const pct=Math.min(100,Math.round((c.streak/c.target)*100));
-      const color=c.completed?"#FFD700":c.streak>=20?T.done:c.streak>=5?user.accent:T.muted;
-      return(<div style={{background:c.completed?"linear-gradient(135deg, #FFD70015, #FFA50015)":T.card,border:`2px solid ${c.completed?"#FFD700":color+"30"}`,borderRadius:14,padding:"16px",marginBottom:16,position:"relative",overflow:"hidden"}}>
-        {c.completed&&<div style={{position:"absolute",top:8,right:10,fontSize:24}}>🎉</div>}
-        <div style={{fontSize:10,fontWeight:700,color:T.muted,letterSpacing:1.2,marginBottom:4,textTransform:"uppercase"}}>Desafio da Consistência — Presente Misterioso 🎁</div>
-        <div style={{display:"flex",alignItems:"baseline",gap:8,marginBottom:10}}>
-          <span style={{fontSize:36}}>🔥</span>
-          <div>
-            <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:32,fontWeight:700,color,lineHeight:1,letterSpacing:-1}}>{c.streak}<span style={{fontSize:16,color:T.muted}}> / {c.target} dias</span></div>
-          </div>
-        </div>
-        <div style={{height:10,background:T.inpBg,borderRadius:5,marginBottom:10,overflow:"hidden"}}>
-          <div style={{height:"100%",width:`${pct}%`,background:c.completed?"linear-gradient(90deg, #FFD700, #FFA500)":color,borderRadius:5,transition:"width 0.5s ease"}}/>
-        </div>
-        {c.completed?(
-          <div style={{fontSize:14,fontWeight:700,color:"#B8860B",textAlign:"center",padding:"8px",background:"#FFD70015",borderRadius:8}}>🎁 Desafio completo! Você conquistou o prêmio misterioso.</div>
-        ):(
-          <>
-            <div style={{fontSize:13,color:T.sub,marginBottom:6}}>
-              {c.todayIsWeekday&&!c.todayTrained
-                ?"Hoje é dia útil — treine para manter (ou aumentar) a sequência!"
-                :`Faltam ${c.daysLeft} dias úteis para o prêmio misterioso 🎁`}
-            </div>
-            <div style={{fontSize:11,color:T.muted,fontStyle:"italic"}}>Regra: treinar de segunda a sexta, sem falhar nenhum dia útil. Um dia perdido = reseta do zero.</div>
-          </>
-        )}
-      </div>);
-    })()}
 
     {/* ── Check-in Diário ─────────────────────────────── */}
     <div style={{background:T.card,border:`1.5px solid ${checkinSaved?T.borderDone:user.accent+"40"}`,borderRadius:14,padding:"14px 16px",marginBottom:16}}>
@@ -2543,6 +2638,8 @@ function DashboardView({user,plans,setPillar,setShowSettings}){
       </div>
       <button onClick={()=>saveCheckin(checkin)} style={{width:"100%",marginTop:14,padding:12,borderRadius:10,border:"none",background:checkinDirty?user.accent:(checkinSaved?T.done:user.accent),color:"#FFF",fontSize:14,fontWeight:700,cursor:"pointer",minHeight:46}}>{checkinDirty?"💾 Salvar Check-in":checkinSaved?"✓ Salvo — toque para salvar de novo":"💾 Salvar Check-in"}</button>
     </div>
+
+    {user.id==="B"&&<CampCard user={user}/>}
 
     {/* 4 main stats */}
     <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:12}}>
