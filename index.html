@@ -48,7 +48,7 @@ const { useState, useEffect, useRef } = React;
 const LIGHT_T={bg:"#F8F7F5",card:"#FFFFFF",border:"#E6E4E0",borderDone:"#BBF7D0",text:"#0A0A0A",sub:"#888880",muted:"#C0BFB8",done:"#15803D",doneBg:"#F0FDF4",inpBg:"#F4F3F0",timerBg:"#FFF8F0",timerBorder:"#FDDCB5",deloadBg:"#FFF7ED",deloadBorder:"#FED7AA",deloadText:"#9A3412",deloadSub:"#C2410C",scroll:"#DDDDDD"};
 const DARK_T={bg:"#0C0C0C",card:"#171717",border:"#282828",borderDone:"#1A3A1A",text:"#F0F0F0",sub:"#888880",muted:"#484848",done:"#4ADE80",doneBg:"#091409",inpBg:"#202020",timerBg:"#1C1400",timerBorder:"#3D2E00",deloadBg:"#1C1000",deloadBorder:"#3D2800",deloadText:"#FED7AA",deloadSub:"#FBBF24",scroll:"#333333"};
 let T=LIGHT_T;
-const APP_VERSION="2026.07.06-3";
+const APP_VERSION="2026.07.14-1";
 const USERS={G:{id:"G",name:"Guilherme",accent:"#EA6C00",goal:87,goalDate:"2026-08-31",ctx:"atleta BJJ faixa azul — meia-guarda, single leg, força de combate"},B:{id:"B",name:"Bianca",accent:"#E11D4B",goal:null,goalDate:null,ctx:"treino estético feminino — glúteo médio, posterior, afinar cintura"}};
 
 /* ─── DEFAULT CONFIG ─────────────────────────────────────────────────── */
@@ -152,6 +152,25 @@ const MEALS_G=[
         {id:"jantar_prot_pat",nome:"Patinho moído 200g",kcal:344,prot:62,carbs:0,fat:10},
       ]},
     ]},
+  {id:"supl_manha",nome:"Suplementos — Manhã",horario:"com o café da manhã",
+    fixos:[
+      {id:"supl_omega3",nome:"Ômega-3 Vhita (3 cáps · 758+545mg EPA/DHA)",kcal:27,prot:0,carbs:0,fat:3},
+      {id:"supl_d3k2",nome:"D3 + K2 MK7 (2 cáps · 4.000UI + 160mcg)",kcal:0,prot:0,carbs:0,fat:0},
+      {id:"supl_zinco",nome:"Zinco Bisglicinato (1 cáp · 29mg)",kcal:0,prot:0,carbs:0,fat:0},
+      {id:"supl_b9",nome:"Metilfolato B9 (1 cáp · 1.000mcg)",kcal:0,prot:0,carbs:0,fat:0},
+      {id:"supl_b6",nome:"B6 Piridoxina (1 cáp · 50mg)",kcal:0,prot:0,carbs:0,fat:0},
+    ],
+    escolhas:[]},
+  {id:"supl_sub",nome:"Suplementos — Sublingual",horario:"a qualquer hora",
+    fixos:[
+      {id:"supl_b12",nome:"B12 Metilcobalamina (1 pastilha · 1.000mcg, sublingual)",kcal:0,prot:0,carbs:0,fat:0},
+    ],
+    escolhas:[]},
+  {id:"supl_noite",nome:"Suplementos — Noite",horario:"antes de dormir",
+    fixos:[
+      {id:"supl_mg",nome:"Magnésio L-Treonato (2 cáps · 1.500mg)",kcal:0,prot:0,carbs:0,fat:0},
+    ],
+    escolhas:[]},
 ];
 const MEALS_B=[
   {id:"cafe_b",nome:"Café da Manhã",horario:"07:00–09:00",
