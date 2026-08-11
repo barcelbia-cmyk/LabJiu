@@ -48,7 +48,7 @@ const { useState, useEffect, useRef } = React;
 const LIGHT_T={bg:"#F8F7F5",card:"#FFFFFF",border:"#E6E4E0",borderDone:"#BBF7D0",text:"#0A0A0A",sub:"#888880",muted:"#C0BFB8",done:"#15803D",doneBg:"#F0FDF4",inpBg:"#F4F3F0",timerBg:"#FFF8F0",timerBorder:"#FDDCB5",deloadBg:"#FFF7ED",deloadBorder:"#FED7AA",deloadText:"#9A3412",deloadSub:"#C2410C",scroll:"#DDDDDD"};
 const DARK_T={bg:"#0C0C0C",card:"#171717",border:"#282828",borderDone:"#1A3A1A",text:"#F0F0F0",sub:"#888880",muted:"#484848",done:"#4ADE80",doneBg:"#091409",inpBg:"#202020",timerBg:"#1C1400",timerBorder:"#3D2E00",deloadBg:"#1C1000",deloadBorder:"#3D2800",deloadText:"#FED7AA",deloadSub:"#FBBF24",scroll:"#333333"};
 let T=LIGHT_T;
-const APP_VERSION="2026.08.11-5";
+const APP_VERSION="2026.08.11-7";
 const USERS={G:{id:"G",name:"Guilherme",accent:"#EA6C00",goal:87,goalDate:"2026-08-31",ctx:"atleta BJJ faixa azul — meia-guarda, single leg, força de combate"},B:{id:"B",name:"Bianca",accent:"#E11D4B",goal:null,goalDate:null,ctx:"treino estético feminino — glúteo médio, posterior, afinar cintura"},I:{id:"I",name:"Isabela",accent:"#0D9488",goal:null,goalDate:null,ctx:"atleta BJJ faixa azul adulto, profissional — laço/De la Riva, precisa de grip, isometria, potência explosiva e condicionamento pro campeonato de 25/09",noNutricao:true}};
 
 /* ─── DEFAULT CONFIG ─────────────────────────────────────────────────── */
@@ -248,29 +248,33 @@ const I_PLANS={
         velocityCue:"Na puxada explosiva, se a velocidade cair, para a série — não é sobre completar todas as reps a qualquer custo.",
         holdCue:"No hang: para quando a pegada começar a abrir, não espera soltar sozinha — não buscamos a falha total.",
         rirByPhase:{base:"Puxadas: RIR 3-4",construcao:"Puxadas: RIR 2-3",pico:"Puxadas: RIR 1-2"}},
-      {id:"remada_exp",name:"Remada Curvada Pesada + Remada Alta Explosiva (contraste)",sets:4,reps:"5–6 pesada + 6–8 explosiva",rest:"90s",ref:"barra — sem depender de elástico",muscles:["dorsal","ombro"],focus:"Contraste, um exercício em seguida do outro. A remada alta é executada com intenção de velocidade máxima.",explosive:true,priority:3,
+      {id:"remada_curvada_alta_i",name:"Remada Curvada Pesada + Remada Alta Explosiva (contraste)",sets:4,reps:"5–6 pesada + 6–8 explosiva",rest:"90s",ref:"barra — sem depender de elástico",muscles:["dorsal","ombro"],focus:"Contraste, um exercício em seguida do outro. A remada alta é executada com intenção de velocidade máxima.",explosive:true,priority:3,
+        ytVideos:[{id:"8hmYxGeYb8I",label:"Remada Curvada"},{id:"wYy4d0fmJ8k",label:"Remada Alta Explosiva"}],
         velocityCue:"Remada alta: se a barra subir mais devagar que nas primeiras reps, encerra a série ali.",
         rirByPhase:{base:"RIR 3-4 — não busca a falha, foco em aprender o padrão",construcao:"RIR 2-3",pico:"RIR 1-2 — mais perto do limite, ainda com folga"}},
       {id:"farmer",name:"Farmer's Walk Pegada Grossa",sets:4,reps:"25–30m",rest:"90s",ref:"pegada grossa",muscles:["pegada","core"],focus:"Grip fight — o ponto mais fraco dela hoje contra faixas do mesmo nível.",explosive:false,priority:4,
         holdCue:"Para quando a postura começar a ceder (ombro caindo, tronco inclinando) — não é sobre andar até soltar a carga."},
       {id:"rosca_punho_i",name:"Rosca de Punho Leve",sets:3,reps:"15",rest:"45s",ref:"carga baixa",muscles:["antebraço"],focus:"Volume baixo — monitorar dor no dedo anelar direito, para assim que sentir desconforto.",explosive:false,priority:5,
         rirByPhase:{base:"RIR 3-4",construcao:"RIR 2-3",pico:"RIR 2 — aqui não vale forçar até o limite, é acessório"}},
-      {id:"bike_sprint",name:"HIIT — Airbike",sets:6,reps:"20s forte/40s leve",rest:"conforme protocolo",ref:"85–90% de esforço — o 'leve' é ativo, continua pedalando fraco",muscles:["cardio"],focus:"Capacidade de repetir esforço no scramble sem cair de rendimento (força-resistência).",tag:"cardio",explosive:false,priority:6,
+      {id:"bike_sprint",name:"HIIT — Airbike",sets:6,reps:"20s forte/40s leve",rest:"conforme protocolo",ref:"85–90% de esforço — o 'leve' é ativo, continua pedalando fraco",muscles:["cardio"],focus:"Capacidade de repetir esforço no scramble sem cair de rendimento (força-resistência).",tag:"cardio",explosive:false,isCardio:true,priority:6,
         phases:{base:{sets:6,reps:"20s forte/40s leve"},construcao:{sets:8,reps:"20s forte/30s leve"},pico:{sets:5,reps:"15s forte/45s leve"}}},
     ]},
   B:{id:"B",name:"TREINO B",day:"Quarta",focus:"Ponte + Floor Press · Hip Thrust Explosivo · Isometria · HIIT",
     exercises:[
-      {id:"ponte_floorpress_i",name:"Ponte de Quadril Isométrica + Floor Press",sets:4,reps:"hold 20–30s + 6–8 supino",rest:"2min",ref:"sobe e trava o quadril primeiro (posição estática/estável), só depois o braço se move",muscles:["quadril","peitoral","tríceps"],focus:"Simula framing sob controle de quadril — a base fica travada enquanto o braço trabalha.",explosive:false,priority:1,
+      {id:"ponte_floorpress_i",name:"Supino com Ponte",sets:4,reps:"hold 20–30s + 6–8 supino",rest:"2min",ref:"sobe e trava o quadril primeiro (posição estática/estável), só depois o braço se move",muscles:["quadril","peitoral","tríceps"],focus:"Simula framing sob controle de quadril — a base fica travada enquanto o braço trabalha.",explosive:false,priority:1,
+        ytVideos:[{id:"8kmWKCs78xI",label:"Supino com Ponte"}],
         holdCue:"Quadril: para se começar a tremer/ceder — segurar até esse ponto já é suficiente.",
         rirByPhase:{base:"Floor press: RIR 3-4",construcao:"Floor press: RIR 2-3",pico:"Floor press: RIR 1-2"}},
-      {id:"hip_thrust",name:"Elevação Pélvica com Carga (Hip Thrust) — explosivo",sets:4,reps:"6–8, execução rápida",rest:"2min",ref:"carga autorregulada — o peso que ela consegue mover rápido, sem forçar carga máxima",muscles:["glúteo","posterior"],focus:"Potência de quadril pra transferir ao tatame — fuga de ponte, subida explosiva.",explosive:true,priority:2,
+      {id:"hip_thrust",name:"Elevação Pélvica Unilateral Explosiva com Carga",sets:4,reps:"6–8, execução rápida",rest:"2min",ref:"carga autorregulada — o peso que ela consegue mover rápido, sem forçar carga máxima",muscles:["glúteo","posterior"],focus:"Potência de quadril pra transferir ao tatame — fuga de ponte, subida explosiva.",explosive:true,priority:2,
+        ytVideos:[{id:"PdA19d_Vapc",label:"Elevação Pélvica Unilateral Explosiva"}],
         velocityCue:"Se a subida do quadril desacelerar, para a série — carga tem que ser a que ela consegue mover rápido, não a máxima.",
         rirByPhase:{base:"RIR 3-4 — não busca a falha, foco em aprender o padrão",construcao:"RIR 2-3",pico:"RIR 1-2 — mais perto do limite, ainda com folga"}},
       {id:"lombar_iso_i",name:"Extensão Lombar Isométrica",sets:3,reps:"20–30s hold",rest:"60s",ref:"banco romano",muscles:["lombar"],focus:"Isometria de cadeia posterior — segurar posição sob força puxando com as costas.",explosive:false,priority:3,
         holdCue:"Para quando a lombar começar a tremer ou perder a posição neutra — não é sobre aguentar até o limite."},
       {id:"prancha_lat",name:"Prancha Lateral com Carga",sets:3,reps:"20–30s cada lado",rest:"45s",ref:"—",muscles:["core","oblíquos"],focus:"Anti-rotação — estabilidade de tronco no scramble.",tag:"core",explosive:false,priority:4,
+        ytVideos:[{id:"eEBzDMJBoFo",label:"Prancha Lateral com Carga"}],
         holdCue:"Para quando o quadril começar a cair — qualidade da posição importa mais que segurar mais tempo."},
-      {id:"bike_sprint",name:"HIIT — Airbike",sets:6,reps:"20s forte/40s leve",rest:"conforme protocolo",ref:"85–90% de esforço",muscles:["cardio"],focus:"Mesmo protocolo do Treino A.",tag:"cardio",explosive:false,priority:5,
+      {id:"bike_sprint",name:"HIIT — Airbike",sets:6,reps:"20s forte/40s leve",rest:"conforme protocolo",ref:"85–90% de esforço",muscles:["cardio"],focus:"Mesmo protocolo do Treino A.",tag:"cardio",explosive:false,isCardio:true,priority:5,
         phases:{base:{sets:6,reps:"20s forte/40s leve"},construcao:{sets:8,reps:"20s forte/30s leve"},pico:{sets:5,reps:"15s forte/45s leve"}}},
     ]},
   C:{id:"C",name:"TREINO C",day:"Sexta",focus:"Agachamento Zercher · Subida Explosiva · SIT",
@@ -289,13 +293,13 @@ const I_PLANS={
         phases:{base:{hidden:true},construcao:{ref:"Entrou nesta fase"},pico:{ref:"Mantém, volume reduzido"}}},
       {id:"circuito_scramble_i",name:"Circuito Scramble (raspar → subir → passar, simulado)",sets:3,reps:"30–40s",rest:"90s",ref:"a partir da Construção (semana 4)",muscles:["core","quadríceps","posterior"],focus:"Força-resistência específica — repetir esforço de força várias vezes seguidas, igual no scramble real.",explosive:true,priority:5,
         phases:{base:{hidden:true},construcao:{ref:"Entrou nesta fase"},pico:{ref:"Mantém, volume reduzido"}}},
-      {id:"bike_sprint",name:"SIT — Airbike",sets:4,reps:"10s all-out / 2min recuperação",rest:"conforme protocolo",ref:"esforço 100% máximo nos primeiros segundos — se mantém ritmo constante, não foi all-out",muscles:["cardio"],focus:"Potência anaeróbica pura — o pico explosivo do sprint em si.",tag:"cardio",explosive:true,priority:6,
+      {id:"bike_sprint",name:"SIT — Airbike",sets:4,reps:"10s all-out / 2min recuperação",rest:"conforme protocolo",ref:"esforço 100% máximo nos primeiros segundos — se mantém ritmo constante, não foi all-out",muscles:["cardio"],focus:"Potência anaeróbica pura — o pico explosivo do sprint em si.",tag:"cardio",explosive:true,isCardio:true,priority:6,
         velocityCue:"Se conseguir manter o mesmo ritmo do início ao fim do sprint, não foi all-out de verdade — tem que cair a cadência no final.",
         phases:{base:{sets:4,reps:"10s all-out / 2min recuperação"},construcao:{sets:6,reps:"12–15s all-out / 90s–2min recuperação"},pico:{sets:4,reps:"10–12s all-out / 2min recuperação"}}},
     ]},
   Z:{id:"Z",name:"ZONA 2",day:"Terça · Quinta · Sábado · Domingo",focus:"Bike — Base Aeróbica / Recuperação de Lactato",
     exercises:[
-      {id:"zona2_bike_i",name:"Bike Zona 2",sets:1,reps:"35min · 4x/semana",rest:"—",ref:"FC alvo 118–140bpm — sem monitor, usa o teste da conversa (precisa falar frases completas confortavelmente)",muscles:["cardio"],focus:"Base aeróbica pra recuperação entre sprints. Sempre depois do treino do dia, nunca antes, pra não pré-fadigar o jogo. Nunca em jejum.",tag:"cardio",explosive:false,priority:1,
+      {id:"zona2_bike_i",name:"Bike Zona 2",sets:1,reps:"35min · 4x/semana",rest:"—",ref:"FC alvo 118–140bpm — sem monitor, usa o teste da conversa (precisa falar frases completas confortavelmente)",muscles:["cardio"],focus:"Base aeróbica pra recuperação entre sprints. Sempre depois do treino do dia, nunca antes, pra não pré-fadigar o jogo. Nunca em jejum.",tag:"cardio",explosive:false,isCardio:true,priority:1,
         phases:{base:{reps:"35min · 4x/semana"},construcao:{reps:"40min · 5x/semana"},pico:{reps:"35–40min · 3x/semana"}}},
     ]},
 };
@@ -426,6 +430,75 @@ function InlineTimer({seconds,accent,onClose,nextEx}){
   );
 }
 
+/* ─── INTERVAL PROTOCOL PARSER (HIIT/SIT) ────────────────────────────── */
+function parseIntervalReps(repsStr){
+  if(!repsStr)return null;
+  const re=/(\d+)(?:[–-]\d+)?\s*(s|min)/gi;
+  const matches=[...repsStr.matchAll(re)];
+  if(matches.length<2)return null;
+  const toSec=(n,u)=>u.toLowerCase().startsWith("m")?n*60:n;
+  const work=toSec(parseInt(matches[0][1]),matches[0][2]);
+  const rest=toSec(parseInt(matches[1][1]),matches[1][2]);
+  if(!work||!rest)return null;
+  return {work,rest};
+}
+
+/* ─── INTERVAL TIMER (HIIT/SIT) ──────────────────────────────────────── */
+function IntervalTimer({sets,workSec,restSec,accent,onDone}){
+  const[running,setRunning]=useState(false);
+  const[round,setRound]=useState(1);
+  const[phase,setPhase]=useState("work");
+  const[secLeft,setSecLeft]=useState(workSec);
+  const doneRef=useRef(false);
+  useWakeLock(running);
+  useEffect(()=>{
+    if(!running)return;
+    const iv=setInterval(()=>{
+      setSecLeft(s=>{
+        if(s>1)return s-1;
+        // transição de fase/round
+        if(phase==="work"){
+          vib([60]);playBeep();
+          setPhase("rest");
+          return restSec;
+        }
+        if(round>=sets){
+          vib([100,60,100,60,200]);playBeep();
+          setRunning(false);setPhase("done");doneRef.current=true;
+          onDone&&onDone();
+          return 0;
+        }
+        vib([60]);playBeep();
+        setRound(r=>r+1);setPhase("work");
+        return workSec;
+      });
+    },1000);
+    return()=>clearInterval(iv);
+  },[running,phase,round,sets,workSec,restSec]);
+  const start=()=>setRunning(true);
+  const pause=()=>setRunning(false);
+  const reset=()=>{setRunning(false);setRound(1);setPhase("work");setSecLeft(workSec);doneRef.current=false;};
+  const isDone=phase==="done";
+  const color=phase==="work"?"#EF4444":phase==="rest"?"#10B981":accent;
+  const label=phase==="work"?"FORTE":phase==="rest"?"LEVE":"CONCLUÍDO 🎉";
+  const totalPhaseSec=phase==="work"?workSec:restSec;
+  const pct=isDone?100:Math.min(100,((totalPhaseSec-secLeft)/totalPhaseSec)*100);
+  return(
+    <div style={{textAlign:"center",padding:"18px 14px",borderRadius:14,background:`${color}12`,border:`2px solid ${color}`,transition:"background 0.3s,border-color 0.3s"}}>
+      <div style={{fontSize:11,fontWeight:700,color:T.muted,letterSpacing:1}}>ROUND {Math.min(round,sets)}/{sets}</div>
+      <div style={{fontSize:15,fontWeight:700,color,letterSpacing:2,marginTop:4}}>{label}</div>
+      <div style={{fontSize:52,fontWeight:700,fontFamily:"'JetBrains Mono',monospace",color:T.text,margin:"6px 0",lineHeight:1}}>{isDone?"✓":`${secLeft}s`}</div>
+      {!isDone&&<div style={{height:6,background:T.inpBg,borderRadius:3,marginBottom:14,overflow:"hidden"}}><div style={{height:"100%",width:`${pct}%`,background:color,borderRadius:3,transition:"width 1s linear"}}/></div>}
+      <div style={{display:"flex",gap:8,justifyContent:"center"}}>
+        {!isDone&&(running
+          ?<button onClick={pause} style={{padding:"10px 20px",borderRadius:10,border:"none",background:color,color:"#FFF",fontSize:13,fontWeight:700,cursor:"pointer",minHeight:42}}>Pausar</button>
+          :<button onClick={start} style={{padding:"10px 20px",borderRadius:10,border:"none",background:color,color:"#FFF",fontSize:13,fontWeight:700,cursor:"pointer",minHeight:42}}>{round===1&&phase==="work"&&secLeft===workSec?"▶ Iniciar":"Continuar"}</button>)}
+        <button onClick={reset} style={{padding:"10px 16px",borderRadius:10,border:`1px solid ${T.border}`,background:"transparent",color:T.sub,fontSize:13,cursor:"pointer",minHeight:42}}>Reiniciar</button>
+      </div>
+    </div>
+  );
+}
+
 /* ─── MUSCLE TAGS ────────────────────────────────────────────────────── */
 function MuscleTags({muscles}){
   return(<div style={{display:"flex",flexWrap:"wrap",gap:3,marginTop:5}}>{(muscles||[]).slice(0,5).map(m=>(<span key={m} style={{fontSize:10,padding:"2px 7px",borderRadius:10,background:`${MC[m]||"#888"}18`,color:MC[m]||"#888",fontWeight:600}}>{m}</span>))}</div>);
@@ -434,7 +507,13 @@ function MuscleTags({muscles}){
 
 /* ─── EXERCISE IMAGE MODAL ───────────────────────────────────────────── */
 function ExImageModal({ex,onClose}){
-  const ytId=YT[ex.id];
+  useEffect(()=>{
+    const onKey=e=>{if(e.key==="Escape")onClose();};
+    document.addEventListener("keydown",onKey);
+    return()=>document.removeEventListener("keydown",onKey);
+  },[]);
+  const videos=ex.ytVideos&&ex.ytVideos.length?ex.ytVideos:(YT[ex.id]?[{id:YT[ex.id],label:null}]:[]);
+  const ytId=videos[0]?.id;
   const ytUrl=ytId
     ?`https://www.youtube.com/watch?v=${ytId}`
     :`https://www.youtube.com/results?search_query=${encodeURIComponent(ex.name+" exercício como fazer")}`;
@@ -471,10 +550,19 @@ function ExImageModal({ex,onClose}){
           {(ex.muscles||[]).slice(0,6).map(m=>(<span key={m} style={{fontSize:11,padding:"2px 8px",borderRadius:10,background:`${MC[m]||"#888"}18`,color:MC[m]||"#888",fontWeight:600}}>{m}</span>))}
         </div>
         <p style={{fontSize:13,color:T.sub,lineHeight:1.6,marginBottom:12}}>{ex.focus}</p>
-        <a href={ytUrl} target="_blank" rel="noreferrer"
-          style={{display:"flex",alignItems:"center",justifyContent:"center",gap:8,padding:"12px",borderRadius:12,background:"#FF0000",color:"#FFF",fontSize:13,fontWeight:700,textDecoration:"none",marginBottom:8}}>
-          ▶ Abrir no YouTube
-        </a>
+        {videos.length>1?(
+          <div style={{display:"flex",flexDirection:"column",gap:8,marginBottom:8}}>
+            {videos.map((v,i)=>(<a key={i} href={`https://www.youtube.com/watch?v=${v.id}`} target="_blank" rel="noreferrer"
+              style={{display:"flex",alignItems:"center",justifyContent:"center",gap:8,padding:"12px",borderRadius:12,background:"#FF0000",color:"#FFF",fontSize:13,fontWeight:700,textDecoration:"none"}}>
+              ▶ {v.label||`Abrir vídeo ${i+1}`}
+            </a>))}
+          </div>
+        ):(
+          <a href={ytUrl} target="_blank" rel="noreferrer"
+            style={{display:"flex",alignItems:"center",justifyContent:"center",gap:8,padding:"12px",borderRadius:12,background:"#FF0000",color:"#FFF",fontSize:13,fontWeight:700,textDecoration:"none",marginBottom:8}}>
+            ▶ Abrir no YouTube
+          </a>
+        )}
         <button onClick={onClose} style={{width:"100%",padding:11,borderRadius:12,border:`1px solid ${T.border}`,background:"transparent",color:T.sub,fontSize:13,cursor:"pointer",minHeight:44}}>Fechar</button>
       </div>
     </div>
@@ -566,7 +654,17 @@ function SessionExCard({ex,data,onChange,accent,user,onModal,onImgModal,prevExDa
       </div>
       <div style={{borderTop:`1px solid ${T.border}`,padding:"10px 14px 14px"}}>
         {ex.isCardio?(
-          <button onClick={()=>onChange({...data,cardio_done:!data.cardio_done})} style={{width:"100%",padding:14,borderRadius:10,border:`1px solid ${data.cardio_done?T.borderDone:T.border}`,background:data.cardio_done?T.doneBg:T.bg,color:data.cardio_done?T.done:T.sub,fontSize:15,fontWeight:data.cardio_done?700:400,cursor:"pointer",minHeight:48}}>{data.cardio_done?"✓ Sprint feito":"Marcar sprints feitos"}</button>
+          (()=>{
+            const proto=ex.tag==="cardio"&&typeof ex.sets==="number"?parseIntervalReps(ex.reps):null;
+            if(proto){
+              return(<>
+                <IntervalTimer sets={ex.sets} workSec={proto.work} restSec={proto.rest} accent={accent} onDone={()=>onChange({...data,cardio_done:true})}/>
+                {data.cardio_done&&<div style={{marginTop:8,textAlign:"center",fontSize:12,color:T.done,fontWeight:700}}>✓ Protocolo concluído e registrado</div>}
+                <button onClick={()=>onChange({...data,cardio_done:!data.cardio_done})} style={{width:"100%",marginTop:8,padding:10,borderRadius:9,border:`1px solid ${T.border}`,background:"transparent",color:T.sub,fontSize:11,cursor:"pointer"}}>{data.cardio_done?"Desmarcar":"Marcar feito manualmente"}</button>
+              </>);
+            }
+            return(<button onClick={()=>onChange({...data,cardio_done:!data.cardio_done})} style={{width:"100%",padding:14,borderRadius:10,border:`1px solid ${data.cardio_done?T.borderDone:T.border}`,background:data.cardio_done?T.doneBg:T.bg,color:data.cardio_done?T.done:T.sub,fontSize:15,fontWeight:data.cardio_done?700:400,cursor:"pointer",minHeight:48}}>{data.cardio_done?"✓ Feito":"Marcar feito"}</button>);
+          })()
         ):(
           <>
             <div style={{display:"grid",gridTemplateColumns:"30px 1fr 1fr 54px 48px",gap:6,marginBottom:8}}>
