@@ -48,16 +48,16 @@ const { useState, useEffect, useRef } = React;
 const LIGHT_T={bg:"#F8F7F5",card:"#FFFFFF",border:"#E6E4E0",borderDone:"#BBF7D0",text:"#0A0A0A",sub:"#888880",muted:"#C0BFB8",done:"#15803D",doneBg:"#F0FDF4",inpBg:"#F4F3F0",timerBg:"#FFF8F0",timerBorder:"#FDDCB5",deloadBg:"#FFF7ED",deloadBorder:"#FED7AA",deloadText:"#9A3412",deloadSub:"#C2410C",scroll:"#DDDDDD"};
 const DARK_T={bg:"#0C0C0C",card:"#171717",border:"#282828",borderDone:"#1A3A1A",text:"#F0F0F0",sub:"#888880",muted:"#484848",done:"#4ADE80",doneBg:"#091409",inpBg:"#202020",timerBg:"#1C1400",timerBorder:"#3D2E00",deloadBg:"#1C1000",deloadBorder:"#3D2800",deloadText:"#FED7AA",deloadSub:"#FBBF24",scroll:"#333333"};
 let T=LIGHT_T;
-const APP_VERSION="2026.08.11-8";
+const APP_VERSION="2026.09.15-1";
 const USERS={G:{id:"G",name:"Guilherme",accent:"#EA6C00",goal:87,goalDate:"2026-08-31",ctx:"atleta BJJ faixa azul — meia-guarda, single leg, força de combate"},B:{id:"B",name:"Bianca",accent:"#E11D4B",goal:null,goalDate:null,ctx:"treino estético feminino — glúteo médio, posterior, afinar cintura"},I:{id:"I",name:"Isabela",accent:"#0D9488",goal:null,goalDate:null,ctx:"atleta BJJ faixa azul adulto, profissional — laço/De la Riva, precisa de grip, isometria, potência explosiva e condicionamento pro campeonato de 25/09",noNutricao:true}};
 
 /* ─── DEFAULT CONFIG ─────────────────────────────────────────────────── */
 const DEF_CFG={
-  G:{goalWeight:87,goalDate:"2026-08-31",proteinTarget:200,calorieNormal:1800,calorie2treinos:2100,calorieDescanso:1700,hydrationTarget:4000,roundMin:5,restMin:1,numRounds:6},
-  B:{goalWeight:null,goalDate:null,proteinTarget:133,calorieNormal:1600,calorie2treinos:1900,calorieDescanso:1600,hydrationTarget:2500,roundMin:5,restMin:1,numRounds:6},
+  G:{goalWeight:89,goalDate:"2026-08-31",proteinTarget:183,calorieNormal:2300,calorie2treinos:2450,calorieDescanso:2150,hydrationTarget:4000,roundMin:5,restMin:1,numRounds:6},
+  B:{goalWeight:null,goalDate:null,proteinTarget:135,calorieNormal:1665,calorie2treinos:1800,calorieDescanso:1600,hydrationTarget:2500,roundMin:5,restMin:1,numRounds:6},
   I:{goalWeight:null,goalDate:null,proteinTarget:null,calorieNormal:null,calorie2treinos:null,calorieDescanso:null,hydrationTarget:3000,roundMin:5,restMin:1,numRounds:6},
 };
-const MC={"glúteo":"#EA6C00","glúteo médio":"#FB923C","isquiotibiais":"#EF4444","posterior":"#DC2626","lombar":"#B91C1C","quadríceps":"#3B82F6","adutor":"#EC4899","panturrilha":"#06B6D4","sóleo":"#0891B2","dorsal":"#10B981","bíceps":"#059669","romboides":"#16A34A","trapézio":"#D97706","ombro":"#F59E0B","manguito rotador":"#FBBF24","peitoral":"#6366F1","tríceps":"#4F46E5","core":"#8B5CF6","transverso":"#A78BFA","oblíquos":"#7C3AED","pegada":"#78716C","antebraço":"#92400E","dedos":"#A16207","cardio":"#64748B"};
+const MC={"glúteo":"#EA6C00","glúteo médio":"#FB923C","isquiotibiais":"#EF4444","posterior":"#DC2626","lombar":"#B91C1C","quadríceps":"#3B82F6","adutor":"#EC4899","panturrilha":"#06B6D4","sóleo":"#0891B2","dorsal":"#10B981","bíceps":"#059669","romboides":"#16A34A","trapézio":"#D97706","ombro":"#F59E0B","manguito rotador":"#FBBF24","peitoral":"#6366F1","tríceps":"#4F46E5","core":"#8B5CF6","transverso":"#A78BFA","oblíquos":"#7C3AED","pegada":"#78716C","antebraço":"#92400E","dedos":"#A16207","cardio":"#64748B","tornozelo":"#0EA5E9","coluna":"#14B8A6","pescoço":"#DB2777"};
 
 /* ─── YOUTUBE VIDEO IDS (thumbnail + link per exercise) ─────────────── */
 const YT={
@@ -81,7 +81,8 @@ const YT={
   prancha_lat:"RPr51FgCYbA",dead_bug:"g_BYB0R-4Ws",hipopressivo:"CsvaIIraFQE",
   deadhang_puxada_i:"jBZCzK9zlxk",rosca_punho_i:"SqwIBiru46w",ponte_floorpress_i:"gacJl2rHwtg",
   lombar_iso_i:"9IHwhIgxmD0",zercher_agach_i:"w0dsCp3edNc",box_jump_i:"3INzGHuk23U",
-  broad_jump_i:"x9qlFXfQaZU",
+  broad_jump_i:"x9qlFXfQaZU",dead_hang_g:"jBZCzK9zlxk",equilibrio_reach_g:"TShLyAkKU9c",
+  rotacao_tronco_g:"ahqCBzRlwgo",pescoco_iso_g:"fF8Hhf6Z9PY",
 };
 
 
@@ -111,51 +112,37 @@ function FaixaSymbol({faixa,size=14}){
 }
 
 const MEALS_G=[
-  {id:"cafe",nome:"Café da Manhã",horario:"07:00–09:00",
+  {id:"cafe_manha",nome:"Café da Manhã",horario:"07:00–08:00",
     fixos:[
-      {id:"cafe_pao",nome:"Pão francês",kcal:145,prot:5,carbs:28,fat:1.2},
+      {id:"cmg_tapioca",nome:"Tapioca (goma) 100g",kcal:242,prot:0,carbs:60,fat:0},
+      {id:"cmg_ovos",nome:"2 ovos",kcal:140,prot:12,carbs:1,fat:10},
+      {id:"cmg_queijo",nome:"Queijo muçarela 40g",kcal:124,prot:8,carbs:0.8,fat:10},
     ],
-    escolhas:[
-      {id:"cafe_prot",label:"Proteína",opcoes:[
-        {id:"cafe_prot_ovo",nome:"3 ovos cozidos",kcal:234,prot:19,carbs:2,fat:16},
-        {id:"cafe_prot_mus",nome:"Muçarela 60g",kcal:168,prot:13,carbs:1,fat:13},
-      ]},
-    ]},
+    escolhas:[]},
+  {id:"cafe_tarde",nome:"Café da Tarde",horario:"15:30–16:30",
+    fixos:[
+      {id:"ctg_tapioca",nome:"Tapioca (goma) 100g",kcal:242,prot:0,carbs:60,fat:0},
+      {id:"ctg_ovos",nome:"2 ovos",kcal:140,prot:12,carbs:1,fat:10},
+      {id:"ctg_queijo",nome:"Queijo muçarela 40g",kcal:124,prot:8,carbs:0.8,fat:10},
+    ],
+    escolhas:[]},
   {id:"almoco",nome:"Almoço",horario:"12:00–13:00",
     fixos:[
-      {id:"almoco_arroz",nome:"Arroz 100g",kcal:128,prot:2.5,carbs:28,fat:0.2},
-      {id:"almoco_feijao",nome:"Feijão 80g",kcal:62,prot:4,carbs:11,fat:0.4},
+      {id:"almg_arroz",nome:"Arroz 150g",kcal:195,prot:4,carbs:43,fat:0.3},
+      {id:"almg_feijao",nome:"Feijão 100g",kcal:90,prot:6,carbs:16,fat:0.5},
+      {id:"almg_frango",nome:"Frango grelhado 180g",kcal:297,prot:56,carbs:0,fat:6.3},
+      {id:"almg_salada",nome:"Salada à vontade",kcal:45,prot:1,carbs:3,fat:4},
     ],
-    escolhas:[
-      {id:"almoco_prot",label:"Proteína",opcoes:[
-        {id:"almoco_prot_sobre",nome:"Sobrecoxa assada 200g",kcal:420,prot:52,carbs:0,fat:18},
-        {id:"almoco_prot_pat",nome:"Patinho moído 200g",kcal:344,prot:62,carbs:0,fat:10},
-      ]},
-    ]},
-  {id:"pre",nome:"Pré-treino",horario:"16:00–17:00",
+    escolhas:[]},
+  {id:"jantar",nome:"Jantar — Hambúrguer Caseiro",horario:"20:00–21:00",
     fixos:[
-      {id:"pre_banana",nome:"Banana pequena",kcal:70,prot:1,carbs:18,fat:0},
+      {id:"jantg_pao",nome:"Pão de hambúrguer 60g",kcal:165,prot:5,carbs:30,fat:2.4},
+      {id:"jantg_carne",nome:"Carne moída (patinho) 200g",kcal:344,prot:62,carbs:0,fat:10.7},
+      {id:"jantg_queijo",nome:"Queijo muçarela 40g",kcal:124,prot:8,carbs:0.8,fat:10},
+      {id:"jantg_salada",nome:"Alface + tomate",kcal:10,prot:0.5,carbs:2,fat:0},
+      {id:"jantg_molho",nome:"Molho (ketchup + mostarda) 15g",kcal:20,prot:0.3,carbs:5,fat:0.2},
     ],
-    escolhas:[
-      {id:"pre_carb",label:"Carboidrato",opcoes:[
-        {id:"pre_carb_arroz",nome:"Arroz 100g",kcal:128,prot:2.5,carbs:28,fat:0.2},
-        {id:"pre_carb_pao",nome:"Pão francês (sanduíche)",kcal:145,prot:5,carbs:28,fat:1.2},
-      ]},
-      {id:"pre_prot",label:"Proteína",opcoes:[
-        {id:"pre_prot_sobre",nome:"Sobrecoxa assada 150g",kcal:315,prot:39,carbs:0,fat:13.5},
-        {id:"pre_prot_pat",nome:"Patinho moído 150g",kcal:258,prot:46.5,carbs:0,fat:7.5},
-      ]},
-    ]},
-  {id:"jantar",nome:"Jantar",horario:"20:00–21:00",
-    fixos:[
-      {id:"jantar_arroz",nome:"Arroz 70g",kcal:90,prot:1.75,carbs:19.6,fat:0.14},
-    ],
-    escolhas:[
-      {id:"jantar_prot",label:"Proteína",opcoes:[
-        {id:"jantar_prot_sobre",nome:"Sobrecoxa assada 200g",kcal:420,prot:52,carbs:0,fat:18},
-        {id:"jantar_prot_pat",nome:"Patinho moído 200g",kcal:344,prot:62,carbs:0,fat:10},
-      ]},
-    ]},
+    escolhas:[]},
   {id:"supl_manha",nome:"Suplementos — Manhã",horario:"com o café da manhã",
     fixos:[
       {id:"supl_omega3",nome:"Ômega-3 Vhita (3 cáps · 758+545mg EPA/DHA)",kcal:27,prot:0,carbs:0,fat:3},
@@ -177,32 +164,35 @@ const MEALS_G=[
     escolhas:[]},
 ];
 const MEALS_B=[
-  {id:"cafe_b",nome:"Café da Manhã",horario:"07:00–09:00",
+  {id:"cafe_b",nome:"Café da Manhã",horario:"07:00–08:00",
     fixos:[
-      {id:"cafeb_ovo",nome:"2 ovos",kcal:140,prot:12,carbs:1,fat:10},
-      {id:"cafeb_pao",nome:"Pão integral (2 fatias)",kcal:140,prot:6,carbs:24,fat:2},
-      {id:"cafeb_iog",nome:"Iogurte grego",kcal:100,prot:17,carbs:6,fat:1},
-      {id:"cafeb_fruta",nome:"Fruta",kcal:40,prot:1,carbs:21,fat:0},
+      {id:"cmb_tapioca",nome:"Tapioca (goma) 50g",kcal:121,prot:0,carbs:30,fat:0},
+      {id:"cmb_ovo",nome:"1 ovo",kcal:70,prot:6,carbs:0.5,fat:5},
+      {id:"cmb_queijo",nome:"Queijo muçarela 30g",kcal:93,prot:6,carbs:0.6,fat:7.5},
+    ],
+    escolhas:[]},
+  {id:"cafe_tarde_b",nome:"Café da Tarde",horario:"15:30–16:30",
+    fixos:[
+      {id:"ctb_tapioca",nome:"Tapioca (goma) 50g",kcal:121,prot:0,carbs:30,fat:0},
+      {id:"ctb_ovo",nome:"1 ovo",kcal:70,prot:6,carbs:0.5,fat:5},
+      {id:"ctb_queijo",nome:"Queijo muçarela 30g",kcal:93,prot:6,carbs:0.6,fat:7.5},
     ],
     escolhas:[]},
   {id:"almoco_b",nome:"Almoço",horario:"12:00–13:00",
     fixos:[
-      {id:"almb_frango",nome:"Frango 150g",kcal:248,prot:46,carbs:0,fat:5},
-      {id:"almb_arroz",nome:"Arroz 120g",kcal:155,prot:3,carbs:34,fat:0},
-      {id:"almb_salada",nome:"Salada",kcal:77,prot:1,carbs:13,fat:5},
+      {id:"almb_arroz",nome:"Arroz 150g",kcal:195,prot:4,carbs:43,fat:0.3},
+      {id:"almb_feijao",nome:"Feijão 100g",kcal:90,prot:6,carbs:16,fat:0.5},
+      {id:"almb_frango",nome:"Frango grelhado 100g",kcal:165,prot:31,carbs:0,fat:3.5},
+      {id:"almb_salada",nome:"Salada à vontade",kcal:45,prot:1,carbs:3,fat:4},
     ],
     escolhas:[]},
-  {id:"lanche_b",nome:"Lanche",horario:"15:00–16:00",
+  {id:"jantar_b",nome:"Jantar — Hambúrguer Caseiro",horario:"20:00–21:00",
     fixos:[
-      {id:"lanb_pao",nome:"Pão integral (2 fatias)",kcal:140,prot:6,carbs:24,fat:2},
-      {id:"lanb_ovo",nome:"Ovo",kcal:78,prot:6,carbs:1,fat:5},
-    ],
-    escolhas:[]},
-  {id:"jantar_b",nome:"Jantar",horario:"20:00–21:00",
-    fixos:[
-      {id:"jantb_frango",nome:"Frango 150g",kcal:248,prot:46,carbs:0,fat:5},
-      {id:"jantb_legumes",nome:"Legumes",kcal:55,prot:2,carbs:11,fat:0},
-      {id:"jantb_ovo",nome:"Ovo",kcal:78,prot:6,carbs:1,fat:5},
+      {id:"jantb_pao",nome:"Pão de hambúrguer 50g",kcal:138,prot:4,carbs:25,fat:2},
+      {id:"jantb_carne",nome:"Carne moída (patinho) 150g",kcal:258,prot:47,carbs:0,fat:8},
+      {id:"jantb_queijo",nome:"Queijo muçarela 40g",kcal:124,prot:8,carbs:0.8,fat:10},
+      {id:"jantb_salada",nome:"Alface + tomate",kcal:10,prot:0.5,carbs:2,fat:0},
+      {id:"jantb_molho",nome:"Molho (ketchup + mostarda) 15g",kcal:20,prot:0.3,carbs:5,fat:0.2},
     ],
     escolhas:[]},
 ];
@@ -235,7 +225,46 @@ function nutriSlots(meals,dayData){
 const MONTHS_PT=["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
 
 /* ─── TRAINING DATA ──────────────────────────────────────────────────── */
-const G_PLANS={A:{id:"A",name:"TREINO A",day:"Terça",focus:"Perna · Quadril · Lombar · Single",exercises:[{id:"bike_sprint",name:"Bike Sprint",sets:"4–6",reps:"10s forte/50s leve",rest:"—",ref:"—",muscles:["cardio"],focus:"Potência repetida. Aquece SNC antes dos pesos.",explosive:true,isCardio:true,priority:5},{id:"terra",name:"Levantamento Terra",sets:4,reps:"5",rest:"3min",ref:"75kg",muscles:["lombar","posterior","glúteo"],focus:"Âncora do treino. +2,5kg quando 4×5 limpo.",explosive:false,priority:1},{id:"leg_press",name:"Leg Press Explosivo",sets:4,reps:"5",rest:"90s",ref:"160kg",muscles:["quadríceps","glúteo"],focus:"Se sair lento, reduz. Potência, não carga máxima.",explosive:true,priority:2},{id:"zercher",name:"Zercher Reverse Lunge",sets:3,reps:"6 cada",rest:"2min",ref:"Barra+20kg",muscles:["quadríceps","glúteo","core"],focus:"Simula abraçar a perna no single.",explosive:false,priority:3},{id:"hip_thrust",name:"Hip Thrust Unilateral",sets:3,reps:"10 cada",rest:"75s",ref:"PC→10kg",muscles:["glúteo","posterior"],focus:"Glúteo e quadril sem explodir lombar.",explosive:false,priority:5},{id:"puxada_a",name:"Puxada Alta",sets:4,reps:"6–8",rest:"2min",ref:"50kg",muscles:["dorsal","bíceps"],focus:"Maior fraqueza no upper. +2,5kg quando 4×8 limpo.",explosive:false,priority:4},{id:"swing",name:"Swing com Anilha",sets:3,reps:"8",rest:"90s",ref:"20–25kg",muscles:["glúteo","lombar","quadríceps"],focus:"Explosão de quadril, ponte, saída de pressão.",explosive:true,priority:5},{id:"pallof",name:"Pallof Press",sets:3,reps:"10 cada",rest:"60s",ref:"Leve",muscles:["core","oblíquos"],focus:"Anti-rotação. Não ser desmontado na meia.",explosive:false,priority:6},{id:"suitcase",name:"Suitcase Hold",sets:3,reps:"30s cada",rest:"60s",ref:"20kg",muscles:["core","pegada","antebraço"],focus:"Core lateral + pegada. Começa pelo lado esquerdo.",explosive:false,priority:4}]},B:{id:"B",name:"TREINO B",day:"Quinta",focus:"Esgrima · Puxada · Ombro · Pegada",exercises:[{id:"remada_exp",name:"Remada Explosiva Unilateral",sets:5,reps:"5 cada",rest:"90s",ref:"35–40kg",muscles:["dorsal","bíceps","core"],focus:"Puxar rápido, segurar 1s, voltar controlado.",explosive:true,priority:1},{id:"puxada_b",name:"Puxada Alta",sets:4,reps:"6–8",rest:"2min",ref:"50kg",muscles:["dorsal","bíceps"],focus:"+2,5kg quando 4×8 sair limpo.",explosive:false,priority:2},{id:"serrote",name:"Serrote com Halter",sets:4,reps:"8 cada",rest:"90s",ref:"24–26kg",muscles:["dorsal","bíceps","romboides"],focus:"Puxar perna no single, dorsal forte.",explosive:false,priority:3},{id:"desenvolvimento",name:"Desenvolvimento Unilateral",sets:4,reps:"6 cada",rest:"90s",ref:"12–14kg",muscles:["ombro","tríceps"],focus:"Frame forte. Ombro estável pro underhook.",explosive:false,priority:4},{id:"supino",name:"Supino com Halteres",sets:3,reps:"8",rest:"90s",ref:"16–18kg",muscles:["peitoral","tríceps","ombro"],focus:"Empurrada e frame.",explosive:false,priority:5},{id:"face_pull",name:"Face Pull",sets:2,reps:"15–20",rest:"45s",ref:"Leve",muscles:["ombro","trapézio","manguito rotador"],focus:"Higiene articular. Não é opcional.",explosive:false,priority:6},{id:"rot_ext",name:"Rotação Externa",sets:2,reps:"15 cada",rest:"45s",ref:"Leve",muscles:["manguito rotador"],focus:"Ombro 2/10 — prevenção.",explosive:false,priority:7},{id:"farmer",name:"Farmer Hold",sets:4,reps:"25–30s",rest:"90s",ref:"20kg cada",muscles:["pegada","antebraço","trapézio"],focus:"Pegada bruta. Base de tudo no GI.",explosive:false,priority:4},{id:"plate_pinch",name:"Plate Pinch Hold",sets:3,reps:"20–30s",rest:"75s",ref:"5–10kg",muscles:["pegada","dedos"],focus:"Pinça e dedos. Não encaixa no buraco.",explosive:false,priority:5},{id:"rosca",name:"Rosca Martelo",sets:2,reps:"10–12",rest:"60s",ref:"12kg",muscles:["bíceps","antebraço"],focus:"Força de abraçar perna no single.",explosive:false,priority:8}]},C:{id:"C",name:"TREINO C",day:"Sábado",focus:"Peito · Tríceps · Bíceps · Core",exercises:[{id:"supino_inc",name:"Supino Inclinado com Halteres",sets:4,reps:"8–10",rest:"2min",ref:"—",muscles:["peitoral"],focus:"Peitoral superior — prioridade do dia.",explosive:false,priority:1},{id:"crucifixo_inc",name:"Crucifixo Inclinado com Halteres",sets:3,reps:"12–15",rest:"90s",ref:"—",muscles:["peitoral"],focus:"Isolamento, alongamento sob carga.",explosive:false,priority:2},{id:"mergulho_paral",name:"Paralelas (Mergulho) ou Crossover na Polia",sets:3,reps:"10–12",rest:"90s",ref:"—",muscles:["peitoral","tríceps"],focus:"Peitoral inferior + tríceps.",explosive:false,priority:3},{id:"triceps_testa",name:"Tríceps Testa com Barra",sets:3,reps:"10–12",rest:"90s",ref:"—",muscles:["tríceps"],focus:"Cabeça longa do tríceps.",explosive:false,priority:4},{id:"triceps_corda",name:"Tríceps Corda na Polia",sets:3,reps:"12–15",rest:"60s",ref:"—",muscles:["tríceps"],focus:"Finalização, bombeamento.",explosive:false,priority:5},{id:"rosca_direta",name:"Rosca Direta com Barra",sets:3,reps:"10–12",rest:"75s",ref:"—",muscles:["bíceps"],focus:"Ângulo supinado — complementa a rosca martelo do B.",explosive:false,priority:6},{id:"cable_crunch",name:"Abdominal na Polia Alta (Cable Crunch)",sets:3,reps:"15",rest:"60s",ref:"—",muscles:["core"],focus:"Core anterior, carga progressiva.",tag:"core",explosive:false,priority:7},{id:"prancha_peso",name:"Prancha com Peso nas Costas",sets:3,reps:"40s",rest:"45s",ref:"—",muscles:["core"],focus:"Progressão da prancha do treino A.",tag:"core",explosive:false,priority:8}]}};
+const G_PLANS={
+  M:{id:"M",name:"MOBILIDADE DIÁRIA",day:"Todo dia, antes do jiu",focus:"Amplitude de quadril, ombro e coluna — não substitui o aquecimento técnico",
+    exercises:[
+      {id:"mob_90_90",name:"90/90 (troca de lado)",sets:1,reps:"30s cada posição",rest:"—",ref:"—",muscles:["quadril"],focus:"Amplitude de rotação de quadril — guarda e passagem.",tag:"mobilidade",explosive:false,priority:1},
+      {id:"mob_agach_hold",name:"Agachamento Profundo (hold)",sets:1,reps:"30-45s",rest:"—",ref:"peso do corpo",muscles:["quadril","tornozelo"],focus:"Abre quadril e tornozelo antes de carregar peso.",tag:"mobilidade",explosive:false,priority:2},
+      {id:"mob_flexor_quadril",name:"Alongamento de Flexor de Quadril (ajoelhado)",sets:1,reps:"30s cada lado",rest:"—",ref:"—",muscles:["quadril"],focus:"Libera o flexor — essencial pra quem passa muito tempo sentado.",tag:"mobilidade",explosive:false,priority:3},
+      {id:"mob_circulo_braco",name:"Círculos de Braço (amplitude máxima)",sets:1,reps:"10 cada direção",rest:"—",ref:"—",muscles:["ombro"],focus:"Prepara o ombro pra framing e esgrima.",tag:"mobilidade",explosive:false,priority:4},
+      {id:"mob_catcow",name:"Cat-Cow",sets:1,reps:"8-10 reps",rest:"—",ref:"—",muscles:["coluna"],focus:"Mobiliza a coluna inteira, flexão e extensão.",tag:"mobilidade",explosive:false,priority:5},
+      {id:"mob_rot_toracica",name:"Rotação Torácica (quatro apoios)",sets:1,reps:"8 cada lado",rest:"—",ref:"—",muscles:["coluna"],focus:"Amplitude de rotação de tronco — importante pra guarda e raspagem.",tag:"mobilidade",explosive:false,priority:6},
+      {id:"mob_tornozelo",name:"Mobilização de Tornozelo (ajoelhado)",sets:1,reps:"8 cada lado",rest:"—",ref:"—",muscles:["tornozelo"],focus:"Empurra o joelho à frente mantendo o calcanhar no chão.",tag:"mobilidade",explosive:false,priority:7},
+    ]},
+  A:{id:"A",name:"TREINO A — Força-Resistência & Controle",day:"Terça",focus:"Isometria de resistência, pegada e controle de quadril",
+    exercises:[
+      {id:"terra_zercher_combo",name:"Terra Zercher + Agachamento (combo)",sets:4,reps:"5",rest:"2–3min",ref:"até 40kg — a pegada Zercher já deixa mais pesado que parece",muscles:["lombar","posterior","glúteo","quadríceps","core"],focus:"Tira a barra do chão direto pra postura Zercher (na dobra do cotovelo, sem pegada nas mãos) — alavanca ruim já faz 40kg pesar mais. Assim que 'levanta', agacha na sequência sem soltar.",explosive:false,priority:1},
+      {id:"remada_barra",name:"Remada Curvada com Barra",sets:4,reps:"8",rest:"90s",ref:"—",muscles:["dorsal","romboides","trapézio"],focus:"Puxar pesado — a base do framing e da guarda que segura.",explosive:false,priority:2},
+      {id:"farmer",name:"Farmer's Walk (tempo sob tensão)",sets:4,reps:"45-60s",rest:"90s",ref:"peso moderado, foco no tempo",muscles:["pegada","antebraço","trapézio"],focus:"Resistência de pegada — perfil dominante do BJJ é resistência-força, não só força máxima.",explosive:false,priority:3},
+      {id:"suitcase",name:"Suitcase Hold",sets:3,reps:"40-60s cada lado",rest:"75s",ref:"20kg",muscles:["core","pegada","antebraço"],focus:"Anti-rotação — não ser desmontado na disputa lateral.",explosive:false,priority:4},
+      {id:"dead_hang_g",name:"Dead Hang (teste + treino de pegada)",sets:3,reps:"até quase falhar — cronometra e anota",rest:"90s",ref:"pegada de gi/toalha/barra",muscles:["pegada","antebraço"],focus:"Vira sua referência de evolução — anota o tempo toda semana. Resistência isométrica de pegada é determinante de sucesso em imobilizações, quedas e finalizações segundo a pesquisa.",explosive:false,priority:5},
+      {id:"hip_thrust",name:"Ponte de Quadril Isométrica com Carga",sets:3,reps:"30-40s",rest:"75s",ref:"barra apoiada no quadril",muscles:["glúteo","posterior"],focus:"Segura o quadril travado no alto sob carga — treina resistir compressão de cima, não gerar potência.",explosive:false,priority:6},
+      {id:"equilibrio_reach_g",name:"Equilíbrio Unipodal com Alcance",sets:3,reps:"6 toques cada direção, por perna",rest:"60s",ref:"sem peso — apoia numa parede/cadeira se precisar",muscles:["tornozelo","core"],focus:"Equilíbrio puro, sem carga nem agachamento — fica na perna de apoio e toca o chão à frente/lado/atrás com a outra. Fica por último de propósito — com as pernas já cansadas, o desafio fica mais real.",explosive:false,priority:7},
+    ]},
+  B:{id:"B",name:"TREINO B — Potência & Condicionamento Anaeróbico",day:"Quinta",focus:"Explosão, rotação de tronco e picos de intensidade",
+    exercises:[
+      {id:"bike_sit_g",name:"Bike — SIT (sprint máximo)",sets:"4–6",reps:"10-15s all-out",rest:"90s-2min",ref:"esforço 100% máximo",muscles:["cardio"],focus:"Potência anaeróbica pura. Lutas de BJJ passam de 10mmol/L de lactato — esse é o estímulo que treina isso de verdade.",explosive:true,isCardio:true,priority:1,ytVideos:[{id:"FuH_wscyj68",label:"Bike Sprint"}]},
+      {id:"swing",name:"Swing com Anilha",sets:4,reps:"8",rest:"90s",ref:"20–25kg",muscles:["glúteo","lombar","quadríceps"],focus:"Explosão de quadril pura — a mesma potência de uma raspagem/ponte.",explosive:true,priority:2},
+      {id:"agach_bulgaro",name:"Agachamento Búlgaro Explosivo",sets:4,reps:"6 cada perna",rest:"90s",ref:"halteres",muscles:["quadríceps","glúteo"],focus:"Sobe com intenção máxima de velocidade — potência unilateral de perna.",explosive:true,priority:3},
+      {id:"serrote",name:"Serrote Explosivo com Halter",sets:4,reps:"6 cada",rest:"90s",ref:"puxa rápido, desce controlado",muscles:["dorsal","bíceps","romboides"],focus:"Puxada unilateral rápida — simula puxar a perna do adversário no single.",explosive:true,priority:4},
+      {id:"rotacao_tronco_g",name:"Rotação de Tronco Explosiva com Anilha",sets:3,reps:"8 cada lado",rest:"75s",ref:"anilha leve/moderada",muscles:["core","oblíquos"],focus:"Gera rotação de quadril e tronco com velocidade — a mecânica de potência de uma raspagem que gira.",explosive:true,priority:5},
+      {id:"desenvolvimento",name:"Desenvolvimento Unilateral (explosivo)",sets:3,reps:"6 cada",rest:"90s",ref:"12–14kg",muscles:["ombro","tríceps"],focus:"Frame forte, ombro estável pro underhook.",explosive:true,priority:6},
+      {id:"bike_hiit_g",name:"Bike — HIIT (fechamento)",sets:6,reps:"20s forte/40s leve",rest:"conforme protocolo",ref:"85-90% de esforço",muscles:["cardio"],focus:"Capacidade de repetir esforço no scramble sem cair de rendimento.",tag:"cardio",explosive:false,isCardio:true,priority:7,ytVideos:[{id:"FuH_wscyj68",label:"Bike HIIT"}]},
+    ]},
+  C:{id:"C",name:"TREINO C — Prevenção & Acessório",day:"Sábado (bônus)",focus:"Ombro, pescoço e padrão de puxar contra resistência",
+    exercises:[
+      {id:"supino",name:"Supino com Halteres (no chão)",sets:3,reps:"8",rest:"90s",ref:"16–18kg",muscles:["peitoral","tríceps","ombro"],focus:"Empurrar. Deitado no chão/colchonete, sem banco.",explosive:false,priority:1},
+      {id:"pullover",name:"Pullover Unilateral (fechamento no quadril)",sets:3,reps:"8 cada braço",rest:"75s",ref:"halter — segura 2-3s no fechamento",muscles:["dorsal","peitoral"],focus:"Em pé: leva o braço de posição elevada até fechar o cotovelo na cintura, e segura ali — treina resistir e reverter a esgrima do adversário puxando seu braço pra cima.",explosive:false,priority:2},
+      {id:"yraise_g",name:"Y-Raise com Halteres Leves (deitado de bruços)",sets:3,reps:"15",rest:"45s",ref:"Leve",muscles:["ombro","trapézio","manguito rotador"],focus:"Higiene articular do ombro — não é opcional.",explosive:false,priority:3},
+      {id:"rot_ext",name:"Rotação Externa com Halter (deitado de lado)",sets:2,reps:"15 cada",rest:"45s",ref:"Leve",muscles:["manguito rotador"],focus:"Prevenção de ombro — pesquisa mostra que atletas de BJJ mais experientes têm mais disfunção de ombro.",explosive:false,priority:4},
+      {id:"pescoco_iso_g",name:"Isometria de Pescoço Manual (4 direções)",sets:2,reps:"15s cada direção",rest:"30s",ref:"resistência com a própria mão — leve",muscles:["pescoço"],focus:"Frente, trás, e os dois lados. Ajuda a resistir cross-face e cabeça empurrada pra baixo.",explosive:false,priority:5},
+    ]},
+};
 const B_PLANS={A:{id:"A",name:"TREINO A",day:"Segunda",focus:"Glúteo Médio · Posterior · Isquiotibiais",cardio:"Bike ergométrica — 15min, intensidade 5–6/10",exercises:[{id:"clamshell",name:"Clamshell c/ Elástico",sets:2,reps:"20",rest:"30s",ref:"Elástico",muscles:["glúteo médio"],focus:"Ativa glúteo médio antes de carregar peso.",tag:"ativação",priority:0},{id:"lat_band",name:"Caminhada Lateral c/ Elástico",sets:2,reps:"10 cada",rest:"30s",ref:"Elástico",muscles:["glúteo médio","adutor"],focus:"10 passos cada lado, devagar e controlado.",tag:"ativação",priority:0},{id:"abducao_maq",name:"Abdução na Máquina (Tronco 20°)",sets:4,reps:"20",rest:"90s",ref:"20–30kg",muscles:["glúteo médio"],focus:"Inclinar 20° ativa mais o glúteo médio. Abrir 2s, manter 1s, fechar controlado.",priority:1},{id:"abducao_cabo",name:"Abdução em Pé no Cabo",sets:4,reps:"15 cada",rest:"90s",ref:"Leve",muscles:["glúteo médio"],focus:"Apoiar em superfície firme. Sem rotacionar o quadril.",priority:2},{id:"hip_thrust_b",name:"Hip Thrust com Barra",sets:4,reps:"10–12",rest:"2min",ref:"20–40kg",muscles:["glúteo","isquiotibiais"],focus:"Pés afastados, joelhos para fora. Apertar glúteo 1s no topo.",priority:3},{id:"stiff_b",name:"Stiff com Barra",sets:4,reps:"10–12",rest:"90s",ref:"20–30kg",muscles:["isquiotibiais","glúteo","lombar"],focus:"Quadril para trás, coluna neutra. Sentir o posterior puxando forte.",priority:4},{id:"mesa_uni",name:"Mesa Flexora Unilateral",sets:3,reps:"12 cada",rest:"90s",ref:"Leve",muscles:["isquiotibiais"],focus:"Fase excêntrica lenta (3s).",priority:5}]},B:{id:"B",name:"TREINO B",day:"Terça",focus:"Quadríceps · Panturrilha",cardio:"Elíptico — 15min, intensidade 6–7/10",exercises:[{id:"agach_sumo",name:"Agachamento Sumô com Barra",sets:4,reps:"10–12",rest:"2min",ref:"20–40kg",muscles:["glúteo","quadríceps","adutor"],focus:"Pés bem abertos, dedos para fora.",priority:1},{id:"leg_press_b",name:"Leg Press 45° — Pisada Alta",sets:4,reps:"12",rest:"90s",ref:"60–100kg",muscles:["quadríceps","glúteo"],focus:"Pisada alta recruta mais glúteo.",priority:2},{id:"agach_bulgaro",name:"Agachamento Búlgaro c/ Halteres",sets:3,reps:"10 cada",rest:"90s",ref:"8–16kg",muscles:["glúteo","quadríceps"],focus:"Pé traseiro no banco. Tronco levemente à frente = mais glúteo.",priority:3},{id:"cadeira_ext",name:"Cadeira Extensora",sets:3,reps:"15",rest:"60s",ref:"20–35kg",muscles:["quadríceps"],focus:"Amplitude completa. Fase excêntrica lenta.",priority:4},{id:"gemeos_pe",name:"Gêmeos em Pé na Máquina",sets:4,reps:"20",rest:"60s",ref:"40–70kg",muscles:["panturrilha"],focus:"Calcanhar desce abaixo da plataforma. Amplitude total.",priority:5},{id:"gemeos_sent",name:"Gêmeos Sentado na Máquina",sets:3,reps:"20",rest:"60s",ref:"20–40kg",muscles:["sóleo"],focus:"Ativa o sóleo (panturrilha inferior).",priority:6}]},C:{id:"C",name:"TREINO C",day:"Quarta",focus:"Costas · Ombros · Core Profundo",exercises:[{id:"puxada_larga",name:"Puxada Frente Pegada Larga",sets:4,reps:"10–12",rest:"2min",ref:"25–45kg",muscles:["dorsal","bíceps"],focus:"Cotovelos descem em direção ao quadril. Cria o V-taper.",priority:1},{id:"puxada_sup",name:"Puxada Fechada / Supinada",sets:3,reps:"10–12",rest:"90s",ref:"25–40kg",muscles:["dorsal","bíceps"],focus:"Ênfase no dorsal inferior.",priority:2},{id:"remada_barra",name:"Remada Baixa com Barra",sets:3,reps:"12",rest:"90s",ref:"20–40kg",muscles:["dorsal","romboides","trapézio"],focus:"Cotovelos próximos ao corpo.",priority:3},{id:"remada_uni_b",name:"Remada Unilateral c/ Haltere",sets:3,reps:"10 cada",rest:"90s",ref:"10–20kg",muscles:["dorsal","bíceps"],focus:"Coluna paralela ao chão. Puxar cotovelo alto.",priority:4},{id:"pullover",name:"Pullover na Polia (de Joelhos)",sets:3,reps:"12",rest:"75s",ref:"15–30kg",muscles:["dorsal","peitoral"],focus:"Empurrar os cotovelos para o bolso.",priority:5},{id:"elev_lat",name:"Elevação Lateral c/ Halteres",sets:3,reps:"15",rest:"60s",ref:"4–8kg",muscles:["ombro"],focus:"Peso leve. Ombros largos = cintura mais fina.",priority:6},{id:"prancha_c",name:"Prancha Frontal",sets:3,reps:"40s",rest:"45s",ref:"—",muscles:["core","transverso"],focus:"Contrair o abdômen para DENTRO.",tag:"core",priority:7},{id:"vacuum",name:"Vacuum Abdominal",sets:5,reps:"20s",rest:"30s",ref:"—",muscles:["transverso"],focus:"Soltar o ar totalmente e sugar o abdômen.",tag:"core",priority:8}]},D:{id:"D",name:"TREINO D",day:"Quinta",focus:"Glúteo Volume · Abdução",cardio:"Bike — 10min intensidade moderada",exercises:[{id:"hip_uni_b",name:"Hip Thrust Unilateral c/ Barra",sets:4,reps:"10 cada",rest:"90s",ref:"15–30kg",muscles:["glúteo","isquiotibiais"],focus:"Uma perna de cada vez. Elimina compensações.",priority:1},{id:"goblet",name:"Agachamento Goblet c/ Haltere",sets:4,reps:"12",rest:"90s",ref:"12–24kg",muscles:["glúteo","quadríceps","adutor"],focus:"Haltere no peito. Descer bem fundo.",priority:2},{id:"passada_rev",name:"Passada Reversa c/ Halteres",sets:3,reps:"12 cada",rest:"90s",ref:"8–16kg",muscles:["glúteo","quadríceps"],focus:"Passo para trás, joelho toca levemente o chão.",priority:3},{id:"abducao_ang",name:"Abdução Máquina (Ângulo Diferente)",sets:4,reps:"20",rest:"90s",ref:"25–40kg",muscles:["glúteo médio"],focus:"Muda o ângulo de ativação vs. segunda-feira.",priority:4},{id:"kickback",name:"Glúteo no Cabo — Kickback",sets:3,reps:"15 cada",rest:"75s",ref:"Leve",muscles:["glúteo"],focus:"Apertar glúteo no pico. Não balançar o tronco.",priority:5}]},E:{id:"E",name:"TREINO E",day:"Sexta",focus:"Pernas Completo · Core · Panturrilha",cardio:"Elíptico — 15min intensidade moderada",exercises:[{id:"mesa_flex_e",name:"Mesa Flexora",sets:4,reps:"12",rest:"90s",ref:"20–35kg",muscles:["isquiotibiais"],focus:"Fase excêntrica 3s na descida.",priority:1},{id:"leg_press_e",name:"Leg Press 45° — Pisada Alta",sets:4,reps:"12",rest:"90s",ref:"60–100kg",muscles:["quadríceps","glúteo"],focus:"Volume de perna sem alto estresse articular.",priority:2},{id:"elev_pelv",name:"Elevação Pélvica c/ Barra no Step",sets:3,reps:"15",rest:"90s",ref:"20–40kg",muscles:["glúteo","isquiotibiais"],focus:"Ângulo diferente do hip thrust.",priority:3},{id:"cad_adut",name:"Cadeira Adutora",sets:3,reps:"20",rest:"60s",ref:"30–50kg",muscles:["adutor","glúteo médio"],focus:"Adutores complementam o glúteo médio.",priority:4},{id:"gemeos_pe_e",name:"Gêmeos em Pé na Máquina",sets:3,reps:"20",rest:"60s",ref:"40–70kg",muscles:["panturrilha"],focus:"Volume extra. Amplitude completa.",priority:5},{id:"panturrilha_lp",name:"Panturrilha no Leg Press",sets:3,reps:"20",rest:"60s",ref:"40–70kg",muscles:["panturrilha","sóleo"],focus:"Maior amplitude de movimento.",priority:6},{id:"prancha_lat",name:"Prancha Lateral",sets:3,reps:"30s cada",rest:"45s",ref:"—",muscles:["oblíquos","core"],focus:"Estabilizar — sem carga para não alargar oblíquos.",tag:"core",priority:7},{id:"dead_bug",name:"Dead Bug",sets:3,reps:"10",rest:"45s",ref:"—",muscles:["core","transverso"],focus:"Lombar sempre colada no chão.",tag:"core",priority:8},{id:"hipopressivo",name:"Hipopressivo",sets:3,reps:"20s",rest:"30s",ref:"—",muscles:["transverso","core"],focus:"Reduz a cintura em repouso com prática regular.",tag:"core",priority:9}]}};
 
 const I_PLANS={
