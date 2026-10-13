@@ -48,12 +48,12 @@ const { useState, useEffect, useRef } = React;
 const LIGHT_T={bg:"#F8F7F5",card:"#FFFFFF",border:"#E6E4E0",borderDone:"#BBF7D0",text:"#0A0A0A",sub:"#888880",muted:"#C0BFB8",done:"#15803D",doneBg:"#F0FDF4",inpBg:"#F4F3F0",timerBg:"#FFF8F0",timerBorder:"#FDDCB5",deloadBg:"#FFF7ED",deloadBorder:"#FED7AA",deloadText:"#9A3412",deloadSub:"#C2410C",scroll:"#DDDDDD"};
 const DARK_T={bg:"#0C0C0C",card:"#171717",border:"#282828",borderDone:"#1A3A1A",text:"#F0F0F0",sub:"#888880",muted:"#484848",done:"#4ADE80",doneBg:"#091409",inpBg:"#202020",timerBg:"#1C1400",timerBorder:"#3D2E00",deloadBg:"#1C1000",deloadBorder:"#3D2800",deloadText:"#FED7AA",deloadSub:"#FBBF24",scroll:"#333333"};
 let T=LIGHT_T;
-const APP_VERSION="2026.09.15-1";
-const USERS={G:{id:"G",name:"Guilherme",accent:"#EA6C00",goal:87,goalDate:"2026-08-31",ctx:"atleta BJJ faixa azul — meia-guarda, single leg, força de combate"},B:{id:"B",name:"Bianca",accent:"#E11D4B",goal:null,goalDate:null,ctx:"treino estético feminino — glúteo médio, posterior, afinar cintura"},I:{id:"I",name:"Isabela",accent:"#0D9488",goal:null,goalDate:null,ctx:"atleta BJJ faixa azul adulto, profissional — laço/De la Riva, precisa de grip, isometria, potência explosiva e condicionamento pro campeonato de 25/09",noNutricao:true}};
+const APP_VERSION="2026.10.13-1";
+const USERS={G:{id:"G",name:"Guilherme",accent:"#EA6C00",goal:89,goalDate:"2026-12-05",ctx:"atleta BJJ faixa azul — meia-guarda, single leg, força de combate"},B:{id:"B",name:"Bianca",accent:"#E11D4B",goal:null,goalDate:null,ctx:"treino estético feminino — glúteo médio, posterior, afinar cintura"},I:{id:"I",name:"Isabela",accent:"#0D9488",goal:null,goalDate:null,ctx:"atleta BJJ faixa azul adulto, profissional — laço/De la Riva, precisa de grip, isometria, potência explosiva e condicionamento pro campeonato de 25/09",noNutricao:true}};
 
 /* ─── DEFAULT CONFIG ─────────────────────────────────────────────────── */
 const DEF_CFG={
-  G:{goalWeight:89,goalDate:"2026-08-31",proteinTarget:183,calorieNormal:2300,calorie2treinos:2450,calorieDescanso:2150,hydrationTarget:4000,roundMin:5,restMin:1,numRounds:6},
+  G:{goalWeight:89,goalDate:"2026-12-05",proteinTarget:183,calorieNormal:2300,calorie2treinos:2450,calorieDescanso:2150,hydrationTarget:4000,roundMin:5,restMin:1,numRounds:6},
   B:{goalWeight:null,goalDate:null,proteinTarget:135,calorieNormal:1665,calorie2treinos:1800,calorieDescanso:1600,hydrationTarget:2500,roundMin:5,restMin:1,numRounds:6},
   I:{goalWeight:null,goalDate:null,proteinTarget:null,calorieNormal:null,calorie2treinos:null,calorieDescanso:null,hydrationTarget:3000,roundMin:5,restMin:1,numRounds:6},
 };
@@ -116,14 +116,16 @@ const MEALS_G=[
     fixos:[
       {id:"cmg_tapioca",nome:"Tapioca (goma) 100g",kcal:242,prot:0,carbs:60,fat:0},
       {id:"cmg_ovos",nome:"2 ovos",kcal:140,prot:12,carbs:1,fat:10},
-      {id:"cmg_queijo",nome:"Queijo muçarela 40g",kcal:124,prot:8,carbs:0.8,fat:10},
+      {id:"cmg_queijo",nome:"Queijo muçarela 20g",kcal:62,prot:4,carbs:0.4,fat:5},
+      {id:"cmg_requeijao",nome:"Requeijão 20g",kcal:53,prot:2,carbs:0.6,fat:4.8},
     ],
     escolhas:[]},
   {id:"cafe_tarde",nome:"Café da Tarde",horario:"15:30–16:30",
     fixos:[
       {id:"ctg_tapioca",nome:"Tapioca (goma) 100g",kcal:242,prot:0,carbs:60,fat:0},
       {id:"ctg_ovos",nome:"2 ovos",kcal:140,prot:12,carbs:1,fat:10},
-      {id:"ctg_queijo",nome:"Queijo muçarela 40g",kcal:124,prot:8,carbs:0.8,fat:10},
+      {id:"ctg_queijo",nome:"Queijo muçarela 20g",kcal:62,prot:4,carbs:0.4,fat:5},
+      {id:"ctg_requeijao",nome:"Requeijão 20g",kcal:53,prot:2,carbs:0.6,fat:4.8},
     ],
     escolhas:[]},
   {id:"almoco",nome:"Almoço",horario:"12:00–13:00",
@@ -168,14 +170,16 @@ const MEALS_B=[
     fixos:[
       {id:"cmb_tapioca",nome:"Tapioca (goma) 50g",kcal:121,prot:0,carbs:30,fat:0},
       {id:"cmb_ovo",nome:"1 ovo",kcal:70,prot:6,carbs:0.5,fat:5},
-      {id:"cmb_queijo",nome:"Queijo muçarela 30g",kcal:93,prot:6,carbs:0.6,fat:7.5},
+      {id:"cmb_queijo",nome:"Queijo muçarela 15g",kcal:47,prot:3,carbs:0.3,fat:3.8},
+      {id:"cmb_requeijao",nome:"Requeijão 15g",kcal:40,prot:1.5,carbs:0.45,fat:3.6},
     ],
     escolhas:[]},
   {id:"cafe_tarde_b",nome:"Café da Tarde",horario:"15:30–16:30",
     fixos:[
       {id:"ctb_tapioca",nome:"Tapioca (goma) 50g",kcal:121,prot:0,carbs:30,fat:0},
       {id:"ctb_ovo",nome:"1 ovo",kcal:70,prot:6,carbs:0.5,fat:5},
-      {id:"ctb_queijo",nome:"Queijo muçarela 30g",kcal:93,prot:6,carbs:0.6,fat:7.5},
+      {id:"ctb_queijo",nome:"Queijo muçarela 15g",kcal:47,prot:3,carbs:0.3,fat:3.8},
+      {id:"ctb_requeijao",nome:"Requeijão 15g",kcal:40,prot:1.5,carbs:0.45,fat:3.6},
     ],
     escolhas:[]},
   {id:"almoco_b",nome:"Almoço",horario:"12:00–13:00",
@@ -225,8 +229,15 @@ function nutriSlots(meals,dayData){
 const MONTHS_PT=["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
 
 /* ─── TRAINING DATA ──────────────────────────────────────────────────── */
+const RIR_G={
+  base:"RIR 3-4 — déficit calórico acumulando, deixa folga",
+  deload:"RIR 4+ — semana leve, mesma carga com metade das séries",
+  intensificacao:"RIR 2-3 — intensidade sobe, nunca na falha",
+  taper:"RIR 2-3 — volume baixo, só manter qualidade",
+  camp:"RIR 3+ — só manter, chegar fresco",
+};
 const G_PLANS={
-  M:{id:"M",name:"MOBILIDADE DIÁRIA",day:"Todo dia, antes do jiu",focus:"Amplitude de quadril, ombro e coluna — não substitui o aquecimento técnico",
+  M:{id:"M",noScale:true,name:"MOBILIDADE DIÁRIA",day:"Todo dia, antes do jiu",focus:"Amplitude de quadril, ombro e coluna — não substitui o aquecimento técnico",
     exercises:[
       {id:"mob_90_90",name:"90/90 (troca de lado)",sets:1,reps:"30s cada posição",rest:"—",ref:"—",muscles:["quadril"],focus:"Amplitude de rotação de quadril — guarda e passagem.",tag:"mobilidade",explosive:false,priority:1},
       {id:"mob_agach_hold",name:"Agachamento Profundo (hold)",sets:1,reps:"30-45s",rest:"—",ref:"peso do corpo",muscles:["quadril","tornozelo"],focus:"Abre quadril e tornozelo antes de carregar peso.",tag:"mobilidade",explosive:false,priority:2},
@@ -236,30 +247,30 @@ const G_PLANS={
       {id:"mob_rot_toracica",name:"Rotação Torácica (quatro apoios)",sets:1,reps:"8 cada lado",rest:"—",ref:"—",muscles:["coluna"],focus:"Amplitude de rotação de tronco — importante pra guarda e raspagem.",tag:"mobilidade",explosive:false,priority:6},
       {id:"mob_tornozelo",name:"Mobilização de Tornozelo (ajoelhado)",sets:1,reps:"8 cada lado",rest:"—",ref:"—",muscles:["tornozelo"],focus:"Empurra o joelho à frente mantendo o calcanhar no chão.",tag:"mobilidade",explosive:false,priority:7},
     ]},
-  A:{id:"A",name:"TREINO A — Força-Resistência & Controle",day:"Terça",focus:"Isometria de resistência, pegada e controle de quadril",
+  A:{id:"A",essentialOnly:true,name:"TREINO A — Força-Resistência & Controle",day:"Terça",focus:"Isometria de resistência, pegada e controle de quadril",
     exercises:[
-      {id:"terra_zercher_combo",name:"Terra Zercher + Agachamento (combo)",sets:4,reps:"5",rest:"2–3min",ref:"até 40kg — a pegada Zercher já deixa mais pesado que parece",muscles:["lombar","posterior","glúteo","quadríceps","core"],focus:"Tira a barra do chão direto pra postura Zercher (na dobra do cotovelo, sem pegada nas mãos) — alavanca ruim já faz 40kg pesar mais. Assim que 'levanta', agacha na sequência sem soltar.",explosive:false,priority:1},
-      {id:"remada_barra",name:"Remada Curvada com Barra",sets:4,reps:"8",rest:"90s",ref:"—",muscles:["dorsal","romboides","trapézio"],focus:"Puxar pesado — a base do framing e da guarda que segura.",explosive:false,priority:2},
-      {id:"farmer",name:"Farmer's Walk (tempo sob tensão)",sets:4,reps:"45-60s",rest:"90s",ref:"peso moderado, foco no tempo",muscles:["pegada","antebraço","trapézio"],focus:"Resistência de pegada — perfil dominante do BJJ é resistência-força, não só força máxima.",explosive:false,priority:3},
-      {id:"suitcase",name:"Suitcase Hold",sets:3,reps:"40-60s cada lado",rest:"75s",ref:"20kg",muscles:["core","pegada","antebraço"],focus:"Anti-rotação — não ser desmontado na disputa lateral.",explosive:false,priority:4},
-      {id:"dead_hang_g",name:"Dead Hang (teste + treino de pegada)",sets:3,reps:"até quase falhar — cronometra e anota",rest:"90s",ref:"pegada de gi/toalha/barra",muscles:["pegada","antebraço"],focus:"Vira sua referência de evolução — anota o tempo toda semana. Resistência isométrica de pegada é determinante de sucesso em imobilizações, quedas e finalizações segundo a pesquisa.",explosive:false,priority:5},
-      {id:"hip_thrust",name:"Ponte de Quadril Isométrica com Carga",sets:3,reps:"30-40s",rest:"75s",ref:"barra apoiada no quadril",muscles:["glúteo","posterior"],focus:"Segura o quadril travado no alto sob carga — treina resistir compressão de cima, não gerar potência.",explosive:false,priority:6},
+      {id:"terra_zercher_combo",rirByPhase:RIR_G,essential:true,name:"Terra Zercher + Agachamento (combo)",sets:4,reps:"5",rest:"2–3min",ref:"até 40kg — a pegada Zercher já deixa mais pesado que parece",muscles:["lombar","posterior","glúteo","quadríceps","core"],focus:"Tira a barra do chão direto pra postura Zercher (na dobra do cotovelo, sem pegada nas mãos) — alavanca ruim já faz 40kg pesar mais. Assim que 'levanta', agacha na sequência sem soltar.",explosive:false,priority:1},
+      {id:"remada_barra",rirByPhase:RIR_G,essential:true,name:"Remada Curvada com Barra",sets:4,reps:"8",rest:"90s",ref:"—",muscles:["dorsal","romboides","trapézio"],focus:"Puxar pesado — a base do framing e da guarda que segura.",explosive:false,priority:2},
+      {id:"farmer",essential:true,holdCue:"Tempo sob tensão — para quando a postura ceder, não busca a falha total.",name:"Farmer's Walk (tempo sob tensão)",sets:4,reps:"45-60s",rest:"90s",ref:"peso moderado, foco no tempo",muscles:["pegada","antebraço","trapézio"],focus:"Resistência de pegada — perfil dominante do BJJ é resistência-força, não só força máxima.",explosive:false,priority:3},
+      {id:"suitcase",holdCue:"Para quando o tronco começar a inclinar — qualidade da posição importa mais que o tempo.",name:"Suitcase Hold",sets:3,reps:"40-60s cada lado",rest:"75s",ref:"20kg",muscles:["core","pegada","antebraço"],focus:"Anti-rotação — não ser desmontado na disputa lateral.",explosive:false,priority:4},
+      {id:"dead_hang_g",essential:true,holdCue:"Teste de pegada — cronometra, anota, para quando a mão abrir. Não insiste na falha total.",name:"Dead Hang (teste + treino de pegada)",sets:3,reps:"até quase falhar — cronometra e anota",rest:"90s",ref:"pegada de gi/toalha/barra",muscles:["pegada","antebraço"],focus:"Vira sua referência de evolução — anota o tempo toda semana. Resistência isométrica de pegada é determinante de sucesso em imobilizações, quedas e finalizações segundo a pesquisa.",explosive:false,priority:5},
+      {id:"hip_thrust",holdCue:"Segura o quadril travado — para quando começar a tremer ou ceder.",name:"Ponte de Quadril Isométrica com Carga",sets:3,reps:"30-40s",rest:"75s",ref:"barra apoiada no quadril",muscles:["glúteo","posterior"],focus:"Segura o quadril travado no alto sob carga — treina resistir compressão de cima, não gerar potência.",explosive:false,priority:6},
       {id:"equilibrio_reach_g",name:"Equilíbrio Unipodal com Alcance",sets:3,reps:"6 toques cada direção, por perna",rest:"60s",ref:"sem peso — apoia numa parede/cadeira se precisar",muscles:["tornozelo","core"],focus:"Equilíbrio puro, sem carga nem agachamento — fica na perna de apoio e toca o chão à frente/lado/atrás com a outra. Fica por último de propósito — com as pernas já cansadas, o desafio fica mais real.",explosive:false,priority:7},
     ]},
-  B:{id:"B",name:"TREINO B — Potência & Condicionamento Anaeróbico",day:"Quinta",focus:"Explosão, rotação de tronco e picos de intensidade",
+  B:{id:"B",essentialOnly:true,name:"TREINO B — Potência & Condicionamento Anaeróbico",day:"Quinta",focus:"Explosão, rotação de tronco e picos de intensidade",
     exercises:[
-      {id:"bike_sit_g",name:"Bike — SIT (sprint máximo)",sets:"4–6",reps:"10-15s all-out",rest:"90s-2min",ref:"esforço 100% máximo",muscles:["cardio"],focus:"Potência anaeróbica pura. Lutas de BJJ passam de 10mmol/L de lactato — esse é o estímulo que treina isso de verdade.",explosive:true,isCardio:true,priority:1,ytVideos:[{id:"FuH_wscyj68",label:"Bike Sprint"}]},
-      {id:"swing",name:"Swing com Anilha",sets:4,reps:"8",rest:"90s",ref:"20–25kg",muscles:["glúteo","lombar","quadríceps"],focus:"Explosão de quadril pura — a mesma potência de uma raspagem/ponte.",explosive:true,priority:2},
-      {id:"agach_bulgaro",name:"Agachamento Búlgaro Explosivo",sets:4,reps:"6 cada perna",rest:"90s",ref:"halteres",muscles:["quadríceps","glúteo"],focus:"Sobe com intenção máxima de velocidade — potência unilateral de perna.",explosive:true,priority:3},
-      {id:"serrote",name:"Serrote Explosivo com Halter",sets:4,reps:"6 cada",rest:"90s",ref:"puxa rápido, desce controlado",muscles:["dorsal","bíceps","romboides"],focus:"Puxada unilateral rápida — simula puxar a perna do adversário no single.",explosive:true,priority:4},
-      {id:"rotacao_tronco_g",name:"Rotação de Tronco Explosiva com Anilha",sets:3,reps:"8 cada lado",rest:"75s",ref:"anilha leve/moderada",muscles:["core","oblíquos"],focus:"Gera rotação de quadril e tronco com velocidade — a mecânica de potência de uma raspagem que gira.",explosive:true,priority:5},
-      {id:"desenvolvimento",name:"Desenvolvimento Unilateral (explosivo)",sets:3,reps:"6 cada",rest:"90s",ref:"12–14kg",muscles:["ombro","tríceps"],focus:"Frame forte, ombro estável pro underhook.",explosive:true,priority:6},
+      {id:"bike_sit_g",essential:true,velocityCue:"Se conseguir manter o mesmo ritmo do início ao fim, não foi all-out — tem que cair no final.",name:"Bike — SIT (sprint máximo)",sets:"4–6",reps:"10-15s all-out",rest:"90s-2min",ref:"esforço 100% máximo",muscles:["cardio"],focus:"Potência anaeróbica pura. Lutas de BJJ passam de 10mmol/L de lactato — esse é o estímulo que treina isso de verdade.",explosive:true,isCardio:true,priority:1,ytVideos:[{id:"FuH_wscyj68",label:"Bike Sprint"}]},
+      {id:"swing",essential:true,velocityCue:"Velocidade > carga — se o swing desacelerar, encerra a série.",name:"Swing com Anilha",sets:4,reps:"8",rest:"90s",ref:"20–25kg",muscles:["glúteo","lombar","quadríceps"],focus:"Explosão de quadril pura — a mesma potência de uma raspagem/ponte.",explosive:true,priority:2},
+      {id:"agach_bulgaro",velocityCue:"Sobe com intenção máxima de velocidade — se desacelerar, encerra a série.",name:"Agachamento Búlgaro Explosivo",sets:4,reps:"6 cada perna",rest:"90s",ref:"halteres",muscles:["quadríceps","glúteo"],focus:"Sobe com intenção máxima de velocidade — potência unilateral de perna.",explosive:true,priority:3},
+      {id:"serrote",essential:true,velocityCue:"Puxa rápido, desce controlado — se a velocidade cair, encerra o lado.",name:"Serrote Explosivo com Halter",sets:4,reps:"6 cada",rest:"90s",ref:"puxa rápido, desce controlado",muscles:["dorsal","bíceps","romboides"],focus:"Puxada unilateral rápida — simula puxar a perna do adversário no single.",explosive:true,priority:4},
+      {id:"rotacao_tronco_g",essential:true,velocityCue:"Gira com velocidade — se perder a técnica ou a rapidez, encerra a série.",name:"Rotação de Tronco Explosiva com Anilha",sets:3,reps:"8 cada lado",rest:"75s",ref:"anilha leve/moderada",muscles:["core","oblíquos"],focus:"Gera rotação de quadril e tronco com velocidade — a mecânica de potência de uma raspagem que gira.",explosive:true,priority:5},
+      {id:"desenvolvimento",velocityCue:"Executa rápido na subida — se desacelerar, encerra a série.",name:"Desenvolvimento Unilateral (explosivo)",sets:3,reps:"6 cada",rest:"90s",ref:"12–14kg",muscles:["ombro","tríceps"],focus:"Frame forte, ombro estável pro underhook.",explosive:true,priority:6},
       {id:"bike_hiit_g",name:"Bike — HIIT (fechamento)",sets:6,reps:"20s forte/40s leve",rest:"conforme protocolo",ref:"85-90% de esforço",muscles:["cardio"],focus:"Capacidade de repetir esforço no scramble sem cair de rendimento.",tag:"cardio",explosive:false,isCardio:true,priority:7,ytVideos:[{id:"FuH_wscyj68",label:"Bike HIIT"}]},
     ]},
-  C:{id:"C",name:"TREINO C — Prevenção & Acessório",day:"Sábado (bônus)",focus:"Ombro, pescoço e padrão de puxar contra resistência",
+  C:{id:"C",hideInPhases:["camp"],name:"TREINO C — Prevenção & Acessório",day:"Sábado (bônus)",focus:"Ombro, pescoço e padrão de puxar contra resistência",
     exercises:[
-      {id:"supino",name:"Supino com Halteres (no chão)",sets:3,reps:"8",rest:"90s",ref:"16–18kg",muscles:["peitoral","tríceps","ombro"],focus:"Empurrar. Deitado no chão/colchonete, sem banco.",explosive:false,priority:1},
-      {id:"pullover",name:"Pullover Unilateral (fechamento no quadril)",sets:3,reps:"8 cada braço",rest:"75s",ref:"halter — segura 2-3s no fechamento",muscles:["dorsal","peitoral"],focus:"Em pé: leva o braço de posição elevada até fechar o cotovelo na cintura, e segura ali — treina resistir e reverter a esgrima do adversário puxando seu braço pra cima.",explosive:false,priority:2},
+      {id:"supino",rirByPhase:RIR_G,name:"Supino com Halteres (no chão)",sets:3,reps:"8",rest:"90s",ref:"16–18kg",muscles:["peitoral","tríceps","ombro"],focus:"Empurrar. Deitado no chão/colchonete, sem banco.",explosive:false,priority:1},
+      {id:"pullover",rirByPhase:RIR_G,name:"Pullover Unilateral (fechamento no quadril)",sets:3,reps:"8 cada braço",rest:"75s",ref:"halter — segura 2-3s no fechamento",muscles:["dorsal","peitoral"],focus:"Em pé: leva o braço de posição elevada até fechar o cotovelo na cintura, e segura ali — treina resistir e reverter a esgrima do adversário puxando seu braço pra cima.",explosive:false,priority:2},
       {id:"yraise_g",name:"Y-Raise com Halteres Leves (deitado de bruços)",sets:3,reps:"15",rest:"45s",ref:"Leve",muscles:["ombro","trapézio","manguito rotador"],focus:"Higiene articular do ombro — não é opcional.",explosive:false,priority:3},
       {id:"rot_ext",name:"Rotação Externa com Halter (deitado de lado)",sets:2,reps:"15 cada",rest:"45s",ref:"Leve",muscles:["manguito rotador"],focus:"Prevenção de ombro — pesquisa mostra que atletas de BJJ mais experientes têm mais disfunção de ombro.",explosive:false,priority:4},
       {id:"pescoco_iso_g",name:"Isometria de Pescoço Manual (4 direções)",sets:2,reps:"15s cada direção",rest:"30s",ref:"resistência com a própria mão — leve",muscles:["pescoço"],focus:"Frente, trás, e os dois lados. Ajuda a resistir cross-face e cabeça empurrada pra baixo.",explosive:false,priority:5},
@@ -380,6 +391,76 @@ function IsabelaPhaseBanner(){
       <div style={{display:"flex",gap:3}}>
         {[1,2,3,4,5,6,7].map(w=>(<div key={w} style={{width:8,height:24,borderRadius:3,background:w<info.week?info.color:w===info.week?info.color:T.inpBg,opacity:w===info.week?1:w<info.week?0.5:0.3}}/>))}
       </div>
+    </div>
+  );
+}
+
+/* ─── GUILHERME — PERIODIZAÇÃO ATÉ O CAMP (5/12) ─────────────────────── */
+const GUILHERME_CAMP_START="2026-10-11";
+const GUILHERME_CAMP_DATE="2026-12-05";
+function guilhermePhaseInfo(){
+  const start=new Date(GUILHERME_CAMP_START+"T00:00:00");
+  const today=new Date(todayStr()+"T00:00:00");
+  const camp=new Date(GUILHERME_CAMP_DATE+"T00:00:00");
+  const daysToCamp=Math.ceil((camp-today)/86400000);
+  const diffDays=Math.floor((today-start)/86400000);
+  const b={totalWeeks:8,daysToCamp};
+  if(diffDays<0)return {...b,week:0,phase:"pre",label:"Ainda não começou",sub:"Começa em 11/10",desc:"",color:"#94A3B8"};
+  const week=Math.floor(diffDays/7)+1;
+  if(week>8)return {...b,week:9,phase:"pos",label:"Camp concluído",sub:"Volta pro plano base",desc:"",color:"#94A3B8"};
+  const sub=`Semana ${week} de 8`;
+  if(week<=3)return {...b,week,phase:"base",label:"Base",sub,desc:"Volume normal · RIR 3-4 — déficit acumulando, deixa folga",color:"#3B82F6"};
+  if(week===4)return {...b,week,phase:"deload",label:"Deload",sub,desc:"Metade das séries, mesma carga — recupera antes da próxima fase",color:"#10B981"};
+  if(week<=6)return {...b,week,phase:"intensificacao",label:"Intensificação",sub,desc:"Um pouco menos de volume, mais intensidade · RIR 2-3",color:"#F59E0B"};
+  if(week===7)return {...b,week,phase:"taper",label:"Taper",sub,desc:"Volume baixo, qualidade alta — começando a chegar fresco",color:"#F97316"};
+  return {...b,week,phase:"camp",label:"Semana do Camp",sub:`${sub} — reta final!`,desc:"Só o essencial (Treino C fora). Chega descansado.",color:"#EF4444"};
+}
+function scaleSetsG(sets,phase){
+  const f=n=>{
+    if(phase==="deload"||phase==="camp")return Math.max(1,Math.ceil(n/2));
+    if(phase==="intensificacao")return n>=4?n-1:n;
+    if(phase==="taper")return n>=3?n-1:n;
+    return n;
+  };
+  if(typeof sets==="number")return f(sets);
+  const m=typeof sets==="string"&&sets.match(/^(\d+)[–-](\d+)$/);
+  if(m)return `${f(+m[1])}–${f(+m[2])}`;
+  return sets;
+}
+function resolveGuilhermePlans(rawPlans){
+  const {phase}=guilhermePhaseInfo();
+  const out={};
+  Object.keys(rawPlans).forEach(k=>{
+    const plan=rawPlans[k];
+    if(plan.hideInPhases&&plan.hideInPhases.includes(phase))return;
+    let exs=plan.exercises;
+    if(phase==="camp"&&plan.essentialOnly)exs=exs.filter(e=>e.essential);
+    exs=exs.map(ex=>{
+      const e={...ex};
+      if(ex.rirByPhase&&ex.rirByPhase[phase])e.rir=ex.rirByPhase[phase];
+      if(!plan.noScale)e.sets=scaleSetsG(ex.sets,phase);
+      return e;
+    });
+    out[k]={...plan,exercises:exs};
+  });
+  return out;
+}
+function GuilhermePhaseBanner(){
+  const info=guilhermePhaseInfo();
+  const bars=Array.from({length:info.totalWeeks},(_,i)=>i+1);
+  return(
+    <div style={{background:`${info.color}12`,border:`1.5px solid ${info.color}40`,borderRadius:14,padding:"12px 16px",marginBottom:14}}>
+      <div style={{display:"flex",alignItems:"center",justifyContent:"space-between"}}>
+        <div>
+          <div style={{fontSize:9,fontWeight:700,color:info.color,letterSpacing:1.2,textTransform:"uppercase"}}>Fase do camp — 05/12</div>
+          <div style={{fontSize:18,fontWeight:700,color:T.text,fontFamily:"'Barlow Condensed',sans-serif"}}>{info.label}</div>
+          <div style={{fontSize:11,color:T.muted,marginTop:1}}>{info.sub}{info.daysToCamp>=0&&info.phase!=="pre"?` · ${info.daysToCamp} dias pro camp`:""}</div>
+        </div>
+        <div style={{display:"flex",gap:3}}>
+          {bars.map(w=>(<div key={w} style={{width:7,height:24,borderRadius:3,background:w<=info.week?info.color:T.inpBg,opacity:w===info.week?1:w<info.week?0.5:0.3}}/>))}
+        </div>
+      </div>
+      {info.desc&&<div style={{fontSize:11,color:T.sub,marginTop:8,lineHeight:1.4}}>{info.desc}</div>}
     </div>
   );
 }
@@ -1278,6 +1359,7 @@ function FisicoView({user,plans}){
   return(
     <div>
       {user.id==="I"&&<IsabelaPhaseBanner/>}
+      {user.id==="G"&&<GuilhermePhaseBanner/>}
       <div style={{display:"flex",gap:5,marginBottom:16,overflowX:"auto",paddingBottom:4,WebkitOverflowScrolling:"touch"}}>
         {tabs.map(t=>(<button key={t.id} onClick={()=>setTab(t.id)} style={{padding:"7px 14px",borderRadius:20,border:`1px solid ${tab===t.id?user.accent:T.border}`,background:tab===t.id?`${user.accent}15`:T.inpBg,color:tab===t.id?user.accent:T.sub,fontSize:12,fontWeight:tab===t.id?700:400,cursor:"pointer",whiteSpace:"nowrap",flexShrink:0}}>{t.l}</button>))}
       </div>
@@ -2912,6 +2994,7 @@ function DashboardView({user,plans,setPillar,setShowSettings}){
 
     {user.id==="B"&&<CampCard user={user}/>}
     {user.id==="I"&&<IsabelaPhaseBanner/>}
+      {user.id==="G"&&<GuilhermePhaseBanner/>}
 
     {/* 4 main stats */}
     <div style={{display:"grid",gridTemplateColumns:"1fr 1fr",gap:8,marginBottom:12}}>
@@ -3192,7 +3275,7 @@ function App(){
   if(!uid){
     return <UserGate onSelect={setUid} dark={dark} toggleTheme={toggleTheme}/>;
   }
-  const user=USERS[uid];const plans=uid==="G"?G_PLANS:uid==="I"?resolveIsabelaPlans(I_PLANS):B_PLANS;
+  const user=USERS[uid];const plans=uid==="G"?resolveGuilhermePlans(G_PLANS):uid==="I"?resolveIsabelaPlans(I_PLANS):B_PLANS;
   return(
     <>
       <style>{`
