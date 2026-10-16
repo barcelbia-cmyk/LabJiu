@@ -48,7 +48,7 @@ const { useState, useEffect, useRef } = React;
 const LIGHT_T={bg:"#F8F7F5",card:"#FFFFFF",border:"#E6E4E0",borderDone:"#BBF7D0",text:"#0A0A0A",sub:"#888880",muted:"#C0BFB8",done:"#15803D",doneBg:"#F0FDF4",inpBg:"#F4F3F0",timerBg:"#FFF8F0",timerBorder:"#FDDCB5",deloadBg:"#FFF7ED",deloadBorder:"#FED7AA",deloadText:"#9A3412",deloadSub:"#C2410C",scroll:"#DDDDDD"};
 const DARK_T={bg:"#0C0C0C",card:"#171717",border:"#282828",borderDone:"#1A3A1A",text:"#F0F0F0",sub:"#888880",muted:"#484848",done:"#4ADE80",doneBg:"#091409",inpBg:"#202020",timerBg:"#1C1400",timerBorder:"#3D2E00",deloadBg:"#1C1000",deloadBorder:"#3D2800",deloadText:"#FED7AA",deloadSub:"#FBBF24",scroll:"#333333"};
 let T=LIGHT_T;
-const APP_VERSION="2026.10.13-1";
+const APP_VERSION="2026.10.14-1";
 const USERS={G:{id:"G",name:"Guilherme",accent:"#EA6C00",goal:89,goalDate:"2026-12-05",ctx:"atleta BJJ faixa azul — meia-guarda, single leg, força de combate"},B:{id:"B",name:"Bianca",accent:"#E11D4B",goal:null,goalDate:null,ctx:"treino estético feminino — glúteo médio, posterior, afinar cintura"},I:{id:"I",name:"Isabela",accent:"#0D9488",goal:null,goalDate:null,ctx:"atleta BJJ faixa azul adulto, profissional — laço/De la Riva, precisa de grip, isometria, potência explosiva e condicionamento pro campeonato de 25/09",noNutricao:true}};
 
 /* ─── DEFAULT CONFIG ─────────────────────────────────────────────────── */
@@ -204,6 +204,39 @@ const MEALS_B=[
 
 
 /* ─── NUTRITION TOTALS HELPER (handles fixos + escolhas) ────────────── */
+/* ─── BEBIDAS (valores aproximados) ──────────────────────────────────── */
+const BEBIDAS=[
+  {grupo:"Cafés",itens:[
+    {k:"exp1",nome:"Expresso",desc:"30ml",ml:30,cafe:63,kcal:2},
+    {k:"exp2",nome:"Café duplo",desc:"expresso duplo 60ml",ml:60,cafe:126,kcal:4},
+    {k:"coado",nome:"Xícara de café",desc:"coado 150ml",ml:150,cafe:90,kcal:2},
+    {k:"caneca",nome:"Caneca de café",desc:"300ml",ml:300,cafe:180,kcal:4},
+    {k:"cafeleite",nome:"Café com leite",desc:"200ml",ml:200,cafe:60,kcal:62,prot:3},
+    {k:"cold",nome:"Cold brew",desc:"300ml",ml:300,cafe:150,kcal:5},
+  ]},
+  {grupo:"Chás",itens:[
+    {k:"cha_erva",nome:"Chá de erva",desc:"200ml, sem cafeína",ml:200,cafe:0,kcal:2},
+    {k:"cha_preto",nome:"Chá preto/verde",desc:"200ml",ml:200,cafe:35,kcal:2},
+    {k:"cha_mate",nome:"Chá mate",desc:"300ml",ml:300,cafe:60,kcal:3},
+  ]},
+  {grupo:"Esportivas e naturais",itens:[
+    {k:"isoton",nome:"Isotônico",desc:"500ml",ml:500,cafe:0,kcal:110},
+    {k:"coco",nome:"Água de coco",desc:"300ml",ml:300,cafe:0,kcal:60},
+    {k:"gas",nome:"Água com gás",desc:"300ml",ml:300,cafe:0,kcal:0},
+    {k:"suco",nome:"Suco natural",desc:"200ml",ml:200,cafe:0,kcal:90},
+    {k:"leite",nome:"Leite",desc:"200ml",ml:200,cafe:0,kcal:120,prot:6},
+  ]},
+  {grupo:"Energéticos e refrigerantes",itens:[
+    {k:"energ",nome:"Energético",desc:"lata 250ml",ml:250,cafe:80,kcal:110},
+    {k:"energ0",nome:"Energético zero",desc:"lata 250ml",ml:250,cafe:80,kcal:5},
+    {k:"refri",nome:"Refrigerante",desc:"lata 350ml",ml:350,cafe:35,kcal:140},
+    {k:"refri0",nome:"Refrigerante zero",desc:"lata 350ml",ml:350,cafe:35,kcal:0},
+  ]},
+  {grupo:"Álcool (não conta como hidratação)",hid:0,itens:[
+    {k:"cerveja",nome:"Cerveja",desc:"lata 350ml",ml:350,cafe:0,kcal:150},
+    {k:"vinho",nome:"Vinho",desc:"taça 150ml",ml:150,cafe:0,kcal:125},
+  ]},
+];
 function nutriTotals(meals,dayData){
   const di=dayData?.done_items||[];
   const esc=dayData?.escolhas||{};
@@ -213,6 +246,7 @@ function nutriTotals(meals,dayData){
     (m.escolhas||[]).forEach(g=>{const sel=esc[g.id];if(sel){const opt=g.opcoes.find(o=>o.id===sel);if(opt){kcal+=opt.kcal;prot+=opt.prot;carbs+=opt.carbs;fat+=opt.fat;}}});
   });
   (dayData?.extras||[]).forEach(e=>{kcal+=e.kcal||0;prot+=e.prot||0;});
+  (dayData?.bebidas||[]).forEach(b=>{kcal+=b.kcal||0;prot+=b.prot||0;});
   return{kcal:Math.round(kcal),prot:Math.round(prot*10)/10,carbs:Math.round(carbs),fat:Math.round(fat)};
 }
 function nutriSlots(meals,dayData){
@@ -1379,6 +1413,8 @@ function NutricaoView({user}){
   const[weekData,setWeekData]=useState([]);
   const[ci,setCi]=useState({nome:"",kcal:"",prot:""});
   const[showExtra,setShowExtra]=useState(false);
+  const[showCb,setShowCb]=useState(false);
+  const[cb,setCb]=useState({nome:"",ml:"",cafe:"",kcal:"",hid:true});
 
   useEffect(()=>{
     sGet(sk(user.id,"nutri",todayStr()),{tipo_dia:"normal",done_items:[],escolhas:{},extras:[],agua_ml:0})
@@ -1409,6 +1445,23 @@ function NutricaoView({user}){
   const addCi=()=>{if(!ci.nome||!ci.kcal)return;update({...today,extras:[...ex,{id:Date.now(),nome:ci.nome,kcal:parseFloat(ci.kcal)||0,prot:parseFloat(ci.prot)||0}]});setCi({nome:"",kcal:"",prot:""});setShowExtra(false);};
   const delEx=id=>update({...today,extras:ex.filter(e=>e.id!==id)});
   const addAg=ml=>update({...today,agua_ml:ag+ml});
+  const bebidas=today.bebidas||[];
+  const cafeTotal=bebidas.reduce((a,b)=>a+(b.cafe||0),0);
+  const kcalBeb=bebidas.reduce((a,b)=>a+(b.kcal||0),0);
+  const addBeb=(b)=>{
+    const hidMl=b.hid===0?0:b.ml;
+    const entry={id:Date.now()+Math.random(),nome:b.nome,desc:b.desc||"",ml:b.ml,cafe:b.cafe||0,kcal:b.kcal||0,prot:b.prot||0,hidMl};
+    update({...today,agua_ml:ag+hidMl,bebidas:[...bebidas,entry]});
+  };
+  const delBeb=(id)=>{
+    const e=bebidas.find(x=>x.id===id);if(!e)return;
+    update({...today,agua_ml:Math.max(0,ag-(e.hidMl||0)),bebidas:bebidas.filter(x=>x.id!==id)});
+  };
+  const addCustomBeb=()=>{
+    const ml=parseFloat(cb.ml);if(!cb.nome.trim()||!ml||ml<=0)return;
+    addBeb({nome:cb.nome.trim(),desc:`${ml}ml`,ml,cafe:parseFloat(cb.cafe)||0,kcal:parseFloat(cb.kcal)||0,hid:cb.hid?1:0});
+    setCb({nome:"",ml:"",cafe:"",kcal:"",hid:true});setShowCb(false);
+  };
 
   const wAvgK=weekData.length?Math.round(weekData.reduce((a,d)=>a+nutriTotals(user.id==="G"?MEALS_G:MEALS_B,d).kcal,0)/weekData.length):0;
 
@@ -1571,6 +1624,54 @@ function NutricaoView({user}){
           </div>
           {ag>0&&<div style={{textAlign:"center"}}><button onClick={()=>update({...today,agua_ml:Math.max(0,ag-250)})} style={{fontSize:11,color:T.muted,background:"transparent",border:"none",cursor:"pointer"}}>← Desfazer 250ml</button></div>}
         </div>
+        <div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:14,padding:"14px",marginBottom:12}}>
+          <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",marginBottom:10}}>
+            <div style={{fontSize:13,fontWeight:700,color:T.text}}>Outras bebidas</div>
+            <div style={{fontSize:10,color:T.muted}}>valores aproximados</div>
+          </div>
+          {BEBIDAS.map(g=>(<div key={g.grupo} style={{marginBottom:10}}>
+            <div style={{fontSize:10,fontWeight:700,color:T.muted,letterSpacing:0.8,textTransform:"uppercase",marginBottom:6}}>{g.grupo}</div>
+            <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
+              {g.itens.map(b=>(<button key={b.k} onClick={()=>addBeb({...b,hid:g.hid})} style={{padding:"8px 10px",borderRadius:10,border:`1px solid ${T.border}`,background:T.inpBg,cursor:"pointer",textAlign:"left",minHeight:44}}>
+                <div style={{fontSize:12,fontWeight:700,color:T.text}}>{b.nome}</div>
+                <div style={{fontSize:10,color:T.muted,marginTop:1}}>{b.desc}{b.cafe?` · ${b.cafe}mg cafeína`:""}</div>
+              </button>))}
+            </div>
+          </div>))}
+          {!showCb&&<button onClick={()=>setShowCb(true)} style={{width:"100%",padding:10,borderRadius:10,border:`1px dashed ${T.border}`,background:"transparent",color:T.muted,fontSize:12,cursor:"pointer",marginTop:2}}>+ Bebida personalizada</button>}
+          {showCb&&<div style={{background:T.inpBg,borderRadius:10,padding:10,marginTop:4}}>
+            <input value={cb.nome} onChange={e=>setCb(p=>({...p,nome:e.target.value}))} placeholder="Nome da bebida" style={{...I,marginBottom:6,minHeight:40,fontSize:14}}/>
+            <div style={{display:"flex",gap:6,marginBottom:6}}>
+              <input value={cb.ml} onChange={e=>setCb(p=>({...p,ml:e.target.value}))} placeholder="ml" inputMode="numeric" style={{...I,minHeight:40,fontSize:14}}/>
+              <input value={cb.cafe} onChange={e=>setCb(p=>({...p,cafe:e.target.value}))} placeholder="cafeína mg" inputMode="numeric" style={{...I,minHeight:40,fontSize:14}}/>
+              <input value={cb.kcal} onChange={e=>setCb(p=>({...p,kcal:e.target.value}))} placeholder="kcal" inputMode="numeric" style={{...I,minHeight:40,fontSize:14}}/>
+            </div>
+            <label style={{display:"flex",alignItems:"center",gap:8,fontSize:12,color:T.sub,marginBottom:8}}><input type="checkbox" checked={cb.hid} onChange={e=>setCb(p=>({...p,hid:e.target.checked}))}/> Conta como hidratação</label>
+            <div style={{display:"flex",gap:6}}>
+              <button onClick={()=>setShowCb(false)} style={{flex:1,padding:9,borderRadius:9,border:`1px solid ${T.border}`,background:"transparent",color:T.sub,fontSize:12,cursor:"pointer"}}>Cancelar</button>
+              <button onClick={addCustomBeb} style={{flex:2,padding:9,borderRadius:9,border:"none",background:"#06B6D4",color:"#FFF",fontSize:12,fontWeight:700,cursor:"pointer"}}>Adicionar</button>
+            </div>
+          </div>}
+        </div>
+        {bebidas.length>0&&<div style={{background:T.card,border:`1px solid ${T.border}`,borderRadius:14,padding:"14px",marginBottom:12}}>
+          <div style={{display:"flex",gap:8,marginBottom:10}}>
+            <div style={{flex:1,background:T.inpBg,borderRadius:10,padding:"8px 10px",textAlign:"center"}}>
+              <div style={{fontSize:16,fontWeight:700,fontFamily:"'JetBrains Mono',monospace",color:cafeTotal>400?"#EF4444":cafeTotal>300?"#F59E0B":T.text}}>{cafeTotal}<span style={{fontSize:10,color:T.muted}}>mg</span></div>
+              <div style={{fontSize:9,color:T.muted,marginTop:2}}>cafeína hoje</div>
+            </div>
+            <div style={{flex:1,background:T.inpBg,borderRadius:10,padding:"8px 10px",textAlign:"center"}}>
+              <div style={{fontSize:16,fontWeight:700,fontFamily:"'JetBrains Mono',monospace",color:T.text}}>{kcalBeb}<span style={{fontSize:10,color:T.muted}}>kcal</span></div>
+              <div style={{fontSize:9,color:T.muted,marginTop:2}}>das bebidas</div>
+            </div>
+          </div>
+          <div style={{fontSize:10,color:T.muted,marginBottom:8}}>Referência geral p/ adultos saudáveis: até ~400mg de cafeína por dia.</div>
+          <div style={{display:"flex",flexDirection:"column",gap:4}}>
+            {bebidas.map(b=>(<div key={b.id} style={{display:"flex",alignItems:"center",justifyContent:"space-between",fontSize:12,padding:"6px 8px",background:T.inpBg,borderRadius:8}}>
+              <span style={{color:T.text,fontWeight:600}}>{b.nome} <span style={{color:T.muted,fontWeight:400}}>{b.desc}</span></span>
+              <span style={{display:"flex",alignItems:"center",gap:8,color:T.muted,fontFamily:"'JetBrains Mono',monospace",fontSize:11}}>{b.cafe?`${b.cafe}mg`:""}<button onClick={()=>delBeb(b.id)} style={{background:"transparent",border:"none",color:T.muted,fontSize:15,cursor:"pointer",padding:0}}>×</button></span>
+            </div>))}
+          </div>
+        </div>}
         {user.id==="G"&&<><div style={{background:T.deloadBg,border:`1px solid ${T.deloadBorder}`,borderRadius:12,padding:"12px 14px",marginBottom:10}}>
           <div style={{fontSize:12,fontWeight:700,color:T.deloadText,marginBottom:4}}>⚠ Tirzepatida + Hidratação</div>
           <div style={{fontSize:12,color:T.deloadSub,lineHeight:1.6}}>A tirzepatida reduz a percepção de sede. Beba antes de sentir — especialmente em dias de treino duplo e Open.</div>
