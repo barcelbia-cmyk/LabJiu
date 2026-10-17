@@ -48,7 +48,7 @@ const { useState, useEffect, useRef } = React;
 const LIGHT_T={bg:"#F8F7F5",card:"#FFFFFF",border:"#E6E4E0",borderDone:"#BBF7D0",text:"#0A0A0A",sub:"#888880",muted:"#C0BFB8",done:"#15803D",doneBg:"#F0FDF4",inpBg:"#F4F3F0",timerBg:"#FFF8F0",timerBorder:"#FDDCB5",deloadBg:"#FFF7ED",deloadBorder:"#FED7AA",deloadText:"#9A3412",deloadSub:"#C2410C",scroll:"#DDDDDD"};
 const DARK_T={bg:"#0C0C0C",card:"#171717",border:"#282828",borderDone:"#1A3A1A",text:"#F0F0F0",sub:"#888880",muted:"#484848",done:"#4ADE80",doneBg:"#091409",inpBg:"#202020",timerBg:"#1C1400",timerBorder:"#3D2E00",deloadBg:"#1C1000",deloadBorder:"#3D2800",deloadText:"#FED7AA",deloadSub:"#FBBF24",scroll:"#333333"};
 let T=LIGHT_T;
-const APP_VERSION="2026.10.14-1";
+const APP_VERSION="2026.10.14-2";
 const USERS={G:{id:"G",name:"Guilherme",accent:"#EA6C00",goal:89,goalDate:"2026-12-05",ctx:"atleta BJJ faixa azul — meia-guarda, single leg, força de combate"},B:{id:"B",name:"Bianca",accent:"#E11D4B",goal:null,goalDate:null,ctx:"treino estético feminino — glúteo médio, posterior, afinar cintura"},I:{id:"I",name:"Isabela",accent:"#0D9488",goal:null,goalDate:null,ctx:"atleta BJJ faixa azul adulto, profissional — laço/De la Riva, precisa de grip, isometria, potência explosiva e condicionamento pro campeonato de 25/09",noNutricao:true}};
 
 /* ─── DEFAULT CONFIG ─────────────────────────────────────────────────── */
@@ -504,7 +504,19 @@ const sk=(...p)=>p.join(":");
 const sSet=async(k,v)=>{try{localStorage.setItem(k,JSON.stringify(v));}catch{}};
 const sGet=async(k,fb=null)=>{try{const r=localStorage.getItem(k);return r!==null?JSON.parse(r):fb;}catch{return fb;}};
 const sList=async(p)=>{try{const out=[];for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.startsWith(p))out.push(k);}return out;}catch{return [];}};
-const todayStr=()=>new Date().toISOString().split("T")[0];
+const ymd=(d)=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+const todayStr=()=>ymd(new Date());
+function useDayKey(){
+  const[d,setD]=useState(todayStr());
+  useEffect(()=>{
+    const chk=()=>{const t=todayStr();setD(p=>p===t?p:t);};
+    const iv=setInterval(chk,30000);
+    document.addEventListener("visibilitychange",chk);
+    window.addEventListener("focus",chk);
+    return()=>{clearInterval(iv);document.removeEventListener("visibilitychange",chk);window.removeEventListener("focus",chk);};
+  },[]);
+  return d;
+}
 const parseRest=r=>{if(!r||r==="—")return 0;const m=r.match(/(\d+(?:\.\d+)?)\s*min/);if(m)return Math.round(parseFloat(m[1])*60);const s=r.match(/(\d+)s/);return s?parseInt(s[1]):90;};
 const fmtTime=s=>s>59?`${Math.floor(s/60)}:${(s%60).toString().padStart(2,"0")}`:s+"s";
 const vib=p=>{try{if("vibrate"in navigator)navigator.vibrate(p);}catch{}};
@@ -895,7 +907,7 @@ function ActiveSession({plan,user,onFinish,onCancel}){
   const pct=Math.round((doneCt/plan.exercises.length)*100);
   const finish=async()=>{
     const end=new Date();
-    const sess={date:start.toISOString().split("T")[0],type:plan.id,planName:plan.name,startTime:start.toTimeString().slice(0,5),endTime:end.toTimeString().slice(0,5),durationMin:Math.round((end-start)/60000),exercises:exData,notes:sessNotes};
+    const sess={date:ymd(start),type:plan.id,planName:plan.name,startTime:start.toTimeString().slice(0,5),endTime:end.toTimeString().slice(0,5),durationMin:Math.round((end-start)/60000),exercises:exData,notes:sessNotes};
     await sSet(sk(user.id,"sess",sess.date,plan.id),sess);
     for(const[eid,d]of Object.entries(exData)){const done=(d.sets||[]).filter(s=>s.done&&s.w&&!isNaN(parseFloat(s.w)));if(!done.length)continue;const maxW=Math.max(...done.map(s=>parseFloat(s.w)));const cur=await sGet(sk(user.id,"pr",eid));if(!cur||maxW>(parseFloat(cur.weight)||0))await sSet(sk(user.id,"pr",eid),{weight:maxW,date:sess.date,reps:done[done.length-1].r});}
     onFinish();
@@ -992,7 +1004,7 @@ function StatsView({user,plans}){
   },[user.id,calMonth]);
 
   const prList=Object.values(prs).filter(p=>p.weight>0);
-  const ws7=new Date();ws7.setDate(ws7.getDate()-7);const ws7str=ws7.toISOString().split("T")[0];
+  const ws7=new Date();ws7.setDate(ws7.getDate()-7);const ws7str=ymd(ws7);
   const weekSess=allSess.filter(s=>s.date>=ws7str);
   const weekSets=weekSess.reduce((a,s)=>a+Object.values(s.exercises||{}).reduce((b,d)=>b+(d.sets?.filter(x=>x.done).length||0),0),0);
 
@@ -1138,7 +1150,7 @@ function LongTermStats({treinoDates,jiuMeta,earliestDate,accent}){
   if(daysSinceStart<30)return null; // só aparece com pelo menos 30 dias de histórico
 
   const cutoff=new Date();cutoff.setDate(cutoff.getDate()-period);
-  const cutoffStr=cutoff.toISOString().split("T")[0];
+  const cutoffStr=ymd(cutoff);
   const treinosCount=treinoDates.filter(d=>d>=cutoffStr).length;
   const jiuFiltered=jiuMeta.filter(j=>j.date>=cutoffStr);
   const jiuCount=jiuFiltered.length;
@@ -1416,19 +1428,21 @@ function NutricaoView({user}){
   const[showCb,setShowCb]=useState(false);
   const[cb,setCb]=useState({nome:"",ml:"",cafe:"",kcal:"",hid:true});
 
+  const dayKey=useDayKey();
   useEffect(()=>{
-    sGet(sk(user.id,"nutri",todayStr()),{tipo_dia:"normal",done_items:[],escolhas:{},extras:[],agua_ml:0})
+    setToday({tipo_dia:"normal",done_items:[],escolhas:{},extras:[],agua_ml:0,bebidas:[]});
+    sGet(sk(user.id,"nutri",dayKey),{tipo_dia:"normal",done_items:[],escolhas:{},extras:[],agua_ml:0})
       .then(d=>setToday(d||{tipo_dia:"normal",done_items:[],escolhas:{},extras:[],agua_ml:0}));
     (async()=>{
       const days=[];
-      for(let i=1;i<8;i++){const d=new Date();d.setDate(d.getDate()-i);const ds=d.toISOString().split("T")[0];const data=await sGet(sk(user.id,"nutri",ds),null);if(data)days.push({date:ds,...data});}
+      for(let i=1;i<8;i++){const d=new Date();d.setDate(d.getDate()-i);const ds=ymd(d);const data=await sGet(sk(user.id,"nutri",ds),null);if(data)days.push({date:ds,...data});}
       setWeekData(days);
     })();
-  },[user.id]);
+  },[user.id,dayKey]);
 
   const[dietaDirty,setDietaDirty]=useState(false);
-  const update=async(d)=>{setToday(d);setDietaDirty(false);await sSet(sk(user.id,"nutri",todayStr()),d);};
-  const save=async d=>{setToday(d);await sSet(sk(user.id,"nutri",todayStr()),d);setDietaDirty(false);window.__toast?.("Dieta de hoje salva");};
+  const update=async(d)=>{setToday(d);setDietaDirty(false);await sSet(sk(user.id,"nutri",dayKey),d);};
+  const save=async d=>{setToday(d);await sSet(sk(user.id,"nutri",dayKey),d);setDietaDirty(false);window.__toast?.("Dieta de hoje salva");};
   const cfg=window.__config||DEF_CFG[user.id];
   const KT=today.tipo_dia==="2treinos"?cfg.calorie2treinos:today.tipo_dia==="descanso"?cfg.calorieDescanso:cfg.calorieNormal;
   const PT=cfg.proteinTarget;
@@ -2060,7 +2074,7 @@ function JiuView({user}){
   const tabs=[{id:"sessao",l:"Sessão"},{id:"parceiros",l:"Parceiros"},{id:"posicoes",l:"Posições"},{id:"faixa",l:"🥋 Faixa"},{id:"adversarios",l:"Adversários"},{id:"timer",l:"⏱ Timer"}];
 
   // ── Rola sub-form component (reused) ───────────────────────────────
-  const weekCardio=cardioLog.filter(c=>{const d=new Date();d.setDate(d.getDate()-7);return c.date>=d.toISOString().split("T")[0];}).reduce((a,c)=>a+parseInt(c.dur||0),0);
+  const weekCardio=cardioLog.filter(c=>{const d=new Date();d.setDate(d.getDate()-7);return c.date>=ymd(d);}).reduce((a,c)=>a+parseInt(c.dur||0),0);
 
   return(
     <div>
@@ -2836,26 +2850,27 @@ function DashboardView({user,plans,setPillar,setShowSettings}){
   const[checkin,setCheckin]=useState({sono:3,horas:7,disposicao:3,corpo:3});
   const[checkinSaved,setCheckinSaved]=useState(false);
   const[reloadKey,setReloadKey]=useState(0);
+  const dayKey=useDayKey();
   useEffect(()=>{
-    sGet(sk(user.id,"checkin",todayStr()),null).then(c=>{if(c){setCheckin(c);setCheckinSaved(true);}else{setCheckin({sono:3,horas:7,disposicao:3,corpo:3});setCheckinSaved(false);}});
-  },[user.id]);
+    sGet(sk(user.id,"checkin",dayKey),null).then(c=>{if(c){setCheckin(c);setCheckinSaved(true);}else{setCheckin({sono:3,horas:7,disposicao:3,corpo:3});setCheckinSaved(false);}});
+  },[user.id,dayKey]);
   const [checkinDirty,setCheckinDirty]=useState(false);
   const updCheckin=async(newC)=>{
     setCheckin(newC);setCheckinDirty(false);
-    await sSet(sk(user.id,"checkin",todayStr()),newC);
+    await sSet(sk(user.id,"checkin",dayKey),newC);
     setCheckinSaved(true);
     setReloadKey(k=>k+1);
   };
   const saveCheckin=async(newC)=>{
     setCheckin(newC);
-    await sSet(sk(user.id,"checkin",todayStr()),newC);
+    await sSet(sk(user.id,"checkin",dayKey),newC);
     window.__toast?.("Check-in de hoje salvo");
     setCheckinSaved(true);setCheckinDirty(false);
     setReloadKey(k=>k+1);
   };
   useEffect(()=>{
     (async()=>{
-      const ws=new Date();ws.setDate(ws.getDate()-7);const wsStr=ws.toISOString().split("T")[0];
+      const ws=new Date();ws.setDate(ws.getDate()-7);const wsStr=ymd(ws);
       // Treinos semana
       const skeys=await sList(sk(user.id,"sess",""));let treinos=0;
       const allTreinoDates=[];
@@ -2870,7 +2885,7 @@ function DashboardView({user,plans,setPillar,setShowSettings}){
       // Nutrição (dias com 3+ refeições)
       let nutriOk=0;
       const nutriMeals=user.id==="G"?MEALS_G:MEALS_B;
-      for(let i=0;i<7;i++){const d=new Date();d.setDate(d.getDate()-i);const ds=d.toISOString().split("T")[0];const n=await sGet(sk(user.id,"nutri",ds),null);if(n){const sl=nutriSlots(nutriMeals,n);if(sl.total>0&&sl.done>=Math.ceil(sl.total*0.6))nutriOk++;}}
+      for(let i=0;i<7;i++){const d=new Date();d.setDate(d.getDate()-i);const ds=ymd(d);const n=await sGet(sk(user.id,"nutri",ds),null);if(n){const sl=nutriSlots(nutriMeals,n);if(sl.total>0&&sl.done>=Math.ceil(sl.total*0.6))nutriOk++;}}
       // Peso atual + meta
       const pesos=await sGet(sk(user.id,"weight"),[]);
       const pesoAtual=pesos.length?pesos[pesos.length-1].weight:null;
@@ -2883,7 +2898,7 @@ function DashboardView({user,plans,setPillar,setShowSettings}){
 
       // ── Check-ins diários (sono/disposição/corpo — independente de treino) ──
       const checkinsByDate={};
-      for(let i=0;i<14;i++){const d=new Date();d.setDate(d.getDate()-i);const ds=d.toISOString().split("T")[0];const c=await sGet(sk(user.id,"checkin",ds),null);if(c)checkinsByDate[ds]=c;}
+      for(let i=0;i<14;i++){const d=new Date();d.setDate(d.getDate()-i);const ds=ymd(d);const c=await sGet(sk(user.id,"checkin",ds),null);if(c)checkinsByDate[ds]=c;}
       const checkinsWeek=Object.entries(checkinsByDate).filter(([ds])=>ds>=wsStr).map(([,c])=>c);
       const avgFadiga=checkinsWeek.length?Math.round(checkinsWeek.reduce((a,f)=>a+((f.sono||0)+(f.disposicao||0)+(f.corpo||0))/3,0)/checkinsWeek.length*2*10)/10:null;
 
@@ -2921,12 +2936,12 @@ function DashboardView({user,plans,setPillar,setShowSettings}){
 
       // Fator 5: Dias consecutivos de treino (recuperação)
       let consec=0;
-      for(let i=1;i<=7;i++){const d=new Date();d.setDate(d.getDate()-i);const ds=d.toISOString().split("T")[0];const hasJiu=jiuLog.some(s=>s.date===ds);let hasGym=false;for(const k of skeys){const s=await sGet(k);if(s&&s.date===ds){hasGym=true;break;}}if(hasJiu||hasGym)consec++;else break;}
+      for(let i=1;i<=7;i++){const d=new Date();d.setDate(d.getDate()-i);const ds=ymd(d);const hasJiu=jiuLog.some(s=>s.date===ds);let hasGym=false;for(const k of skeys){const s=await sGet(k);if(s&&s.date===ds){hasGym=true;break;}}if(hasJiu||hasGym)consec++;else break;}
       const consecFactor=consec<=1?1.5:consec<=2?1.2:consec<=3?0.8:consec<=4?0.5:0.2; // 0–1.5
 
       // Fator 6: Nutrição (proteína média últimos 2 dias)
       let protSum=0,protN=0;
-      for(let i=1;i<=2;i++){const d=new Date();d.setDate(d.getDate()-i);const ds=d.toISOString().split("T")[0];const n=await sGet(sk(user.id,"nutri",ds),null);if(n){const k=nutriTotals(user.id==="G"?MEALS_G:MEALS_B,n).prot;if(k>0){protSum+=k;protN++;}}}
+      for(let i=1;i<=2;i++){const d=new Date();d.setDate(d.getDate()-i);const ds=ymd(d);const n=await sGet(sk(user.id,"nutri",ds),null);if(n){const k=nutriTotals(user.id==="G"?MEALS_G:MEALS_B,n).prot;if(k>0){protSum+=k;protN++;}}}
       const avgProt2=protN>0?protSum/protN:0;
       const nutFactor=cfg.proteinTarget>0?Math.min(1.5,(avgProt2/cfg.proteinTarget)*1.5):0.9; // 0–1.5
 
@@ -3005,7 +3020,7 @@ function DashboardView({user,plans,setPillar,setShowSettings}){
 
       setData({treinos,jiuSess:jiuWeek.length,nutriOk,pesoAtual,pesoAnterior,avgFadiga,rolasWeek:rolasWeek.length,winsWeek,goalWeight:cfg.goalWeight,goalDate:cfg.goalDate,correlacoes,readiness,readinessFactors,padroes,monthSummary,allTreinoDates,allJiuMeta,earliestDate});
     })();
-  },[user.id,reloadKey]);
+  },[user.id,reloadKey,dayKey]);
 
   if(!data)return(<div style={{display:"flex",alignItems:"center",justifyContent:"center",padding:"60px 0",color:T.muted,fontSize:13}}>Carregando...</div>);
 
@@ -3374,7 +3389,7 @@ function App(){
   useEffect(()=>{document.body.style.background=T.bg;},[dark]);
   const toggleTheme=()=>setDark(d=>{const nd=!d;try{localStorage.setItem("pf-theme",nd?"dark":"light");}catch{}return nd;});
   if(!uid){
-    return <UserGate onSelect={setUid} dark={dark} toggleTheme={toggleTheme}/>;
+    return <UserGate onSelect={(id)=>{setUid(id);setPillar("home");}} dark={dark} toggleTheme={toggleTheme}/>;
   }
   const user=USERS[uid];const plans=uid==="G"?resolveGuilhermePlans(G_PLANS):uid==="I"?resolveIsabelaPlans(I_PLANS):B_PLANS;
   return(
