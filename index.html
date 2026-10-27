@@ -48,7 +48,7 @@ const { useState, useEffect, useRef } = React;
 const LIGHT_T={bg:"#F8F7F5",card:"#FFFFFF",border:"#E6E4E0",borderDone:"#BBF7D0",text:"#0A0A0A",sub:"#888880",muted:"#C0BFB8",done:"#15803D",doneBg:"#F0FDF4",inpBg:"#F4F3F0",timerBg:"#FFF8F0",timerBorder:"#FDDCB5",deloadBg:"#FFF7ED",deloadBorder:"#FED7AA",deloadText:"#9A3412",deloadSub:"#C2410C",scroll:"#DDDDDD"};
 const DARK_T={bg:"#0C0C0C",card:"#171717",border:"#282828",borderDone:"#1A3A1A",text:"#F0F0F0",sub:"#888880",muted:"#484848",done:"#4ADE80",doneBg:"#091409",inpBg:"#202020",timerBg:"#1C1400",timerBorder:"#3D2E00",deloadBg:"#1C1000",deloadBorder:"#3D2800",deloadText:"#FED7AA",deloadSub:"#FBBF24",scroll:"#333333"};
 let T=LIGHT_T;
-const APP_VERSION="2026.10.14-2";
+const APP_VERSION="2026.10.14-3";
 const USERS={G:{id:"G",name:"Guilherme",accent:"#EA6C00",goal:89,goalDate:"2026-12-05",ctx:"atleta BJJ faixa azul — meia-guarda, single leg, força de combate"},B:{id:"B",name:"Bianca",accent:"#E11D4B",goal:null,goalDate:null,ctx:"treino estético feminino — glúteo médio, posterior, afinar cintura"},I:{id:"I",name:"Isabela",accent:"#0D9488",goal:null,goalDate:null,ctx:"atleta BJJ faixa azul adulto, profissional — laço/De la Riva, precisa de grip, isometria, potência explosiva e condicionamento pro campeonato de 25/09",noNutricao:true}};
 
 /* ─── DEFAULT CONFIG ─────────────────────────────────────────────────── */
@@ -2845,6 +2845,154 @@ function CampCard({user}){
   );
 }
 
+/* ─── DASHBOARD: HIDRATAÇÃO RÁPIDA ───────────────────────────────────── */
+function HidratacaoRapida({user}){
+  const dayKey=useDayKey();
+  const[day,setDay]=useState(null);
+  const[more,setMore]=useState(false);
+  const dayRef=useRef(null);
+  const cfg=window.__config||DEF_CFG[user.id];
+  const AT=cfg.hydrationTarget||3000;
+  useEffect(()=>{
+    setDay(null);dayRef.current=null;
+    sGet(sk(user.id,"nutri",dayKey),null).then(d=>{const nd=d||{tipo_dia:"normal",done_items:[],escolhas:{},extras:[],agua_ml:0};dayRef.current=nd;setDay(nd);});
+  },[user.id,dayKey]);
+  if(!day)return null;
+  const apply=async(fn)=>{const cur=dayRef.current;if(!cur)return;const nd=fn(cur);dayRef.current=nd;setDay(nd);await sSet(sk(user.id,"nutri",dayKey),nd);};
+  const addWater=ml=>apply(d=>({...d,agua_ml:(d.agua_ml||0)+ml}));
+  const undo=()=>apply(d=>({...d,agua_ml:Math.max(0,(d.agua_ml||0)-250)}));
+  const addB=(b,hid)=>apply(d=>{
+    const hidMl=hid===0?0:b.ml;
+    const entry={id:Date.now()+Math.random(),nome:b.nome,desc:b.desc||"",ml:b.ml,cafe:b.cafe||0,kcal:b.kcal||0,prot:b.prot||0,hidMl};
+    return {...d,agua_ml:(d.agua_ml||0)+hidMl,bebidas:[...(d.bebidas||[]),entry]};
+  });
+  const delB=(id)=>apply(d=>{
+    const e=(d.bebidas||[]).find(x=>x.id===id);if(!e)return d;
+    return {...d,agua_ml:Math.max(0,(d.agua_ml||0)-(e.hidMl||0)),bebidas:d.bebidas.filter(x=>x.id!==id)};
+  });
+  const ag=day.agua_ml||0;
+  const bebidas=day.bebidas||[];
+  const cafeTotal=bebidas.reduce((a,b)=>a+(b.cafe||0),0);
+  const done=ag>=AT;
+  const quick=["exp1","exp2","coado"].map(k=>BEBIDAS[0].itens.find(i=>i.k===k));
+  const btn={padding:"10px 8px",borderRadius:10,fontSize:13,fontWeight:700,cursor:"pointer",minHeight:46,flex:1};
+  return(
+    <div style={{background:T.card,border:`1.5px solid ${done?T.borderDone:"#06B6D440"}`,borderRadius:14,padding:"14px 16px",marginBottom:16}}>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"baseline",marginBottom:8}}>
+        <div style={{fontSize:10,fontWeight:700,color:T.muted,letterSpacing:1.2,textTransform:"uppercase"}}>💧 Hidratação</div>
+        <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:22,fontWeight:700,color:done?T.done:"#06B6D4"}}>{(ag/1000).toFixed(2)}<span style={{fontSize:12,color:T.muted}}> / {(AT/1000).toFixed(1)}L</span></div>
+      </div>
+      <div style={{height:8,background:T.inpBg,borderRadius:4,marginBottom:12,overflow:"hidden"}}><div style={{height:"100%",width:`${Math.min(100,(ag/AT)*100)}%`,background:done?T.done:"#06B6D4",borderRadius:4,transition:"width 0.4s ease"}}/></div>
+      <div style={{display:"flex",gap:6,marginBottom:6}}>
+        {[[250,"250ml"],[500,"500ml"],[750,"750ml"],[1000,"1L"]].map(([ml,l])=>(<button key={ml} onClick={()=>addWater(ml)} style={{...btn,border:"1px solid #06B6D4",background:"#06B6D410",color:"#06B6D4"}}>+{l}</button>))}
+      </div>
+      <div style={{display:"flex",gap:6,marginBottom:6}}>
+        {quick.map(b=>(<button key={b.k} onClick={()=>addB(b)} style={{...btn,fontSize:12,border:`1px solid ${T.border}`,background:T.inpBg,color:T.text,padding:"8px 4px"}}>☕ {b.nome}<div style={{fontSize:9,fontWeight:400,color:T.muted}}>{b.desc}</div></button>))}
+      </div>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center"}}>
+        <button onClick={()=>setMore(m=>!m)} style={{background:"transparent",border:"none",color:user.accent,fontSize:12,fontWeight:700,cursor:"pointer",padding:"6px 0"}}>{more?"▲ Menos bebidas":"▼ Mais bebidas"}</button>
+        {ag>0&&<button onClick={undo} style={{background:"transparent",border:"none",color:T.muted,fontSize:11,cursor:"pointer",padding:"6px 0"}}>← Desfazer 250ml</button>}
+      </div>
+      {more&&<div style={{marginTop:4}}>
+        {BEBIDAS.map(g=>(<div key={g.grupo} style={{marginBottom:8}}>
+          <div style={{fontSize:9,fontWeight:700,color:T.muted,letterSpacing:0.8,textTransform:"uppercase",marginBottom:5}}>{g.grupo}</div>
+          <div style={{display:"flex",flexWrap:"wrap",gap:5}}>
+            {g.itens.map(b=>(<button key={b.k} onClick={()=>addB(b,g.hid)} style={{padding:"7px 9px",borderRadius:9,border:`1px solid ${T.border}`,background:T.inpBg,cursor:"pointer",textAlign:"left",minHeight:40}}>
+              <div style={{fontSize:11,fontWeight:700,color:T.text}}>{b.nome}</div>
+              <div style={{fontSize:9,color:T.muted}}>{b.desc}{b.cafe?` · ${b.cafe}mg`:""}</div>
+            </button>))}
+          </div>
+        </div>))}
+        <div style={{fontSize:10,color:T.muted}}>Bebida personalizada: Nutrição › Hidratação.</div>
+      </div>}
+      {bebidas.length>0&&<div style={{marginTop:8,paddingTop:8,borderTop:`1px solid ${T.border}`}}>
+        <div style={{fontSize:11,color:cafeTotal>400?"#EF4444":cafeTotal>300?"#F59E0B":T.sub,marginBottom:6}}>Cafeína hoje: <b>{cafeTotal}mg</b> <span style={{color:T.muted}}>(ref. geral: até ~400mg)</span></div>
+        <div style={{display:"flex",flexWrap:"wrap",gap:5}}>
+          {bebidas.map(b=>(<span key={b.id} style={{display:"inline-flex",alignItems:"center",gap:5,fontSize:11,color:T.text,background:T.inpBg,borderRadius:8,padding:"4px 8px"}}>{b.nome}<button onClick={()=>delB(b.id)} style={{background:"transparent",border:"none",color:T.muted,fontSize:14,cursor:"pointer",padding:0,lineHeight:1}}>×</button></span>))}
+        </div>
+      </div>}
+    </div>
+  );
+}
+
+/* ─── DASHBOARD: PESO EM JEJUM ───────────────────────────────────────── */
+function PesoRapidoCard({user,onSaved}){
+  const dayKey=useDayKey();
+  const[log,setLog]=useState(null);
+  const[inp,setInp]=useState("");
+  useEffect(()=>{sGet(sk(user.id,"weight"),[]).then(d=>setLog(d||[]));},[user.id,dayKey]);
+  if(!log)return null;
+  const goal=(window.__config?.goalWeight)||user.goal;
+  const hoje=log.find(e=>e.date===dayKey);
+  const last=log[log.length-1];
+  const prev=log.length>1?log[log.length-2]:null;
+  const off=(n)=>{const d=new Date(dayKey+"T12:00:00");d.setDate(d.getDate()-n);return ymd(d);};
+  const avg=(arr)=>arr.length?arr.reduce((a,e)=>a+e.weight,0)/arr.length:null;
+  const a7=avg(log.filter(e=>e.date>off(7)&&e.date<=dayKey));
+  const a7prev=avg(log.filter(e=>e.date>off(14)&&e.date<=off(7)));
+  const dAvg=a7!=null&&a7prev!=null?a7-a7prev:null;
+  const dLast=last&&prev?last.weight-prev.weight:null;
+  const downGood=goal!=null&&last?last.weight>goal:null;
+  const colorFor=(d)=>d==null||downGood==null||Math.abs(d)<0.2?T.text:((d<0)===downGood?T.done:"#EF4444");
+  const fmt=(d)=>d==null?"—":`${d>0?"+":""}${d.toFixed(1)}`;
+  let status=null;
+  if(dAvg!=null){
+    if(Math.abs(dAvg)<0.2)status={t:downGood?"→ Estagnado na semana":"→ Estável na semana",c:downGood?"#F59E0B":T.sub};
+    else if(downGood==null)status={t:dAvg<0?"↓ Caindo":"↑ Subindo",c:T.sub};
+    else if((dAvg<0)===downGood)status={t:"✓ Evoluindo na direção da meta",c:T.done};
+    else status={t:"↑ Contra a meta esta semana",c:"#EF4444"};
+  }
+  const save=async()=>{
+    const w=parseFloat(inp.replace(",","."));
+    if(isNaN(w)||w<30||w>300){window.__toast?.("Peso inválido");return;}
+    const nl=[...log.filter(e=>e.date!==dayKey),{date:dayKey,weight:w}].sort((a,b)=>a.date.localeCompare(b.date));
+    setLog(nl);setInp("");
+    await sSet(sk(user.id,"weight"),nl);
+    window.__toast?.("Peso de hoje registrado");
+    onSaved&&onSaved();
+  };
+  const recent=log.slice(-14);
+  const W=300,H=44;
+  const ws=recent.map(e=>e.weight);
+  const mn=ws.length?Math.min(...ws,goal!=null&&goal>0?Math.max(goal,Math.min(...ws)-3):Infinity)-0.5:0;
+  const mx=ws.length?Math.max(...ws)+0.5:1;
+  const rg=(mx-mn)||1;
+  const pts=recent.map((e,i)=>`${ws.length<2?W/2:i*(W/(ws.length-1))},${H-((e.weight-mn)/rg)*H}`).join(" ");
+  return(
+    <div style={{background:T.card,border:`1.5px solid ${hoje?T.borderDone:user.accent+"40"}`,borderRadius:14,padding:"14px 16px",marginBottom:16}}>
+      <div style={{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:10}}>
+        <div style={{fontSize:10,fontWeight:700,color:T.muted,letterSpacing:1.2,textTransform:"uppercase"}}>⚖️ Peso em jejum</div>
+        {hoje&&<span style={{fontSize:11,color:T.done,fontWeight:700}}>✓ Hoje: {hoje.weight}kg</span>}
+      </div>
+      <div style={{display:"flex",gap:8,marginBottom:12}}>
+        <input value={inp} onChange={e=>setInp(e.target.value)} onKeyDown={e=>e.key==="Enter"&&save()} placeholder={hoje?`Atualizar (hoje: ${hoje.weight})`:"Peso de hoje (ex: 95.4)"} inputMode="decimal" style={{flex:1,background:T.inpBg,border:`1px solid ${T.border}`,borderRadius:10,color:T.text,padding:"10px 12px",fontSize:16,outline:"none",minHeight:46,boxSizing:"border-box"}}/>
+        <button onClick={save} style={{padding:"0 18px",borderRadius:10,border:"none",background:user.accent,color:"#FFF",fontSize:14,fontWeight:700,cursor:"pointer",minHeight:46}}>Salvar</button>
+      </div>
+      {last&&<div style={{display:"grid",gridTemplateColumns:"1fr 1fr 1fr",gap:8,marginBottom:status?8:0}}>
+        <div style={{background:T.inpBg,borderRadius:10,padding:"8px 6px",textAlign:"center"}}>
+          <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:16,fontWeight:700,color:T.text}}>{last.weight}</div>
+          <div style={{fontSize:9,color:T.muted,marginTop:2}}>último ({last.date.slice(8)}/{last.date.slice(5,7)})</div>
+        </div>
+        <div style={{background:T.inpBg,borderRadius:10,padding:"8px 6px",textAlign:"center"}}>
+          <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:16,fontWeight:700,color:colorFor(dLast)}}>{fmt(dLast)}</div>
+          <div style={{fontSize:9,color:T.muted,marginTop:2}}>vs pesagem anterior</div>
+        </div>
+        <div style={{background:T.inpBg,borderRadius:10,padding:"8px 6px",textAlign:"center"}}>
+          <div style={{fontFamily:"'JetBrains Mono',monospace",fontSize:16,fontWeight:700,color:colorFor(dAvg)}}>{fmt(dAvg)}</div>
+          <div style={{fontSize:9,color:T.muted,marginTop:2}}>média 7d vs 7d antes</div>
+        </div>
+      </div>}
+      {status&&<div style={{fontSize:12,fontWeight:700,color:status.c,marginBottom:recent.length>1?8:0}}>{status.t}</div>}
+      {recent.length>1&&<svg width="100%" viewBox={`0 0 ${W} ${H+6}`} style={{display:"block",overflow:"visible"}}>
+        {goal!=null&&goal>=mn&&goal<=mx&&<line x1="0" y1={H-((goal-mn)/rg)*H} x2={W} y2={H-((goal-mn)/rg)*H} stroke={T.done} strokeWidth="1.2" strokeDasharray="4" strokeOpacity="0.6"/>}
+        <polyline points={pts} fill="none" stroke={user.accent} strokeWidth="2" strokeLinejoin="round" strokeLinecap="round"/>
+        {recent.map((e,i)=>(<circle key={i} cx={ws.length<2?W/2:i*(W/(ws.length-1))} cy={H-((e.weight-mn)/rg)*H} r={i===recent.length-1?3.5:2} fill={user.accent}/>))}
+      </svg>}
+      <div style={{fontSize:10,color:T.muted,marginTop:6}}>A média de 7 dias filtra a oscilação diária de água. Histórico completo em Físico › Corpo.</div>
+    </div>
+  );
+}
+
 function DashboardView({user,plans,setPillar,setShowSettings}){
   const[data,setData]=useState(null);
   const[checkin,setCheckin]=useState({sono:3,horas:7,disposicao:3,corpo:3});
@@ -3054,6 +3202,9 @@ function DashboardView({user,plans,setPillar,setShowSettings}){
       <div style={{fontSize:12,color:T.muted,marginBottom:2,textTransform:"capitalize"}}>{today}</div>
       <div style={{fontFamily:"'Barlow Condensed',sans-serif",fontSize:28,fontWeight:700,color:T.text,letterSpacing:-0.5}}>Semana de {user.name}</div>
     </div>
+
+    {!user.noNutricao&&<HidratacaoRapida key={"h"+user.id} user={user}/>}
+    <PesoRapidoCard key={"p"+user.id} user={user} onSaved={()=>setReloadKey(k=>k+1)}/>
 
     {/* ── Check-in Diário ─────────────────────────────── */}
     <div style={{background:T.card,border:`1.5px solid ${checkinSaved?T.borderDone:user.accent+"40"}`,borderRadius:14,padding:"14px 16px",marginBottom:16}}>
@@ -3375,7 +3526,8 @@ function UserGate({onSelect,dark,toggleTheme}){
 
 /* ─── APP ────────────────────────────────────────────────────────────── */
 function App(){
-  const[uid,setUid]=useState(null);
+  const[uid,setUid]=useState(()=>{try{const s=localStorage.getItem("pf-last-user");return USERS[s]?s:null;}catch{return null;}});
+  const chooseUser=(id)=>{try{localStorage.setItem("pf-last-user",id);}catch{}setUid(id);setPillar("home");};
   const[pillar,setPillar]=useState("home");
   const[toastMsg,setToastMsg]=useState(null);
   const loadCfg=async(id)=>{const c=await sGet(sk(id,"config"),DEF_CFG[id]);const merged={...DEF_CFG[id],...(c||{})};window.__config=merged;return merged;};
@@ -3389,7 +3541,7 @@ function App(){
   useEffect(()=>{document.body.style.background=T.bg;},[dark]);
   const toggleTheme=()=>setDark(d=>{const nd=!d;try{localStorage.setItem("pf-theme",nd?"dark":"light");}catch{}return nd;});
   if(!uid){
-    return <UserGate onSelect={(id)=>{setUid(id);setPillar("home");}} dark={dark} toggleTheme={toggleTheme}/>;
+    return <UserGate onSelect={chooseUser} dark={dark} toggleTheme={toggleTheme}/>;
   }
   const user=USERS[uid];const plans=uid==="G"?resolveGuilhermePlans(G_PLANS):uid==="I"?resolveIsabelaPlans(I_PLANS):B_PLANS;
   return(
@@ -3415,7 +3567,7 @@ function App(){
             </div>
             <div style={{display:"flex",alignItems:"center",gap:8}}>
               <div style={{display:"flex",background:T.inpBg,borderRadius:20,padding:3,border:`1px solid ${T.border}`,gap:2}}>
-                {Object.values(USERS).map(u=>(<button key={u.id} onClick={()=>{setUid(u.id);setPillar("home");}} style={{padding:"5px 12px",borderRadius:16,border:"none",background:uid===u.id?u.accent:"transparent",color:uid===u.id?"#FFF":T.muted,fontSize:12,fontWeight:700,cursor:"pointer",transition:"all 0.2s",minHeight:30}}>{u.name}</button>))}
+                {Object.values(USERS).map(u=>(<button key={u.id} onClick={()=>chooseUser(u.id)} style={{padding:"5px 12px",borderRadius:16,border:"none",background:uid===u.id?u.accent:"transparent",color:uid===u.id?"#FFF":T.muted,fontSize:12,fontWeight:700,cursor:"pointer",transition:"all 0.2s",minHeight:30}}>{u.name}</button>))}
               </div>
               <button onClick={()=>setUid(null)} style={{width:34,height:34,borderRadius:9,border:`1px solid ${T.border}`,background:T.inpBg,color:T.sub,fontSize:14,cursor:"pointer"}} title="Trocar de usuário">🔄</button>
               <button onClick={()=>doCheckUpdate(setCheckingUpd)} disabled={checkingUpd} style={{width:34,height:34,borderRadius:9,border:`1px solid ${T.border}`,background:T.inpBg,color:T.sub,fontSize:15,cursor:checkingUpd?"default":"pointer",animation:checkingUpd?"spin 0.8s linear infinite":"none"}} title={`Verificar atualização — v${APP_VERSION}`}>⟳</button>
